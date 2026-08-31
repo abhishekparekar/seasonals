@@ -560,8 +560,14 @@ export default function AdminPanel({ onBackToHome }) {
     e.preventDefault();
     setIsSavingHero(true);
     try {
-      await saveSiteSettings("hero_config", heroForm);
-      showToast("Hero Section settings updated live!");
+      const bgToSave = heroForm.bgImage || heroForm.backgroundImage || "/images/herobg2.png";
+      const updatedHero = {
+        ...heroForm,
+        bgImage: bgToSave,
+        backgroundImage: bgToSave
+      };
+      await saveSiteSettings("hero_config", updatedHero);
+      showToast("Hero Section background image & settings updated live!");
     } catch (err) {
       console.error(err);
       showToast("Failed to save Hero settings.", "error");

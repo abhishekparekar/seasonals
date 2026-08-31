@@ -130,15 +130,23 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
+          const activeBg = data.bgImage || data.backgroundImage || initialHeroConfig.bgImage;
           if (data.titleLine1 === "Illuminate Your Diwali" || !data.titleLine1) {
             setHeroConfig({
               ...initialHeroConfig,
               ...data,
+              bgImage: activeBg,
+              backgroundImage: activeBg,
               titleLine1: "Celebrate Joy.",
               titleHighlight: "Gift with Purpose."
             });
           } else {
-            setHeroConfig({ ...initialHeroConfig, ...data });
+            setHeroConfig({ 
+              ...initialHeroConfig, 
+              ...data, 
+              bgImage: activeBg, 
+              backgroundImage: activeBg 
+            });
           }
         } else {
           setHeroConfig(initialHeroConfig);
