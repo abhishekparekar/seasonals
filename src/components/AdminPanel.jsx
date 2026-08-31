@@ -2647,19 +2647,6 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Developer / Company Credit Text
-                </label>
-                <input
-                  type="text"
-                  value={footerForm.creditText || ''}
-                  onChange={(e) => setFooterForm({ ...footerForm, creditText: e.target.value })}
-                  placeholder="Designed & Developed by iCoded Automation Pvt. Ltd."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
-
               <div className="pt-3 border-t border-white/10 flex justify-end">
                 <button
                   type="submit"

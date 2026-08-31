@@ -53,8 +53,7 @@ const initialInquiryConfig = {
 const initialFooterConfig = {
   brandBio: "Thoughtfully handmade festive products that celebrate creativity, purpose and the incredible talent of children with physical challenges.",
   specialPriceTag: "Special Pack: ₹120 for Pack of 4",
-  supportPhone: "+91 91353 13565",
-  creditText: "Designed & Developed by iCoded Automation Pvt. Ltd."
+  supportPhone: "+91 91353 13565"
 };
 
 const initialWhatsappConfig = {

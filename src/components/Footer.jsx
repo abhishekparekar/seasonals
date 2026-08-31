@@ -98,35 +98,6 @@ export default function Footer({ onOpenLegal }) {
                 </div>
               </a>
 
-              {/* Legal & Policy Links */}
-              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 pt-0.5 text-xs text-white/75">
-                <button
-                  type="button"
-                  onClick={() => onOpenLegal && onOpenLegal('privacy')}
-                  className="hover:text-[#fdb927] transition-colors flex items-center gap-1 underline underline-offset-2"
-                >
-                  <Lock className="w-3 h-3 text-[#fdb927]" />
-                  <span>Privacy Policy</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onOpenLegal && onOpenLegal('terms')}
-                  className="hover:text-[#fdb927] transition-colors flex items-center gap-1 underline underline-offset-2"
-                >
-                  <FileText className="w-3 h-3 text-[#fdb927]" />
-                  <span>Terms & Conditions</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onOpenLegal && onOpenLegal('shipping')}
-                  className="hover:text-[#fdb927] transition-colors flex items-center gap-1 underline underline-offset-2"
-                >
-                  <Truck className="w-3 h-3 text-[#fdb927]" />
-                  <span>Shipping & Returns</span>
-                </button>
-              </div>
 
               <div className="flex items-center gap-2 text-xs text-white/60 pt-0.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#fdb927]" />
@@ -141,14 +112,43 @@ export default function Footer({ onOpenLegal }) {
 
         </div>
 
-        {/* Bottom Bar with Credits */}
-        <div className="pt-3.5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-white/60">
+        {/* Bottom Bar with Legal Links */}
+        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/60">
           <div>
             <p>© 2026 Seasonals. All rights reserved.</p>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-white/80 bg-white/5 px-3 py-1 rounded-full border border-white/10 sm:mr-28">
-            <span>{footerConfig.creditText || "Designed & Developed by iCoded Automation Pvt. Ltd."}</span>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-white/70">
+            <button
+              type="button"
+              onClick={() => onOpenLegal && onOpenLegal('privacy')}
+              className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#fdb927]" />
+              <span>Privacy Policy</span>
+            </button>
+
+            <span className="text-white/20 hidden sm:inline">•</span>
+
+            <button
+              type="button"
+              onClick={() => onOpenLegal && onOpenLegal('terms')}
+              className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#fdb927]" />
+              <span>Terms & Conditions</span>
+            </button>
+
+            <span className="text-white/20 hidden sm:inline">•</span>
+
+            <button
+              type="button"
+              onClick={() => onOpenLegal && onOpenLegal('shipping')}
+              className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+            >
+              <Truck className="w-3.5 h-3.5 text-[#fdb927]" />
+              <span>Shipping & Returns</span>
+            </button>
           </div>
         </div>
 
