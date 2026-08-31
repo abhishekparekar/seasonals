@@ -560,7 +560,7 @@ export default function AdminPanel({ onBackToHome }) {
     e.preventDefault();
     setIsSavingHero(true);
     try {
-      const bgToSave = heroForm.bgImage || heroForm.backgroundImage || "/images/herobg2.png";
+      const bgToSave = heroForm.bgImage || heroForm.backgroundImage || "";
       const updatedHero = {
         ...heroForm,
         bgImage: bgToSave,
@@ -2151,8 +2151,25 @@ export default function AdminPanel({ onBackToHome }) {
                         const file = e.target.files[0];
                         if (file) {
                           const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setHeroForm((prev) => ({ ...prev, bgImage: reader.result }));
+                          reader.onload = (evt) => {
+                            const img = new window.Image();
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              let w = img.width;
+                              let h = img.height;
+                              const maxW = 1600;
+                              if (w > maxW) {
+                                h = Math.round((h * maxW) / w);
+                                w = maxW;
+                              }
+                              canvas.width = w;
+                              canvas.height = h;
+                              const ctx = canvas.getContext('2d');
+                              ctx.drawImage(img, 0, 0, w, h);
+                              const compressed = canvas.toDataURL('image/jpeg', 0.82);
+                              setHeroForm((prev) => ({ ...prev, bgImage: compressed, backgroundImage: compressed }));
+                            };
+                            img.src = evt.target.result;
                           };
                           reader.readAsDataURL(file);
                         }

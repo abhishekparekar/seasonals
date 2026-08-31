@@ -6,12 +6,15 @@ const SiteConfigContext = createContext();
 
 export const defaultReviewsList = [];
 
+const cachedHeroBg = typeof window !== 'undefined' ? (localStorage.getItem('seasonals_cached_herobg') || "") : "";
+
 const initialHeroConfig = {
   badgeText: "✨ Pure Terracotta • Handcrafted with Gold Scalloped Rim",
   titleLine1: "Celebrate Joy.",
   titleHighlight: "Gift with Purpose.",
   subtitle: "Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities.",
-  bgImage: "/images/herobg2.png",
+  bgImage: cachedHeroBg,
+  backgroundImage: cachedHeroBg,
   offerTag: "Special Pack: ₹120 for Pack of 4",
   showPricePill: true,
   primaryBtnText: "Explore Collection",
@@ -130,7 +133,10 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBg = data.bgImage || data.backgroundImage || initialHeroConfig.bgImage;
+          const activeBg = data.bgImage || data.backgroundImage || "";
+          if (activeBg && typeof window !== 'undefined') {
+            try { localStorage.setItem('seasonals_cached_herobg', activeBg); } catch (e) {}
+          }
           if (data.titleLine1 === "Illuminate Your Diwali" || !data.titleLine1) {
             setHeroConfig({
               ...initialHeroConfig,

@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { ShoppingBag } from 'lucide-react';
 
 export default function Hero() {
   const { heroConfig } = useSiteConfig();
 
-  const heroBgImage = heroConfig?.bgImage || heroConfig?.backgroundImage || "/images/herobg2.png";
+  const cachedBg = typeof window !== 'undefined' ? (localStorage.getItem('seasonals_cached_herobg') || "") : "";
+  const heroBgImage = heroConfig?.bgImage || heroConfig?.backgroundImage || cachedBg || "";
+
+  useEffect(() => {
+    if (heroBgImage) {
+      const img = new Image();
+      img.src = heroBgImage;
+    }
+  }, [heroBgImage]);
 
   const scrollToProducts = () => {
     const elem = document.querySelector('#bestsellers');
@@ -24,7 +32,7 @@ export default function Hero() {
     <section
       id="home"
       className="relative flex items-center justify-center text-white py-14 sm:py-20 md:py-24 overflow-hidden bg-cover bg-center bg-no-repeat font-inter transition-all duration-300"
-      style={{ backgroundImage: `url(${JSON.stringify(heroBgImage)})` }}
+      style={heroBgImage ? { backgroundImage: `url(${JSON.stringify(heroBgImage)})` } : {}}
     >
       {/* Centered Content Container for all devices */}
       <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">
