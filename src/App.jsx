@@ -53,18 +53,14 @@ function MainContent() {
   const openAdmin = () => {
     try {
       window.history.pushState(null, '', '/admin');
-    } catch (e) {
-      window.location.hash = 'admin';
-    }
+    } catch (e) {}
     setIsAdminView(true);
   };
 
   const closeAdmin = () => {
     try {
       window.history.pushState(null, '', '/');
-    } catch (e) {
-      window.location.hash = '';
-    }
+    } catch (e) {}
     setIsAdminView(false);
   };
 

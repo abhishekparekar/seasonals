@@ -19,29 +19,23 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Shop', href: '#bestsellers' },
-    { name: 'Our Mission', href: '#mission' },
-    { name: 'Our Story', href: '#story' },
-    { name: 'Bulk & Corporate Gifting', href: '#inquiry' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', targetId: 'home' },
+    { name: 'Shop', targetId: 'bestsellers' },
+    { name: 'Our Mission', targetId: 'mission' },
+    { name: 'Our Story', targetId: 'story' },
+    { name: 'Bulk & Corporate Gifting', targetId: 'inquiry' },
+    { name: 'Contact', targetId: 'contact' },
   ];
 
-  const handleNavClick = (e, link) => {
+  const handleNavClick = (e, targetId) => {
     if (e) e.preventDefault();
     setIsMobileMenuOpen(false);
 
-    const targetId = link.href.replace('#', '');
-    if (targetId === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      try { window.history.pushState(null, '', '#home'); } catch (err) {}
-      return;
-    }
-
+    const cleanId = (typeof targetId === 'string' ? targetId : (targetId?.targetId || targetId?.href || 'home')).replace(/[^a-zA-Z0-9]/g, '');
     const element =
-      document.getElementById(targetId) ||
-      document.querySelector(link.href) ||
-      document.querySelector(link.href === '#bestsellers' ? '#products' : link.href);
+      document.getElementById(cleanId) ||
+      document.querySelector(`#${cleanId}`) ||
+      (cleanId === 'bestsellers' ? document.querySelector('#products') : null);
 
     if (element) {
       const navOffset = 68;
@@ -51,7 +45,6 @@ export default function Navbar() {
         top: offsetPosition,
         behavior: 'smooth'
       });
-      try { window.history.pushState(null, '', link.href); } catch (err) {}
     }
   };
 
@@ -82,10 +75,9 @@ export default function Navbar() {
           
           {/* Brand Logo */}
           <div className="flex items-center">
-            <a
-              href="#home"
-              onClick={(e) => handleNavClick(e, { href: '#home' })}
-              className="flex items-center group focus:outline-none"
+            <button
+              onClick={(e) => handleNavClick(e, 'home')}
+              className="flex items-center group focus:outline-none cursor-pointer bg-transparent border-0 p-0"
               aria-label="Seasonals Home"
             >
               <img
@@ -93,21 +85,20 @@ export default function Navbar() {
                 alt="Seasonals"
                 className="h-8 sm:h-9 md:h-10 w-auto max-w-[125px] sm:max-w-[155px] md:max-w-[185px] object-contain drop-shadow-[0_1px_4px_rgba(253,185,39,0.2)] group-hover:scale-105 transition-transform duration-300"
               />
-            </a>
+            </button>
           </div>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-4 xl:gap-6 h-full">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link)}
-                className="text-[#1b072a] hover:text-[#b37400] text-[13px] xl:text-[14px] font-semibold tracking-normal transition-colors relative group py-2 whitespace-nowrap"
+                onClick={(e) => handleNavClick(e, link.targetId)}
+                className="text-[#1b072a] hover:text-[#b37400] text-[13px] xl:text-[14px] font-semibold tracking-normal transition-colors relative group py-2 whitespace-nowrap cursor-pointer bg-transparent border-0"
               >
                 <span>{link.name}</span>
                 <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#fdb927] transition-all duration-300 group-hover:w-full rounded-full"></span>
-              </a>
+              </button>
             ))}
           </nav>
 
@@ -206,15 +197,14 @@ export default function Navbar() {
                 {/* Clean Navigation Links */}
                 <nav className="mt-4 flex flex-col space-y-1.5">
                   {navLinks.map((link) => (
-                    <a
+                    <button
                       key={link.name}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link)}
-                      className="flex items-center justify-between text-xs sm:text-sm font-bold text-[#1b072a] hover:text-[#9a6400] py-2.5 px-3 rounded-xl hover:bg-[#fdb927]/10 transition-colors border border-transparent hover:border-[#fdb927]/30"
+                      onClick={(e) => handleNavClick(e, link.targetId)}
+                      className="flex items-center justify-between text-xs sm:text-sm font-bold text-[#1b072a] hover:text-[#9a6400] py-2.5 px-3 rounded-xl hover:bg-[#fdb927]/10 transition-colors border border-transparent hover:border-[#fdb927]/30 text-left bg-transparent cursor-pointer w-full"
                     >
                       <span>{link.name}</span>
                       <ChevronRight className="w-4 h-4 text-[#9a6400]" />
-                    </a>
+                    </button>
                   ))}
                 </nav>
               </div>

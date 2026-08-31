@@ -8,6 +8,20 @@ export default function Footer({ onOpenLegal }) {
   const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive Clay Diya Sets. Could you please share product availability & delivery details? Thank you!")}`;
 
+  const scrollToSection = (e, targetId) => {
+    e.preventDefault();
+    const element = document.querySelector(targetId) || document.getElementById(targetId.replace('#', ''));
+    if (element) {
+      const navOffset = 65;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <footer id="contact" className="bg-gradient-to-b from-[#180528] via-[#120220] to-[#0a0112] text-white border-t-2 border-[#fdb927]/30 pt-6 sm:pt-7 pb-4 sm:pb-5 relative overflow-hidden font-inter w-full shadow-2xl">
       {/* Background ambient golden glow decoration */}
@@ -21,14 +35,14 @@ export default function Footer({ onOpenLegal }) {
           
           {/* Column 1: Brand & Craftsmanship */}
           <div className="space-y-2.5 pl-1 sm:pl-3">
-            <a href="#home" className="relative inline-block group focus:outline-none py-0.5">
+            <button onClick={(e) => scrollToSection(e, '#home')} className="relative inline-block group focus:outline-none py-0.5 cursor-pointer text-left">
               <div className="absolute -inset-1.5 bg-[#fdb927]/20 rounded-full blur-md group-hover:bg-[#fdb927]/30 transition-all pointer-events-none"></div>
               <img
                 src="/images/logo3.png"
                 alt="Seasonals Logo"
                 className="relative z-10 h-8 sm:h-9 md:h-10 w-auto max-w-[150px] sm:max-w-[170px] object-contain brightness-110 contrast-105 drop-shadow-[0_2px_10px_rgba(253,185,39,0.4)] group-hover:scale-105 transition-transform"
               />
-            </a>
+            </button>
 
             <p className="text-xs text-white/75 leading-relaxed max-w-sm">
               {footerConfig.brandBio || "Handcrafted organic clay diyas made with traditional terracotta pottery and hand-painted metallic gold rims to bring auspicious light and joy to your Diwali festivities."}
@@ -47,29 +61,29 @@ export default function Footer({ onOpenLegal }) {
             </h4>
             <ul className="space-y-1.5 text-xs sm:text-sm text-white/80">
               <li>
-                <a href="#home" className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5">
+                <button onClick={(e) => scrollToSection(e, '#home')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer">
                   <span className="text-[#fdb927] text-xs font-bold">›</span> Home
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#bestsellers" className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5">
+                <button onClick={(e) => scrollToSection(e, '#bestsellers')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer">
                   <span className="text-[#fdb927] text-xs font-bold">›</span> Handcrafted Diya Sets
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#reviews" className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5">
+                <button onClick={(e) => scrollToSection(e, '#reviews')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer">
                   <span className="text-[#fdb927] text-xs font-bold">›</span> Customer Reviews (4.9 ★)
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#about" className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5">
+                <button onClick={(e) => scrollToSection(e, '#about')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer">
                   <span className="text-[#fdb927] text-xs font-bold">›</span> Our Social Mission (CSR)
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#inquiry" className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5">
+                <button onClick={(e) => scrollToSection(e, '#inquiry')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer">
                   <span className="text-[#fdb927] text-xs font-bold">›</span> Bulk Inquiry & Customization
-                </a>
+                </button>
               </li>
             </ul>
           </div>
