@@ -59,7 +59,8 @@ import {
   Upload,
   Image as ImageIcon,
   Link2,
-  Star
+  Star,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -83,6 +84,9 @@ export default function AdminPanel({ onBackToHome }) {
   const { 
     products: contextProducts, 
     heroConfig, 
+    promoConfig,
+    missionConfig,
+    inquiryConfig,
     footerConfig, 
     whatsappConfig 
   } = useSiteConfig();
@@ -135,6 +139,18 @@ export default function AdminPanel({ onBackToHome }) {
   const [heroForm, setHeroForm] = useState({ ...heroConfig });
   const [isSavingHero, setIsSavingHero] = useState(false);
 
+  // Promo Banner Form State
+  const [promoForm, setPromoForm] = useState({ ...promoConfig });
+  const [isSavingPromo, setIsSavingPromo] = useState(false);
+
+  // Mission Section Form State
+  const [missionForm, setMissionForm] = useState({ ...missionConfig });
+  const [isSavingMission, setIsSavingMission] = useState(false);
+
+  // Inquiry Section Form State
+  const [inquiryForm, setInquiryForm] = useState({ ...inquiryConfig });
+  const [isSavingInquiry, setIsSavingInquiry] = useState(false);
+
   // Footer Section Form State
   const [footerForm, setFooterForm] = useState({ ...footerConfig });
   const [isSavingFooter, setIsSavingFooter] = useState(false);
@@ -147,6 +163,18 @@ export default function AdminPanel({ onBackToHome }) {
   useEffect(() => {
     setHeroForm({ ...heroConfig });
   }, [heroConfig]);
+
+  useEffect(() => {
+    setPromoForm({ ...promoConfig });
+  }, [promoConfig]);
+
+  useEffect(() => {
+    setMissionForm({ ...missionConfig });
+  }, [missionConfig]);
+
+  useEffect(() => {
+    setInquiryForm({ ...inquiryConfig });
+  }, [inquiryConfig]);
 
   useEffect(() => {
     setFooterForm({ ...footerConfig });
@@ -533,12 +561,57 @@ export default function AdminPanel({ onBackToHome }) {
     setIsSavingHero(true);
     try {
       await saveSiteSettings("hero_config", heroForm);
-      showToast("Hero Section text updated live on customer website!");
+      showToast("Hero Section settings updated live!");
     } catch (err) {
       console.error(err);
       showToast("Failed to save Hero settings.", "error");
     } finally {
       setIsSavingHero(false);
+    }
+  };
+
+  // Save Dynamic Promo Settings
+  const handleSavePromoSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingPromo(true);
+    try {
+      await saveSiteSettings("promo_config", promoForm);
+      showToast("Promo Banner settings updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Promo Banner settings.", "error");
+    } finally {
+      setIsSavingPromo(false);
+    }
+  };
+
+  // Save Dynamic Mission Settings
+  const handleSaveMissionSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingMission(true);
+    try {
+      await saveSiteSettings("mission_config", missionForm);
+      showToast("Our Mission settings updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Mission settings.", "error");
+    } finally {
+      setIsSavingMission(false);
+    }
+  };
+
+  // Save Dynamic Inquiry Settings
+  const handleSaveInquirySettings = async (e) => {
+    e.preventDefault();
+    setIsSavingInquiry(true);
+    try {
+      await saveSiteSettings("inquiry_config", inquiryForm);
+      showToast("Inquiry Form settings updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Inquiry settings.", "error");
+    } finally {
+      setIsSavingInquiry(false);
     }
   };
 
@@ -736,6 +809,9 @@ export default function AdminPanel({ onBackToHome }) {
     { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: `${inquiries.length}` },
     { id: 'reviews', label: 'Customer Reviews', icon: Star, badge: `${reviewsList.length}` },
     { id: 'hero', label: 'Hero Section CMS', icon: Sparkles, badge: null },
+    { id: 'promo', label: 'Promo Banner CMS', icon: ImageIcon, badge: null },
+    { id: 'mission', label: 'Our Mission CMS', icon: Heart, badge: null },
+    { id: 'inquiry_cms', label: 'Inquiry Form CMS', icon: HelpCircle, badge: null },
     { id: 'footer', label: 'Footer CMS', icon: FileText, badge: null },
     { id: 'whatsapp', label: 'WhatsApp Settings', icon: Phone, badge: null },
   ];
@@ -2045,6 +2121,47 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
+              {/* Hero Background Image (URL or Upload) */}
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">
+                  Hero Background Image (URL or Upload Image)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={heroForm.bgImage || ''}
+                    onChange={(e) => setHeroForm({ ...heroForm, bgImage: e.target.value })}
+                    placeholder="e.g. /images/herobg2.png or paste image URL"
+                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                  />
+                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Img</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setHeroForm((prev) => ({ ...prev, bgImage: reader.result }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {heroForm.bgImage && (
+                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-24 border border-[#fdb927]/40">
+                    <img src={heroForm.bgImage} alt="Hero BG Preview" className="w-full h-24 object-cover" />
+                    <span className="absolute bottom-1 right-2 text-[10px] font-bold text-white bg-black/70 px-2 py-0.5 rounded">Live BG Preview</span>
+                  </div>
+                )}
+              </div>
+
               {/* Price / Highlight Tag */}
               <div className="bg-black/20 p-4 rounded-2xl border border-[#fdb927]/20 space-y-3">
                 <div className="flex items-center justify-between">
@@ -2167,6 +2284,310 @@ export default function AdminPanel({ onBackToHome }) {
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSavingHero ? 'Publishing Live...' : 'Publish Hero Section Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC PROMO BANNER CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'promo' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Promo Banner CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize promo banner text, headlines, CTA buttons, and uploaded banner image across festive seasons
+              </p>
+            </div>
+
+            <form onSubmit={handleSavePromoSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Top Badge Text</label>
+                <input
+                  type="text"
+                  value={promoForm.badgeText || ''}
+                  onChange={(e) => setPromoForm({ ...promoForm, badgeText: e.target.value })}
+                  placeholder="✨ Festive Special Celebration"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Headline Line 1</label>
+                <input
+                  type="text"
+                  value={promoForm.titleLine1 || ''}
+                  onChange={(e) => setPromoForm({ ...promoForm, titleLine1: e.target.value })}
+                  placeholder="Make Every Celebration"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Headline Golden Highlight (Line 2)</label>
+                <input
+                  type="text"
+                  value={promoForm.titleHighlight || ''}
+                  onChange={(e) => setPromoForm({ ...promoForm, titleHighlight: e.target.value })}
+                  placeholder="Extra Special"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-[#fdb927] font-bold focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle / Description</label>
+                <textarea
+                  rows={3}
+                  value={promoForm.subtitle || ''}
+                  onChange={(e) => setPromoForm({ ...promoForm, subtitle: e.target.value })}
+                  placeholder="Celebrate traditional joy, warmth, and special occasions with your family & friends..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">CTA Button Text</label>
+                <input
+                  type="text"
+                  value={promoForm.btnText || ''}
+                  onChange={(e) => setPromoForm({ ...promoForm, btnText: e.target.value })}
+                  placeholder="Order Now"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Promo Banner Image (URL or Upload Image)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={promoForm.bannerImage || ''}
+                    onChange={(e) => setPromoForm({ ...promoForm, bannerImage: e.target.value })}
+                    placeholder="e.g. /images/promo1.jpg or paste image URL"
+                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                  />
+                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Img</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setPromoForm((prev) => ({ ...prev, bannerImage: reader.result }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {promoForm.bannerImage && (
+                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-28 border border-[#fdb927]/40">
+                    <img src={promoForm.bannerImage} alt="Promo Banner Preview" className="w-full h-28 object-cover" />
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingPromo}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingPromo ? 'Publishing Live...' : 'Publish Promo Banner Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC OUR MISSION CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'mission' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Our Mission CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize mission statement headings, descriptions, and uploaded mission section image
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveMissionSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
+                <input
+                  type="text"
+                  value={missionForm.badgeText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, badgeText: e.target.value })}
+                  placeholder="Our Mission"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Mission Section Title</label>
+                <input
+                  type="text"
+                  value={missionForm.title || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, title: e.target.value })}
+                  placeholder="More Than a Product. A Story of Possibility."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Lead Highlight Sentence</label>
+                <input
+                  type="text"
+                  value={missionForm.leadText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, leadText: e.target.value })}
+                  placeholder="Behind every handmade creation is a child with imagination, patience and talent."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Belief Statement</label>
+                <input
+                  type="text"
+                  value={missionForm.believeText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, believeText: e.target.value })}
+                  placeholder="We believe physical challenges should never limit a child's opportunity to create, learn and contribute."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Detailed Description Paragraph</label>
+                <textarea
+                  rows={4}
+                  value={missionForm.descText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, descText: e.target.value })}
+                  placeholder="Our products are made with care by children with physical challenges..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Mission Section Image (URL or Upload Image)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={missionForm.missionImage || ''}
+                    onChange={(e) => setMissionForm({ ...missionForm, missionImage: e.target.value })}
+                    placeholder="e.g. /images/about1.png or paste image URL"
+                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                  />
+                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Img</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setMissionForm((prev) => ({ ...prev, missionImage: reader.result }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {missionForm.missionImage && (
+                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-32 border border-[#fdb927]/40">
+                    <img src={missionForm.missionImage} alt="Mission Image Preview" className="w-full h-32 object-cover" />
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingMission}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingMission ? 'Publishing Live...' : 'Publish Mission Section Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC INQUIRY FORM CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'inquiry_cms' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Inquiry Form CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize title, subtitle, and badge text of the Inquiry & Custom Orders section
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveInquirySettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Top Badge Text</label>
+                <input
+                  type="text"
+                  value={inquiryForm.badgeText || ''}
+                  onChange={(e) => setInquiryForm({ ...inquiryForm, badgeText: e.target.value })}
+                  placeholder="Have Questions or Need Bulk Orders?"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Inquiry Section Title</label>
+                <input
+                  type="text"
+                  value={inquiryForm.title || ''}
+                  onChange={(e) => setInquiryForm({ ...inquiryForm, title: e.target.value })}
+                  placeholder="Inquire & Custom Orders"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle Description</label>
+                <textarea
+                  rows={3}
+                  value={inquiryForm.subtitle || ''}
+                  onChange={(e) => setInquiryForm({ ...inquiryForm, subtitle: e.target.value })}
+                  placeholder="Looking for corporate gifting, custom color combinations, event favors, or bulk orders?..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingInquiry}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingInquiry ? 'Publishing Live...' : 'Publish Inquiry Form Changes'}</span>
                 </button>
               </div>
             </form>

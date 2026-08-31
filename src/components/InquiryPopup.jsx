@@ -5,7 +5,12 @@ import { useSiteConfig } from '../context/SiteConfigContext';
 import { X, Sparkles, Send, Loader2, Phone, CheckCircle2, MessageSquare } from 'lucide-react';
 
 export default function InquiryPopup() {
-  const { whatsappConfig, footerConfig } = useSiteConfig();
+  const { whatsappConfig, footerConfig, inquiryConfig } = useSiteConfig();
+
+  const badgeText = inquiryConfig?.badgeText || "✨ Bulk & Custom Inquiries";
+  const title = inquiryConfig?.title || "Looking for Bulk Gifts or Custom Handcrafted Products?";
+  const subtitle = inquiryConfig?.subtitle || "Get special corporate rates, custom festive packaging & priority doorstep dispatch.";
+
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -76,7 +81,7 @@ export default function InquiryPopup() {
     }
   };
 
-  const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
+  const cleanPhone = (whatsappConfig?.phoneNumber || "9135313565").replace(/\D/g, "");
   const directWhatsAppUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
     `Hello Seasonals! 🪔\n\nI would like to inquire about *${formData.inquiryType}*.\nName: ${formData.name || 'Customer'}\nContact: ${formData.phone || ''}\nMessage: ${formData.message || 'Please share product catalog and bulk rates.'}`
   )}`;
@@ -144,13 +149,13 @@ export default function InquiryPopup() {
                 <div className="mb-4 pr-6">
                   <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-[#1b072a] mb-1.5">
                     <Sparkles className="w-3 h-3 text-[#b37400]" />
-                    <span>Diwali Special • Bulk & Custom Inquiries</span>
+                    <span>{badgeText}</span>
                   </div>
                   <h3 className="font-playfair text-lg sm:text-xl font-extrabold text-gray-900 leading-snug">
-                    Looking for Bulk Gifts or Custom Diyas? 🪔
+                    {title}
                   </h3>
                   <p className="text-gray-500 text-[11px] sm:text-xs leading-relaxed mt-0.5">
-                    Get special corporate rates, custom festive packaging & priority doorstep dispatch.
+                    {subtitle}
                   </p>
                 </div>
 

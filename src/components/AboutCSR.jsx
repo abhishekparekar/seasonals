@@ -72,8 +72,8 @@ export default function AboutCSR() {
         >
           <div className="relative group w-full">
             <img
-              src="/images/about1.png"
-              alt="Talented children with physical challenges handcrafting festive clay diyas - Seasonals"
+              src={missionConfig?.missionImage || missionConfig?.imageUrl || "/images/about1.png"}
+              alt="Talented children with physical challenges handcrafting festive products - Seasonals"
               className="w-full h-auto object-cover max-h-[560px] sm:max-h-[600px]"
             />
           </div>

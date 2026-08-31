@@ -22,7 +22,7 @@ export default function Hero() {
     <section
       id="home"
       className="relative flex items-center justify-center text-white py-14 sm:py-20 md:py-24 overflow-hidden bg-cover bg-center bg-no-repeat font-inter"
-      style={{ backgroundImage: "url('/images/herobg2.png')" }}
+      style={{ backgroundImage: `url('${heroConfig.bgImage || heroConfig.backgroundImage || '/images/herobg2.png'}')` }}
     >
       {/* Centered Content Container for all devices */}
       <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">

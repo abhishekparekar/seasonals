@@ -5,7 +5,11 @@ import { useSiteConfig } from '../context/SiteConfigContext';
 import { Send, CheckCircle2, MessageSquare, Sparkles, Phone, Mail, HelpCircle, Loader2 } from 'lucide-react';
 
 export default function InquiryForm() {
-  const { whatsappConfig, footerConfig } = useSiteConfig();
+  const { whatsappConfig, footerConfig, inquiryConfig } = useSiteConfig();
+
+  const badgeText = inquiryConfig?.badgeText || "Have Questions or Need Bulk Orders?";
+  const title = inquiryConfig?.title || "Inquire & Custom Orders";
+  const subtitle = inquiryConfig?.subtitle || "Looking for corporate gifting, custom color combinations, event favors, or bulk orders? Send us an inquiry and our team will get back to you promptly.";
 
   const [formData, setFormData] = useState({
     name: '',
@@ -53,8 +57,8 @@ export default function InquiryForm() {
         email: formData.email.trim() || null,
         inquiryType: formData.inquiryType,
         quantityEstimate: formData.quantityEstimate,
-        message: formData.message.trim(),
-        source: 'Website Inquiry Form'
+        ...formData,
+        createdAt: new Date().toISOString()
       });
       setSubmitted(true);
     } catch (err) {
@@ -65,8 +69,7 @@ export default function InquiryForm() {
     }
   };
 
-  const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
-  const directWhatsAppUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
+  const directWhatsAppUrl = `https://wa.me/91${(whatsappConfig?.phoneNumber || "9135313565").replace(/\D/g, "")}?text=${encodeURIComponent(
     `Hello Seasonals! 🪔\n\nI have an inquiry regarding *${formData.inquiryType}*.\nName: ${formData.name || 'Customer'}\nContact: ${formData.phone || ''}\nMessage: ${formData.message || 'Please share product catalog and bulk rates.'}`
   )}`;
 
@@ -82,14 +85,14 @@ export default function InquiryForm() {
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-semibold text-[#1b072a] mb-2.5 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>Have Questions or Need Bulk Festive Orders?</span>
+            <span>{badgeText}</span>
           </div>
 
           <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
-            Inquire & Custom Orders
+            {title}
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-            Looking for corporate gifting, custom color combinations, wedding favors, or bulk orders? Send us an inquiry and our team will get back to you promptly.
+            {subtitle}
           </p>
         </div>
 

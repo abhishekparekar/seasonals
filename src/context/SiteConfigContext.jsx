@@ -11,11 +11,12 @@ const initialHeroConfig = {
   titleLine1: "Celebrate Joy.",
   titleHighlight: "Gift with Purpose.",
   subtitle: "Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities.",
+  bgImage: "/images/herobg2.png",
   offerTag: "Special Pack: ₹120 for Pack of 4",
   showPricePill: true,
-  primaryBtnText: "Explore Diya Collection",
+  primaryBtnText: "Explore Collection",
   showPrimaryBtn: true,
-  secondaryBtnText: "Explore Collection",
+  secondaryBtnText: "Our Mission",
   showSecondaryBtn: false
 };
 
@@ -25,12 +26,28 @@ const initialShopConfig = {
   subtitle: "From festive décor to thoughtful gifts and return favours, discover handmade creations designed to make your celebrations a little more special"
 };
 
+const initialPromoConfig = {
+  badgeText: "✨ Festive Special Celebration",
+  titleLine1: "Make Every Celebration",
+  titleHighlight: "Extra Special",
+  subtitle: "Celebrate traditional joy, warmth, and special occasions with your family & friends. Get authentic handcrafted products delivered directly to your doorstep.",
+  btnText: "Order Now",
+  bannerImage: "/images/promo1.jpg"
+};
+
 const initialMissionConfig = {
   badgeText: "Our Mission",
   title: "More Than a Product. A Story of Possibility.",
   leadText: "Behind every handmade creation is a child with imagination, patience and talent.",
   believeText: "We believe physical challenges should never limit a child's opportunity to create, learn and contribute.",
-  descText: "Our products are made with care by children with physical challenges, giving them a platform to express their creativity, develop skills and experience the pride of seeing their work become part of someone's celebration."
+  descText: "Our products are made with care by children with physical challenges, giving them a platform to express their creativity, develop skills and experience the pride of seeing their work become part of someone's celebration.",
+  missionImage: "/images/about1.png"
+};
+
+const initialInquiryConfig = {
+  badgeText: "Have Questions or Need Bulk Orders?",
+  title: "Inquire & Custom Orders",
+  subtitle: "Looking for corporate gifting, custom color combinations, event favors, or bulk orders? Send us an inquiry and our team will get back to you promptly."
 };
 
 const initialFooterConfig = {
@@ -42,25 +59,25 @@ const initialFooterConfig = {
 
 const initialWhatsappConfig = {
   phoneNumber: "9135313565",
-  defaultMessage: "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive Clay Diya Sets. Could you please share the product details, pricing, and bulk delivery options? Thank you!"
+  defaultMessage: "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive collections & bulk gifting. Could you please share the details? Thank you!"
 };
 
 export function SiteConfigProvider({ children }) {
-  // Only admin-added products from Firestore
+  // Firestore data states
   const [products, setProducts] = useState([]);
-  
-  // Only admin-added reviews from Firestore (No hardcoded demo reviews)
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
   const [heroConfig, setHeroConfig] = useState(initialHeroConfig);
   const [shopConfig, setShopConfig] = useState(initialShopConfig);
+  const [promoConfig, setPromoConfig] = useState(initialPromoConfig);
   const [missionConfig, setMissionConfig] = useState(initialMissionConfig);
+  const [inquiryConfig, setInquiryConfig] = useState(initialInquiryConfig);
   const [footerConfig, setFooterConfig] = useState(initialFooterConfig);
   const [whatsappConfig, setWhatsappConfig] = useState(initialWhatsappConfig);
   const [loading, setLoading] = useState(true);
 
-  // 1. Real-time Firestore Products Listener under tenant 'seasonal-website'
+  // 1. Real-time Firestore Products Listener
   useEffect(() => {
     const productsRef = getTenantCollection("products");
     const unsubscribe = onSnapshot(
@@ -83,7 +100,7 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 2. Real-time Firestore Reviews Listener under tenant 'seasonal-website'
+  // 2. Real-time Firestore Reviews Listener
   useEffect(() => {
     const reviewsRef = getTenantCollection("reviews");
     const unsubscribe = onSnapshot(
@@ -106,7 +123,7 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 3. Real-time Firestore Hero Section Config Listener
+  // 3. Hero Section Listener
   useEffect(() => {
     const heroRef = getTenantDoc("settings", "hero_config");
     const unsubscribe = onSnapshot(
@@ -114,14 +131,12 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Check if stored Firestore data has legacy text "Illuminate Your Diwali", replace with new client brand text
           if (data.titleLine1 === "Illuminate Your Diwali" || !data.titleLine1) {
             setHeroConfig({
               ...initialHeroConfig,
               ...data,
               titleLine1: "Celebrate Joy.",
-              titleHighlight: "Gift with Purpose.",
-              subtitle: initialHeroConfig.subtitle
+              titleHighlight: "Gift with Purpose."
             });
           } else {
             setHeroConfig({ ...initialHeroConfig, ...data });
@@ -135,7 +150,7 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 4. Real-time Firestore Shop Section Config Listener
+  // 4. Shop Section Listener
   useEffect(() => {
     const shopRef = getTenantDoc("settings", "shop_config");
     const unsubscribe = onSnapshot(
@@ -152,7 +167,24 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 5. Real-time Firestore Mission Section Config Listener
+  // 5. Promo Banner Section Listener
+  useEffect(() => {
+    const promoRef = getTenantDoc("settings", "promo_config");
+    const unsubscribe = onSnapshot(
+      promoRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setPromoConfig({ ...initialPromoConfig, ...docSnap.data() });
+        } else {
+          setPromoConfig(initialPromoConfig);
+        }
+      },
+      (err) => console.warn("Tenant Promo config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 6. Mission Section Listener
   useEffect(() => {
     const missionRef = getTenantDoc("settings", "mission_config");
     const unsubscribe = onSnapshot(
@@ -169,7 +201,24 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 6. Real-time Firestore Footer Section Config Listener
+  // 7. Inquiry Section Listener
+  useEffect(() => {
+    const inquiryRef = getTenantDoc("settings", "inquiry_config");
+    const unsubscribe = onSnapshot(
+      inquiryRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setInquiryConfig({ ...initialInquiryConfig, ...docSnap.data() });
+        } else {
+          setInquiryConfig(initialInquiryConfig);
+        }
+      },
+      (err) => console.warn("Tenant Inquiry config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 8. Footer Section Listener
   useEffect(() => {
     const footerRef = getTenantDoc("settings", "footer_config");
     const unsubscribe = onSnapshot(
@@ -184,7 +233,7 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 7. Real-time Firestore WhatsApp Config Listener
+  // 9. WhatsApp Listener
   useEffect(() => {
     const waRef = getTenantDoc("settings", "whatsapp_config");
     const unsubscribe = onSnapshot(
@@ -211,8 +260,12 @@ export function SiteConfigProvider({ children }) {
         setHeroConfig,
         shopConfig,
         setShopConfig,
+        promoConfig,
+        setPromoConfig,
         missionConfig,
         setMissionConfig,
+        inquiryConfig,
+        setInquiryConfig,
         footerConfig,
         setFooterConfig,
         whatsappConfig,
