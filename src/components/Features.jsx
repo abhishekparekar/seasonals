@@ -21,7 +21,7 @@ export default function Features() {
     {
       icon: Truck,
       title: "Pan-India Fast Dispatch",
-      subtitle: "Dispatched within 24 hours to reach your doorstep well before Diwali."
+      subtitle: "Dispatched within 24 hours to reach your doorstep safely for your celebrations."
     },
     {
       icon: Sparkles,
@@ -31,57 +31,57 @@ export default function Features() {
   ];
 
   return (
-    <section id="features" className="py-8 sm:py-12 bg-white border-t border-gray-100 w-full font-inter">
-      <div className="w-full px-2.5 sm:px-6 lg:px-10">
+    <section id="features" className="py-7 sm:py-12 bg-white border-t border-gray-100 w-full font-inter">
+      <div className="w-full px-3 sm:px-6 lg:px-10">
         
         {/* Section Heading */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center gap-3 mb-1.5">
-            <span className="h-[1px] w-10 sm:w-16 bg-[#fdb927]/60"></span>
-            <span className="text-sm font-bold text-[#fdb927] tracking-wider uppercase">
+        <div className="text-center mb-5 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1">
+            <span className="h-[1px] w-8 sm:w-16 bg-[#fdb927]/60"></span>
+            <span className="text-xs sm:text-sm font-bold text-[#fdb927] tracking-wider uppercase">
               The Seasonals Promise
             </span>
-            <span className="h-[1px] w-10 sm:w-16 bg-[#fdb927]/60"></span>
+            <span className="h-[1px] w-8 sm:w-16 bg-[#fdb927]/60"></span>
           </div>
-          <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-            Why Choose Our Handcrafted Diyas?
+          <h2 className="font-playfair text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+            Why Choose Our Handcrafted Creations?
           </h2>
         </div>
 
-        {/* 4 Premium Trust Cards (2 cols mobile, 4 cols desktop) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+        {/* 4 Premium Compact Trust Cards (2 cols on mobile, 4 cols on desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
           {trustBadges.map((badge, idx) => {
             const Icon = badge.icon;
             return (
               <motion.div
                 key={badge.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                transition={{ duration: 0.45, delay: idx * 0.08 }}
-                className="bg-gradient-to-b from-[#FAF7F2] to-white rounded-2xl p-4 sm:p-5 border border-[#fdb927]/30 shadow-sm hover:shadow-[0_10px_25px_rgba(253,185,39,0.2)] hover:border-[#fdb927] transition-all duration-300 flex flex-col justify-between group cursor-default"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
+                className="bg-gradient-to-b from-[#FAF7F2] via-white to-white rounded-2xl p-3 sm:p-5 border border-[#fdb927]/30 shadow-sm hover:shadow-[0_8px_20px_rgba(253,185,39,0.18)] hover:border-[#fdb927] transition-all duration-300 flex flex-col justify-between group cursor-default"
               >
                 <div>
                   {/* Top Golden Icon */}
-                  <div className="w-12 h-12 rounded-2xl bg-[#1b072a] text-[#fdb927] border border-[#fdb927]/40 flex items-center justify-center mb-3.5 shadow-md group-hover:scale-110 group-hover:bg-[#280a3e] transition-all duration-300">
-                    <Icon className="w-6 h-6 group-hover:rotate-6 transition-transform duration-300" strokeWidth={2} />
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#1b072a] text-[#fdb927] border border-[#fdb927]/40 flex items-center justify-center mb-2.5 shadow-md group-hover:scale-105 group-hover:bg-[#280a3e] transition-all duration-300">
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-6 transition-transform duration-300" strokeWidth={2} />
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-playfair font-bold text-sm sm:text-base text-gray-900 mb-1.5 leading-snug group-hover:text-[#280a3e] transition-colors">
+                  <h3 className="font-playfair font-bold text-xs sm:text-base text-gray-900 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
                     {badge.title}
                   </h3>
 
                   {/* Subtitle */}
-                  <p className="text-xs text-gray-600 leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
                     {badge.subtitle}
                   </p>
                 </div>
 
                 {/* Bottom Verified Tag */}
-                <div className="pt-3 mt-3 border-t border-gray-100 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+                <div className="pt-2 mt-2 border-t border-gray-100 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700">
+                  <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600" />
                   <span>Verified Festive Quality</span>
                 </div>
               </motion.div>

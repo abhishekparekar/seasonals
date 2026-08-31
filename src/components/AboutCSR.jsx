@@ -79,65 +79,65 @@ export default function AboutCSR() {
           </div>
         </motion.div>
 
-        {/* 3 Core Impact Pillars - Full Width English */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-6 w-full mb-6 sm:mb-8">
+        {/* 3 Core Impact Pillars - Compact & Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 w-full mb-6 sm:mb-8">
           
           {/* Pillar 1 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-            className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(40,10,62,0.08)] transition-all group"
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.35, delay: 0.1 }}
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(40,10,62,0.12)] transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <HandHeart className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <HandHeart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base sm:text-lg font-bold text-gray-900 mb-2 group-hover:text-[#280a3e] transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
               Celebrating Pure Talent & Capability
             </h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
-              We spotlight creativity and skill, ensuring children with physical challenges receive 100% fair compensation and full respect for their dedication and artistic talent.
+            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+              We spotlight creativity and skill, ensuring children with physical challenges receive 100% fair compensation and full respect for their artistic talent.
             </p>
           </motion.div>
 
           {/* Pillar 2 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.45, delay: 0.2 }}
-            className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(253,185,39,0.15)] transition-all group"
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.35, delay: 0.2 }}
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(253,185,39,0.18)] transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base sm:text-lg font-bold text-gray-900 mb-2 group-hover:text-[#b37400] transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-[#b37400] transition-colors">
               Handcrafted & Eco-Friendly
             </h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
               Crafted from pure organic terracotta clay with traditional floral patterns and finished with festive metallic gold scalloped rims.
             </p>
           </motion.div>
 
           {/* Pillar 3 */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.45, delay: 0.3 }}
-            className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(16,185,129,0.1)] transition-all group"
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.35, delay: 0.3 }}
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(16,185,129,0.12)] transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Heart className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base sm:text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-emerald-700 transition-colors">
               Empowering Creative Talent
             </h3>
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
               Your festive purchase directly supports skill workshops, artistic development, and long-term empowerment for children with physical challenges.
             </p>
           </motion.div>
