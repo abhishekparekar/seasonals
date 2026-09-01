@@ -22,6 +22,7 @@ import {
 } from 'firebase/firestore';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { products as defaultProducts } from '../data/products';
+import MultiImageManager from './MultiImageManager';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -84,8 +85,12 @@ export default function AdminPanel({ onBackToHome }) {
   const { 
     products: contextProducts, 
     heroConfig, 
+    shopConfig,
     promoConfig,
     missionConfig,
+    storyConfig,
+    bulkConfig,
+    contactConfig,
     inquiryConfig,
     footerConfig, 
     whatsappConfig 
@@ -131,6 +136,7 @@ export default function AdminPanel({ onBackToHome }) {
     categoryLabel: 'Best Seller',
     badge: '🔥 Best Seller',
     image: '/images/diya-pack-of-4.jpg',
+    images: ['/images/diya-pack-of-4.jpg'],
     description: '100% handmade terracotta clay with metallic golden rim & embossed floral rosette.',
     inStock: true
   });
@@ -139,6 +145,10 @@ export default function AdminPanel({ onBackToHome }) {
   const [heroForm, setHeroForm] = useState({ ...heroConfig });
   const [isSavingHero, setIsSavingHero] = useState(false);
 
+  // Shop Page Form State
+  const [shopForm, setShopForm] = useState({ ...shopConfig });
+  const [isSavingShop, setIsSavingShop] = useState(false);
+
   // Promo Banner Form State
   const [promoForm, setPromoForm] = useState({ ...promoConfig });
   const [isSavingPromo, setIsSavingPromo] = useState(false);
@@ -146,6 +156,18 @@ export default function AdminPanel({ onBackToHome }) {
   // Mission Section Form State
   const [missionForm, setMissionForm] = useState({ ...missionConfig });
   const [isSavingMission, setIsSavingMission] = useState(false);
+
+  // Story Section Form State
+  const [storyForm, setStoryForm] = useState({ ...storyConfig });
+  const [isSavingStory, setIsSavingStory] = useState(false);
+
+  // Bulk Gifting Form State
+  const [bulkForm, setBulkForm] = useState({ ...bulkConfig });
+  const [isSavingBulk, setIsSavingBulk] = useState(false);
+
+  // Contact Us Form State
+  const [contactForm, setContactForm] = useState({ ...contactConfig });
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
   // Inquiry Section Form State
   const [inquiryForm, setInquiryForm] = useState({ ...inquiryConfig });
@@ -165,12 +187,28 @@ export default function AdminPanel({ onBackToHome }) {
   }, [heroConfig]);
 
   useEffect(() => {
+    setShopForm({ ...shopConfig });
+  }, [shopConfig]);
+
+  useEffect(() => {
     setPromoForm({ ...promoConfig });
   }, [promoConfig]);
 
   useEffect(() => {
     setMissionForm({ ...missionConfig });
   }, [missionConfig]);
+
+  useEffect(() => {
+    setStoryForm({ ...storyConfig });
+  }, [storyConfig]);
+
+  useEffect(() => {
+    setBulkForm({ ...bulkConfig });
+  }, [bulkConfig]);
+
+  useEffect(() => {
+    setContactForm({ ...contactConfig });
+  }, [contactConfig]);
 
   useEffect(() => {
     setInquiryForm({ ...inquiryConfig });
@@ -496,6 +534,7 @@ export default function AdminPanel({ onBackToHome }) {
         categoryLabel: 'Best Seller',
         badge: '🔥 Best Seller',
         image: '/images/diya-pack-of-4.jpg',
+        images: ['/images/diya-pack-of-4.jpg'],
         description: '100% handmade terracotta clay with metallic golden rim & embossed floral rosette.',
         inStock: true
       });
@@ -507,6 +546,10 @@ export default function AdminPanel({ onBackToHome }) {
 
   const handleEditProductClick = (prod) => {
     setEditingProduct(prod);
+    const prodImages = Array.isArray(prod.images) && prod.images.length > 0
+      ? prod.images
+      : (prod.image ? [prod.image] : ['/images/diya-pack-of-4.jpg']);
+
     setProductForm({
       name: prod.name || '',
       price: prod.price || 120,
@@ -514,7 +557,8 @@ export default function AdminPanel({ onBackToHome }) {
       category: prod.category || 'diyas',
       categoryLabel: prod.categoryLabel || 'Best Seller',
       badge: prod.badge || '🔥 Best Seller',
-      image: prod.image || '/images/diya-pack-of-4.jpg',
+      image: prod.image || prodImages[0] || '/images/diya-pack-of-4.jpg',
+      images: prodImages,
       description: prod.description || '',
       inStock: prod.inStock !== false
     });
@@ -560,19 +604,79 @@ export default function AdminPanel({ onBackToHome }) {
     e.preventDefault();
     setIsSavingHero(true);
     try {
-      const bgToSave = heroForm.bgImage || heroForm.backgroundImage || "";
+      const bgToSave = (heroForm.bgImages && heroForm.bgImages[0]) || heroForm.bgImage || heroForm.backgroundImage || "";
       const updatedHero = {
         ...heroForm,
         bgImage: bgToSave,
         backgroundImage: bgToSave
       };
       await saveSiteSettings("hero_config", updatedHero);
-      showToast("Hero Section background image & settings updated live!");
+      showToast("Hero Section background image(s) & settings updated live!");
     } catch (err) {
       console.error(err);
       showToast("Failed to save Hero settings.", "error");
     } finally {
       setIsSavingHero(false);
+    }
+  };
+
+  // Save Dynamic Shop Settings
+  const handleSaveShopSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingShop(true);
+    try {
+      await saveSiteSettings("shop_config", shopForm);
+      showToast("Shop Collection page header & background image(s) updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Shop settings.", "error");
+    } finally {
+      setIsSavingShop(false);
+    }
+  };
+
+  // Save Dynamic Story Settings
+  const handleSaveStorySettings = async (e) => {
+    e.preventDefault();
+    setIsSavingStory(true);
+    try {
+      await saveSiteSettings("story_config", storyForm);
+      showToast("Our Story page header & background image(s) updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Story settings.", "error");
+    } finally {
+      setIsSavingStory(false);
+    }
+  };
+
+  // Save Dynamic Bulk Gifting Settings
+  const handleSaveBulkSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingBulk(true);
+    try {
+      await saveSiteSettings("bulk_config", bulkForm);
+      showToast("Bulk & Corporate Gifting page header & background image(s) updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Bulk Gifting settings.", "error");
+    } finally {
+      setIsSavingBulk(false);
+    }
+  };
+
+  // Save Dynamic Contact Settings
+  const handleSaveContactSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingContact(true);
+    try {
+      await saveSiteSettings("contact_config", contactForm);
+      showToast("Contact Us page header & background image(s) updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save Contact settings.", "error");
+    } finally {
+      setIsSavingContact(false);
     }
   };
 
@@ -596,8 +700,16 @@ export default function AdminPanel({ onBackToHome }) {
     e.preventDefault();
     setIsSavingMission(true);
     try {
-      await saveSiteSettings("mission_config", missionForm);
-      showToast("Our Mission settings updated live!");
+      const showcaseToSave = Array.isArray(missionForm.showcaseImages) && missionForm.showcaseImages.length > 0
+        ? missionForm.showcaseImages
+        : (missionForm.missionImage ? [missionForm.missionImage] : []);
+      const updatedMission = {
+        ...missionForm,
+        showcaseImages: showcaseToSave,
+        missionImage: showcaseToSave[0] || missionForm.missionImage || ""
+      };
+      await saveSiteSettings("mission_config", updatedMission);
+      showToast("Our Mission page showcase photos & settings updated live!");
     } catch (err) {
       console.error(err);
       showToast("Failed to save Mission settings.", "error");
@@ -807,19 +919,38 @@ export default function AdminPanel({ onBackToHome }) {
     );
   }
 
-  // Sidebar Menu Navigation Items
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
-    { id: 'products', label: 'Manage Products', icon: Layers, badge: `${productsList.length}` },
-    { id: 'orders', label: 'Customer Orders', icon: ShoppingBag, badge: `${pendingCount > 0 ? pendingCount : orders.length}` },
-    { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: `${inquiries.length}` },
-    { id: 'reviews', label: 'Customer Reviews', icon: Star, badge: `${reviewsList.length}` },
-    { id: 'hero', label: 'Hero Section CMS', icon: Sparkles, badge: null },
-    { id: 'promo', label: 'Promo Banner CMS', icon: ImageIcon, badge: null },
-    { id: 'mission', label: 'Our Mission CMS', icon: Heart, badge: null },
-    { id: 'inquiry_cms', label: 'Inquiry Form CMS', icon: HelpCircle, badge: null },
-    { id: 'footer', label: 'Footer CMS', icon: FileText, badge: null },
-    { id: 'whatsapp', label: 'WhatsApp Settings', icon: Phone, badge: null },
+  // Grouped Sidebar Menu Navigation Items for Superior UX
+  const navGroups = [
+    {
+      title: "Store Management",
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
+        { id: 'products', label: 'Manage Products', icon: Layers, badge: `${productsList.length}` },
+        { id: 'orders', label: 'Customer Orders', icon: ShoppingBag, badge: `${pendingCount > 0 ? `${pendingCount} new` : orders.length}` },
+        { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: `${inquiries.length}` },
+        { id: 'reviews', label: 'Customer Reviews', icon: Star, badge: `${reviewsList.length}` },
+      ]
+    },
+    {
+      title: "Page CMS Management",
+      items: [
+        { id: 'hero', label: 'Hero Banner CMS', icon: Sparkles, badge: null },
+        { id: 'shop', label: 'Shop Page CMS', icon: ShoppingBag, badge: null },
+        { id: 'mission', label: 'Our Mission CMS', icon: Heart, badge: null },
+        { id: 'story', label: 'Our Story CMS', icon: Sparkles, badge: null },
+        { id: 'bulk', label: 'Bulk Gifting CMS', icon: Layers, badge: null },
+        { id: 'contact', label: 'Contact Us CMS', icon: Phone, badge: null },
+      ]
+    },
+    {
+      title: "Settings & Addons",
+      items: [
+        { id: 'promo', label: 'Promo Banner CMS', icon: ImageIcon, badge: null },
+        { id: 'inquiry_cms', label: 'Inquiry Form CMS', icon: HelpCircle, badge: null },
+        { id: 'footer', label: 'Footer CMS', icon: FileText, badge: null },
+        { id: 'whatsapp', label: 'WhatsApp Settings', icon: Phone, badge: null },
+      ]
+    }
   ];
 
   return (
@@ -838,16 +969,11 @@ export default function AdminPanel({ onBackToHome }) {
             <Menu className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2">
-            <img
-              src="/images/logo3.png"
-              alt="Seasonals Logo"
-              className="h-6 w-auto max-w-[100px] object-contain"
-            />
-            <span className="text-[10px] uppercase font-bold text-[#fdb927] bg-[#fdb927]/10 px-1.5 py-0.5 rounded border border-[#fdb927]/25">
-              Admin
-            </span>
-          </div>
+          <img
+            src="/images/logo3.png"
+            alt="Seasonals Logo"
+            className="h-6 w-auto max-w-[110px] object-contain"
+          />
         </div>
 
         <div className="flex items-center gap-2">
@@ -884,70 +1010,75 @@ export default function AdminPanel({ onBackToHome }) {
               className="fixed inset-0 bg-[#0a0112]/80 backdrop-blur-sm z-50 md:hidden"
             />
 
-            {/* Left Slide-in Drawer */}
+            {/* Left Slide-in Drawer with Fixed Bottom Buttons */}
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 left-0 bottom-0 w-64 sm:w-72 max-w-[80vw] bg-[#1b072a] border-r border-[#fdb927]/30 shadow-2xl z-50 p-4 flex flex-col justify-between overflow-y-auto md:hidden text-white"
+              className="fixed top-0 left-0 bottom-0 w-64 sm:w-72 max-w-[85vw] bg-[#1b072a] border-r border-[#fdb927]/30 shadow-2xl z-50 flex flex-col h-full overflow-hidden md:hidden text-white"
             >
-              <div>
-                {/* Header inside Mobile Drawer */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src="/images/logo3.png"
-                      alt="Seasonals Logo"
-                      className="h-7 w-auto max-w-[120px] object-contain"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setIsMobileSidebarOpen(false)}
-                    className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
-                    aria-label="Close menu"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+              {/* Fixed Header inside Mobile Drawer */}
+              <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0 bg-[#1b072a]">
+                <img
+                  src="/images/logo3.png"
+                  alt="Seasonals Logo"
+                  className="h-7 w-auto max-w-[130px] object-contain"
+                />
+                <button
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                {/* Mobile Navigation Links */}
-                <nav className="mt-4 space-y-1">
-                  {menuItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setIsMobileSidebarOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                          isActive
-                            ? 'bg-[#fdb927] text-[#1b072a] font-bold shadow-md'
-                            : 'text-white/70 hover:text-white hover:bg-white/5'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className={`w-4 h-4 ${isActive ? 'text-[#1b072a]' : 'text-[#fdb927]'}`} />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge && (
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                            isActive ? 'bg-[#1b072a] text-[#fdb927]' : 'bg-white/10 text-white/80'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+              {/* Scrollable Mobile Navigation Links Area */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                <nav className="space-y-4">
+                  {navGroups.map((group, gIdx) => (
+                    <div key={gIdx} className="space-y-1">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-[#fdb927]/70 px-2 mb-1">
+                        {group.title}
+                      </div>
+                      {group.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => {
+                              setActiveTab(item.id);
+                              setIsMobileSidebarOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                              isActive
+                                ? 'bg-[#fdb927] text-[#1b072a] font-bold shadow-md'
+                                : 'text-white/70 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#1b072a]' : 'text-[#fdb927]'}`} />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.badge && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                                isActive ? 'bg-[#1b072a] text-[#fdb927]' : 'bg-white/10 text-white/80'
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </nav>
               </div>
 
-              {/* Mobile Drawer Footer */}
-              <div className="pt-4 border-t border-white/10 space-y-2">
+              {/* Fixed Mobile Drawer Bottom Action Buttons */}
+              <div className="p-3.5 border-t border-white/10 space-y-2 bg-[#1b072a] flex-shrink-0 shadow-lg">
                 <button
                   onClick={() => {
                     setIsMobileSidebarOpen(false);
@@ -975,58 +1106,58 @@ export default function AdminPanel({ onBackToHome }) {
       {/* ========================================================================= */}
       {/* DESKTOP SIDEBAR NAVIGATION (PC, Laptop, iPad Landscape) */}
       {/* ========================================================================= */}
-      <aside className="hidden md:flex md:w-64 bg-[#1b072a] border-r border-[#fdb927]/20 flex-col justify-between flex-shrink-0 z-20">
-        <div>
-          {/* Brand Header with logo3.png */}
-          <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <img
-                src="/images/logo3.png"
-                alt="Seasonals Logo"
-                className="h-7 w-auto max-w-[130px] object-contain drop-shadow-[0_2px_8px_rgba(253,185,39,0.35)]"
-              />
-              <div>
-                <span className="text-[10px] uppercase tracking-widest font-semibold text-[#fdb927] block">
-                  Admin CMS
-                </span>
-              </div>
-            </div>
-          </div>
+      <aside className="hidden md:flex md:w-64 lg:w-72 bg-[#1b072a] border-r border-[#fdb927]/20 flex-col h-screen md:sticky md:top-0 flex-shrink-0 z-20 overflow-hidden">
+        {/* Fixed Brand Header */}
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-center flex-shrink-0 bg-[#1b072a]">
+          <img
+            src="/images/logo3.png"
+            alt="Seasonals Logo"
+            className="h-8 sm:h-9 w-auto max-w-[170px] object-contain drop-shadow-[0_2px_8px_rgba(253,185,39,0.35)]"
+          />
+        </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="p-3 space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                    isActive
-                      ? 'bg-[#fdb927] text-[#1b072a] font-bold shadow-md'
-                      : 'text-white/70 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#1b072a]' : 'text-[#fdb927]'}`} />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                      isActive ? 'bg-[#1b072a] text-[#fdb927]' : 'bg-white/10 text-white/80'
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        {/* Scrollable Navigation Menu Links Area */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-4">
+          <nav className="space-y-4">
+            {navGroups.map((group, gIdx) => (
+              <div key={gIdx} className="space-y-1">
+                <div className="text-[10px] uppercase font-bold tracking-wider text-[#fdb927]/70 px-2.5 mb-1">
+                  {group.title}
+                </div>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                        isActive
+                          ? 'bg-[#fdb927] text-[#1b072a] font-bold shadow-md'
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-[#1b072a]' : 'text-[#fdb927]'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                          isActive ? 'bg-[#1b072a] text-[#fdb927]' : 'bg-white/10 text-white/80'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
         </div>
 
-        {/* Desktop Sidebar Footer */}
-        <div className="p-3 border-t border-white/10 space-y-2">
+        {/* Fixed Desktop Sidebar Footer Action Buttons */}
+        <div className="p-3.5 border-t border-white/10 space-y-2 bg-[#1b072a] flex-shrink-0 shadow-lg">
           <button
             onClick={onBackToHome}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-[#fdb927] bg-white/5 hover:bg-white/10 transition-all border border-white/10"
@@ -1048,7 +1179,7 @@ export default function AdminPanel({ onBackToHome }) {
       {/* ========================================================================= */}
       {/* MAIN CONTENT AREA */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-w-0 overflow-y-auto max-h-screen p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 min-w-0 p-3.5 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden">
         
         {/* Top Header Notification Toast */}
         <AnimatePresence>
@@ -1314,104 +1445,21 @@ export default function AdminPanel({ onBackToHome }) {
                     />
                   </div>
 
-                  {/* Product Image Section (Upload & URL Dual Option) */}
-                  <div className="sm:col-span-3 bg-black/30 p-4 rounded-2xl border border-[#fdb927]/25 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <label className="text-xs font-bold text-[#fdb927] flex items-center gap-1.5">
-                        <ImageIcon className="w-4 h-4" />
-                        <span>Product Image (Choose Upload or Link) *</span>
-                      </label>
-
-                      {/* Mode Toggle Buttons */}
-                      <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 w-fit">
-                        <button
-                          type="button"
-                          onClick={() => setImageInputMode('upload')}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                            imageInputMode === 'upload'
-                              ? 'bg-[#fdb927] text-[#1b072a] shadow'
-                              : 'text-white/70 hover:text-white'
-                          }`}
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Upload File</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setImageInputMode('url')}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                            imageInputMode === 'url'
-                              ? 'bg-[#fdb927] text-[#1b072a] shadow'
-                              : 'text-white/70 hover:text-white'
-                          }`}
-                        >
-                          <Link2 className="w-3.5 h-3.5" />
-                          <span>Image URL</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-                      {/* Input Field (Upload / URL) */}
-                      <div className="sm:col-span-2">
-                        {imageInputMode === 'upload' ? (
-                          <div className="space-y-1.5">
-                            <label className="border-2 border-dashed border-[#fdb927]/40 hover:border-[#fdb927] rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer bg-white/5 hover:bg-white/10 transition-all text-center group">
-                              <Upload className="w-6 h-6 text-[#fdb927] mb-1.5 group-hover:scale-110 transition-transform" />
-                              <span className="text-xs font-bold text-white">
-                                {isCompressingImg ? 'Optimizing Image...' : 'Click to Upload Image from Device'}
-                              </span>
-                              <span className="text-[10px] text-white/50 mt-0.5">
-                                Supports PNG, JPG, JPEG, WEBP (Auto-optimized)
-                              </span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageFileUpload}
-                                className="hidden"
-                              />
-                            </label>
-                          </div>
-                        ) : (
-                          <div className="space-y-1">
-                            <input
-                              type="text"
-                              value={productForm.image}
-                              onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
-                              placeholder="Paste HTTPS image link or /images/..."
-                              className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                            />
-                            <p className="text-[10px] text-white/50">
-                              e.g. https://images.unsplash.com/... or /images/diya-pack-of-4.jpg
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Real-time Image Preview */}
-                      <div className="flex items-center gap-3 bg-black/40 p-2.5 rounded-xl border border-white/10">
-                        {productForm.image ? (
-                          <>
-                            <img
-                              src={productForm.image}
-                              alt="Preview"
-                              className="w-14 h-14 rounded-lg object-cover border border-[#fdb927]/40 flex-shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <span className="text-[10px] font-bold text-emerald-400 block">✓ Image Ready</span>
-                              <span className="text-[10px] text-white/60 truncate block">
-                                {productForm.image.startsWith('data:') ? 'Custom Upload' : productForm.image}
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-center w-full py-2 text-white/40 text-[11px]">
-                            No image selected
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  {/* Multi-Image Product Gallery Manager */}
+                  <div className="sm:col-span-3">
+                    <MultiImageManager
+                      images={productForm.images || (productForm.image ? [productForm.image] : [])}
+                      onChange={(updatedImages) => {
+                        setProductForm((prev) => ({
+                          ...prev,
+                          images: updatedImages,
+                          image: updatedImages[0] || ''
+                        }));
+                      }}
+                      label="Product Gallery Images (Upload Multiple Photos)"
+                      helperText="Add multiple photos for this product. Customers can preview all photos via thumbnail carousel in the quick view modal."
+                      maxImages={6}
+                    />
                   </div>
 
                   {/* Description */}
@@ -2127,63 +2175,20 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
-              {/* Hero Background Image (URL or Upload) */}
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Hero Background Image (URL or Upload Image)
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={heroForm.bgImage || ''}
-                    onChange={(e) => setHeroForm({ ...heroForm, bgImage: e.target.value })}
-                    placeholder="e.g. /images/herobg2.png or paste image URL"
-                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                  />
-                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Img</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (evt) => {
-                            const img = new window.Image();
-                            img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let w = img.width;
-                              let h = img.height;
-                              const maxW = 1600;
-                              if (w > maxW) {
-                                h = Math.round((h * maxW) / w);
-                                w = maxW;
-                              }
-                              canvas.width = w;
-                              canvas.height = h;
-                              const ctx = canvas.getContext('2d');
-                              ctx.drawImage(img, 0, 0, w, h);
-                              const compressed = canvas.toDataURL('image/jpeg', 0.82);
-                              setHeroForm((prev) => ({ ...prev, bgImage: compressed, backgroundImage: compressed }));
-                            };
-                            img.src = evt.target.result;
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                {heroForm.bgImage && (
-                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-24 border border-[#fdb927]/40">
-                    <img src={heroForm.bgImage} alt="Hero BG Preview" className="w-full h-24 object-cover" />
-                    <span className="absolute bottom-1 right-2 text-[10px] font-bold text-white bg-black/70 px-2 py-0.5 rounded">Live BG Preview</span>
-                  </div>
-                )}
-              </div>
+              {/* Multi-Image Hero Background Slider Manager */}
+              <MultiImageManager
+                images={heroForm.bgImages || (heroForm.bgImage ? [heroForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setHeroForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || '',
+                    backgroundImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Hero Background Images (Multi-Image Crossfade Carousel)"
+                helperText="Upload or add multiple background images. When multiple images are added, they will smoothly crossfade on the Hero banner."
+              />
 
               {/* Price / Highlight Tag */}
               <div className="bg-black/20 p-4 rounded-2xl border border-[#fdb927]/20 space-y-3">
@@ -2218,87 +2223,6 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
-              {/* Action Buttons Toggles & Text Config */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                {/* Primary Button */}
-                <div className="bg-black/20 p-4 rounded-2xl border border-[#fdb927]/20 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-xs font-bold text-white block">
-                        Primary Button
-                      </label>
-                      <p className="text-[10px] text-white/50">Golden highlighted main CTA</p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setHeroForm({ ...heroForm, showPrimaryBtn: heroForm.showPrimaryBtn === false ? true : false })}
-                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-                        heroForm.showPrimaryBtn !== false
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white/10 text-white/50 hover:bg-white/20'
-                      }`}
-                    >
-                      <span>{heroForm.showPrimaryBtn !== false ? '✓ ON' : '✕ OFF'}</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-white/70 block mb-1">
-                      Primary Button Text
-                    </label>
-                    <input
-                      type="text"
-                      disabled={heroForm.showPrimaryBtn === false}
-                      value={heroForm.primaryBtnText || ''}
-                      onChange={(e) => setHeroForm({ ...heroForm, primaryBtnText: e.target.value })}
-                      placeholder="Explore Diya Collection"
-                      className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] disabled:opacity-40"
-                    />
-                  </div>
-                </div>
-
-                {/* Secondary Button */}
-                <div className="bg-black/20 p-4 rounded-2xl border border-[#fdb927]/20 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-xs font-bold text-white block">
-                        Secondary Button
-                      </label>
-                      <p className="text-[10px] text-white/50">Glassmorphic secondary CTA</p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setHeroForm({ ...heroForm, showSecondaryBtn: !heroForm.showSecondaryBtn })}
-                      className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-                        heroForm.showSecondaryBtn
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white/10 text-white/50 hover:bg-white/20'
-                      }`}
-                    >
-                      <span>{heroForm.showSecondaryBtn ? '✓ ON' : '✕ OFF'}</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-white/70 block mb-1">
-                      Secondary Button Text
-                    </label>
-                    <input
-                      type="text"
-                      disabled={!heroForm.showSecondaryBtn}
-                      value={heroForm.secondaryBtnText || ''}
-                      onChange={(e) => setHeroForm({ ...heroForm, secondaryBtnText: e.target.value })}
-                      placeholder="Explore Collection"
-                      className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] disabled:opacity-40"
-                    />
-                  </div>
-                </div>
-
-              </div>
-
               <div className="pt-3 border-t border-white/10 flex justify-end">
                 <button
                   type="submit"
@@ -2307,6 +2231,555 @@ export default function AdminPanel({ onBackToHome }) {
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSavingHero ? 'Publishing Live...' : 'Publish Hero Section Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC SHOP PAGE CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'shop' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Shop Page CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize shop page header badge, title, description, and upload multiple top section background images
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveShopSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Top Badge Text</label>
+                <input
+                  type="text"
+                  value={shopForm.badgeText || ''}
+                  onChange={(e) => setShopForm({ ...shopForm, badgeText: e.target.value })}
+                  placeholder="100% Pure Terracotta Handcrafted Collection"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Shop Page Heading Title</label>
+                <input
+                  type="text"
+                  value={shopForm.title || ''}
+                  onChange={(e) => setShopForm({ ...shopForm, title: e.target.value })}
+                  placeholder="Handcrafted Festive Diya Sets"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle / Description</label>
+                <textarea
+                  rows={3}
+                  value={shopForm.subtitle || ''}
+                  onChange={(e) => setShopForm({ ...shopForm, subtitle: e.target.value })}
+                  placeholder="Explore authentic terracotta diyas meticulously hand-painted with radiant 24K gold scalloped rims..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              {/* Multi-Image Background Manager for Shop Page Header */}
+              <MultiImageManager
+                images={shopForm.bgImages || (shopForm.bgImage ? [shopForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setShopForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Shop Header Top Background Images (Multi-Image Crossfade Slider)"
+                helperText="Upload or add multiple background images for the Shop page top header section. When multiple images are added, they crossfade smoothly."
+              />
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingShop}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingShop ? 'Publishing Live...' : 'Publish Shop Page Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC OUR MISSION (CSR) CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'mission' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Our Mission (CSR) CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize mission statement headings, descriptions, section photo, and upload top section background images
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveMissionSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
+                <input
+                  type="text"
+                  value={missionForm.badgeText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, badgeText: e.target.value })}
+                  placeholder="Our Mission"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Mission Section Title</label>
+                <input
+                  type="text"
+                  value={missionForm.title || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, title: e.target.value })}
+                  placeholder="More Than a Product. A Story of Possibility."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Lead Highlight Sentence</label>
+                <input
+                  type="text"
+                  value={missionForm.leadText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, leadText: e.target.value })}
+                  placeholder="Behind every handmade creation is a child with imagination, patience and talent."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Belief Statement</label>
+                <input
+                  type="text"
+                  value={missionForm.believeText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, believeText: e.target.value })}
+                  placeholder="We believe physical challenges should never limit a child's opportunity to create, learn and contribute."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Detailed Description Paragraph</label>
+                <textarea
+                  rows={4}
+                  value={missionForm.descText || ''}
+                  onChange={(e) => setMissionForm({ ...missionForm, descText: e.target.value })}
+                  placeholder="Our products are made with care by children with physical challenges..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              {/* Dynamic Impact Metric Counters & Cards */}
+              <div className="bg-black/30 p-4 sm:p-5 rounded-2xl border border-[#fdb927]/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-[#fdb927]" />
+                      <span>Impact Metric Cards (4 Social Impact Counters)</span>
+                    </label>
+                    <p className="text-[10px] sm:text-[11px] text-white/60 mt-0.5">
+                      Customize values (e.g. 50+, 10,000+, 100%), titles, and descriptions shown on the Our Mission page
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = Array.isArray(missionForm.impactStats) && missionForm.impactStats.length > 0
+                        ? [...missionForm.impactStats]
+                        : [
+                            { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                            { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                            { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                            { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                          ];
+                      setMissionForm({
+                        ...missionForm,
+                        impactStats: [
+                          ...current,
+                          { number: "100+", label: "New Impact Metric", desc: "Custom impact description" }
+                        ]
+                      });
+                    }}
+                    className="px-3 py-1.5 bg-[#fdb927]/20 hover:bg-[#fdb927]/30 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>+ Add Card</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  {(Array.isArray(missionForm.impactStats) && missionForm.impactStats.length > 0 ? missionForm.impactStats : [
+                    { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                    { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                    { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                    { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                  ]).map((stat, idx) => (
+                    <div key={idx} className="bg-black/50 p-3.5 rounded-xl border border-white/10 space-y-2 relative">
+                      <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                        <span className="text-[11px] font-bold text-[#fdb927]">Metric Card #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const current = Array.isArray(missionForm.impactStats) ? [...missionForm.impactStats] : [
+                              { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                              { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                              { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                              { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                            ];
+                            current.splice(idx, 1);
+                            setMissionForm({ ...missionForm, impactStats: current });
+                          }}
+                          className="text-red-400 hover:text-red-300 text-[10px] flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-[10px] text-white/70 block mb-0.5">Value (e.g. 50+, 100%)</label>
+                          <input
+                            type="text"
+                            value={stat.number || ''}
+                            onChange={(e) => {
+                              const current = Array.isArray(missionForm.impactStats) ? [...missionForm.impactStats] : [
+                                { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                                { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                                { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                                { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                              ];
+                              current[idx] = { ...current[idx], number: e.target.value };
+                              setMissionForm({ ...missionForm, impactStats: current });
+                            }}
+                            placeholder="50+"
+                            className="w-full px-2.5 py-1.5 bg-black/40 border border-[#fdb927]/30 rounded-lg text-xs text-[#fdb927] font-black focus:outline-none focus:border-[#fdb927]"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-white/70 block mb-0.5">Title / Label (e.g. Artisans Supported)</label>
+                          <input
+                            type="text"
+                            value={stat.label || ''}
+                            onChange={(e) => {
+                              const current = Array.isArray(missionForm.impactStats) ? [...missionForm.impactStats] : [
+                                { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                                { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                                { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                                { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                              ];
+                              current[idx] = { ...current[idx], label: e.target.value };
+                              setMissionForm({ ...missionForm, impactStats: current });
+                            }}
+                            placeholder="Artisans Supported"
+                            className="w-full px-2.5 py-1.5 bg-black/40 border border-[#fdb927]/30 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-[#fdb927]"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <label className="text-[10px] text-white/70 block mb-0.5">Subtitle Description</label>
+                          <input
+                            type="text"
+                            value={stat.desc || ''}
+                            onChange={(e) => {
+                              const current = Array.isArray(missionForm.impactStats) ? [...missionForm.impactStats] : [
+                                { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+                                { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+                                { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+                                { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+                              ];
+                              current[idx] = { ...current[idx], desc: e.target.value };
+                              setMissionForm({ ...missionForm, impactStats: current });
+                            }}
+                            placeholder="Children receiving skill training & fair wages"
+                            className="w-full px-2.5 py-1.5 bg-black/40 border border-[#fdb927]/30 rounded-lg text-xs text-white focus:outline-none focus:border-[#fdb927]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Multi-Image Middle Section Showcase Photo Gallery */}
+              <MultiImageManager
+                images={missionForm.showcaseImages || (missionForm.missionImage ? [missionForm.missionImage] : [])}
+                onChange={(updatedImages) => {
+                  setMissionForm((prev) => ({
+                    ...prev,
+                    showcaseImages: updatedImages,
+                    missionImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Mission Artisanal Crafting Photos (Middle Section Showcase Gallery)"
+                helperText="Upload or add multiple photos of artisans and children creating diyas. These appear in the main showcase section on the Our Mission page with smooth crossfading, controls, and dot indicators."
+              />
+
+              {/* Multi-Image Top Header Background Manager */}
+              <MultiImageManager
+                images={missionForm.bgImages || (missionForm.bgImage ? [missionForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setMissionForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Mission Page Header Top Background Images (Multi-Image Slider)"
+                helperText="Upload or add multiple background images for the Our Mission page top header section."
+              />
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingMission}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingMission ? 'Publishing Live...' : 'Publish Mission Page Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC OUR STORY JOURNEY CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'story' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Our Story Journey CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize our story heading, narrative intro, and upload top section background images
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveStorySettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
+                <input
+                  type="text"
+                  value={storyForm.badgeText || ''}
+                  onChange={(e) => setStoryForm({ ...storyForm, badgeText: e.target.value })}
+                  placeholder="THE INSPIRING JOURNEY"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Story Page Heading Title</label>
+                <input
+                  type="text"
+                  value={storyForm.title || ''}
+                  onChange={(e) => setStoryForm({ ...storyForm, title: e.target.value })}
+                  placeholder="It Started With Two Sisters, Diyas & A Lesson"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle / Narrative Summary</label>
+                <textarea
+                  rows={3}
+                  value={storyForm.subtitle || ''}
+                  onChange={(e) => setStoryForm({ ...storyForm, subtitle: e.target.value })}
+                  placeholder="Discover how a mother's challenge to her young daughters transformed into a nationwide social initiative..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              {/* Multi-Image Top Header Background Manager */}
+              <MultiImageManager
+                images={storyForm.bgImages || (storyForm.bgImage ? [storyForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setStoryForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Our Story Header Top Background Images (Multi-Image Slider)"
+                helperText="Upload or add multiple background images for the Our Story page top header section."
+              />
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingStory}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingStory ? 'Publishing Live...' : 'Publish Our Story Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC BULK & CORPORATE GIFTING CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'bulk' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Bulk & Corporate Gifting CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize corporate gifting headlines, descriptions, and upload top section background images
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveBulkSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
+                <input
+                  type="text"
+                  value={bulkForm.badgeText || ''}
+                  onChange={(e) => setBulkForm({ ...bulkForm, badgeText: e.target.value })}
+                  placeholder="CORPORATE • WEDDINGS • EVENT FAVORS"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Bulk Gifting Heading Title</label>
+                <input
+                  type="text"
+                  value={bulkForm.title || ''}
+                  onChange={(e) => setBulkForm({ ...bulkForm, title: e.target.value })}
+                  placeholder="Bespoke Corporate Festive Gifting & Bulk Orders"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle / Description</label>
+                <textarea
+                  rows={3}
+                  value={bulkForm.subtitle || ''}
+                  onChange={(e) => setBulkForm({ ...bulkForm, subtitle: e.target.value })}
+                  placeholder="Elevate your corporate gifting with meaningful, sustainable terracotta diyas crafted by specially-abled artisans..."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              {/* Multi-Image Top Header Background Manager */}
+              <MultiImageManager
+                images={bulkForm.bgImages || (bulkForm.bgImage ? [bulkForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setBulkForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Bulk Gifting Header Top Background Images (Multi-Image Slider)"
+                helperText="Upload or add multiple background images for the Bulk & Corporate Gifting page top header section."
+              />
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingBulk}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingBulk ? 'Publishing Live...' : 'Publish Bulk Gifting Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: DYNAMIC CONTACT US CMS */}
+        {/* ===================================================================== */}
+        {activeTab === 'contact' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/10 pb-4">
+              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
+                Dynamic Contact Us CMS
+              </h1>
+              <p className="text-xs text-white/60 mt-0.5">
+                Customize contact page headings, support descriptions, and upload top section background images
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveContactSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
+                <input
+                  type="text"
+                  value={contactForm.badgeText || ''}
+                  onChange={(e) => setContactForm({ ...contactForm, badgeText: e.target.value })}
+                  placeholder="WE ARE HERE TO HELP"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Contact Page Heading Title</label>
+                <input
+                  type="text"
+                  value={contactForm.title || ''}
+                  onChange={(e) => setContactForm({ ...contactForm, title: e.target.value })}
+                  placeholder="Get in Touch with Team Seasonals"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">Subtitle / Description</label>
+                <textarea
+                  rows={3}
+                  value={contactForm.subtitle || ''}
+                  onChange={(e) => setContactForm({ ...contactForm, subtitle: e.target.value })}
+                  placeholder="Have questions about order status, bulk gifting, custom colors, or shipping timelines? Reach out to our dedicated support desk."
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                />
+              </div>
+
+              {/* Multi-Image Top Header Background Manager */}
+              <MultiImageManager
+                images={contactForm.bgImages || (contactForm.bgImage ? [contactForm.bgImage] : [])}
+                onChange={(updatedImages) => {
+                  setContactForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bgImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Contact Us Header Top Background Images (Multi-Image Slider)"
+                helperText="Upload or add multiple background images for the Contact Us page top header section."
+              />
+
+              <div className="pt-3 border-t border-white/10 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingContact}
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingContact ? 'Publishing Live...' : 'Publish Contact Us Changes'}</span>
                 </button>
               </div>
             </form>
@@ -2383,42 +2856,19 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Promo Banner Image (URL or Upload Image)</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={promoForm.bannerImage || ''}
-                    onChange={(e) => setPromoForm({ ...promoForm, bannerImage: e.target.value })}
-                    placeholder="e.g. /images/promo1.jpg or paste image URL"
-                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                  />
-                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Img</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setPromoForm((prev) => ({ ...prev, bannerImage: reader.result }));
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                {promoForm.bannerImage && (
-                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-28 border border-[#fdb927]/40">
-                    <img src={promoForm.bannerImage} alt="Promo Banner Preview" className="w-full h-28 object-cover" />
-                  </div>
-                )}
-              </div>
+              {/* Multi-Image Promo Banner Manager */}
+              <MultiImageManager
+                images={promoForm.bgImages || (promoForm.bannerImage ? [promoForm.bannerImage] : [])}
+                onChange={(updatedImages) => {
+                  setPromoForm((prev) => ({
+                    ...prev,
+                    bgImages: updatedImages,
+                    bannerImage: updatedImages[0] || ''
+                  }));
+                }}
+                label="Promo Banner Featured Images (Multi-Image Carousel)"
+                helperText="Upload or add multiple festive banner images. These will crossfade automatically inside the promo banner card."
+              />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
                 <button
@@ -2428,127 +2878,6 @@ export default function AdminPanel({ onBackToHome }) {
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSavingPromo ? 'Publishing Live...' : 'Publish Promo Banner Changes'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* ===================================================================== */}
-        {/* TAB: DYNAMIC OUR MISSION CMS */}
-        {/* ===================================================================== */}
-        {activeTab === 'mission' && (
-          <div className="space-y-6">
-            <div className="border-b border-white/10 pb-4">
-              <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white">
-                Dynamic Our Mission CMS
-              </h1>
-              <p className="text-xs text-white/60 mt-0.5">
-                Customize mission statement headings, descriptions, and uploaded mission section image
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveMissionSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Badge Tag Text</label>
-                <input
-                  type="text"
-                  value={missionForm.badgeText || ''}
-                  onChange={(e) => setMissionForm({ ...missionForm, badgeText: e.target.value })}
-                  placeholder="Our Mission"
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Mission Section Title</label>
-                <input
-                  type="text"
-                  value={missionForm.title || ''}
-                  onChange={(e) => setMissionForm({ ...missionForm, title: e.target.value })}
-                  placeholder="More Than a Product. A Story of Possibility."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Lead Highlight Sentence</label>
-                <input
-                  type="text"
-                  value={missionForm.leadText || ''}
-                  onChange={(e) => setMissionForm({ ...missionForm, leadText: e.target.value })}
-                  placeholder="Behind every handmade creation is a child with imagination, patience and talent."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Belief Statement</label>
-                <input
-                  type="text"
-                  value={missionForm.believeText || ''}
-                  onChange={(e) => setMissionForm({ ...missionForm, believeText: e.target.value })}
-                  placeholder="We believe physical challenges should never limit a child's opportunity to create, learn and contribute."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Detailed Description Paragraph</label>
-                <textarea
-                  rows={4}
-                  value={missionForm.descText || ''}
-                  onChange={(e) => setMissionForm({ ...missionForm, descText: e.target.value })}
-                  placeholder="Our products are made with care by children with physical challenges..."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">Mission Section Image (URL or Upload Image)</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={missionForm.missionImage || ''}
-                    onChange={(e) => setMissionForm({ ...missionForm, missionImage: e.target.value })}
-                    placeholder="e.g. /images/about1.png or paste image URL"
-                    className="flex-1 px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                  />
-                  <label className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-[#fdb927] border border-[#fdb927]/40 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Img</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setMissionForm((prev) => ({ ...prev, missionImage: reader.result }));
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                {missionForm.missionImage && (
-                  <div className="mt-2 relative rounded-xl overflow-hidden max-h-32 border border-[#fdb927]/40">
-                    <img src={missionForm.missionImage} alt="Mission Image Preview" className="w-full h-32 object-cover" />
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-3 border-t border-white/10 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={isSavingMission}
-                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{isSavingMission ? 'Publishing Live...' : 'Publish Mission Section Changes'}</span>
                 </button>
               </div>
             </form>
@@ -2641,19 +2970,6 @@ export default function AdminPanel({ onBackToHome }) {
                   value={footerForm.brandBio || ''}
                   onChange={(e) => setFooterForm({ ...footerForm, brandBio: e.target.value })}
                   className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Special Price Tag in Footer
-                </label>
-                <input
-                  type="text"
-                  value={footerForm.specialPriceTag || ''}
-                  onChange={(e) => setFooterForm({ ...footerForm, specialPriceTag: e.target.value })}
-                  placeholder="Special Price: ₹120 for Pack of 4"
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                 />
               </div>
 

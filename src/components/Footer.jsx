@@ -43,11 +43,6 @@ export default function Footer({ onOpenLegal, onNavigate }) {
             <p className="text-xs text-white/75 leading-relaxed max-w-sm">
               {footerConfig.brandBio || "Handcrafted organic clay diyas made with traditional terracotta pottery and hand-painted metallic gold rims to bring auspicious light and joy to your festive celebrations."}
             </p>
-            
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3 py-1 rounded-lg text-xs text-[#fdb927] font-bold shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{footerConfig.specialPriceTag || "Special Pack: ₹120 for Pack of 4"}</span>
-            </div>
           </div>
 
           {/* Column 2: Explore Pages */}
@@ -138,7 +133,7 @@ export default function Footer({ onOpenLegal, onNavigate }) {
               </div>
               <div className="flex items-center gap-2 text-xs text-white/70">
                 <Truck className="w-4 h-4 text-[#fdb927]" />
-                <span>Pan-India Doorstep Fast Dispatch</span>
+                <span>Doorstep Fast Dispatch & Delivery</span>
               </div>
             </div>
           </div>

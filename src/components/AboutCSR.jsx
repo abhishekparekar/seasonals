@@ -1,18 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Sparkles, HandHeart, ShoppingBag, Share2, ArrowRight } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, ShoppingBag, Share2, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 
 export default function AboutCSR({ onNavigate, isPreview = false }) {
   const { setQuickViewProduct } = useCart();
   const { products, missionConfig } = useSiteConfig();
+  const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
 
   const badgeText = missionConfig?.badgeText || "Our Mission";
   const title = missionConfig?.title || "More Than a Product. A Story of Possibility.";
   const leadText = missionConfig?.leadText || "Behind every handmade creation is a child with imagination, patience and talent.";
   const believeText = missionConfig?.believeText || "We believe physical challenges should never limit a child's opportunity to create, learn and contribute.";
   const descText = missionConfig?.descText || "Our products are made with care by children with physical challenges, giving them a platform to express their creativity, develop skills and experience the pride of seeing their work become part of someone's celebration.";
+
+  // Multi-image showcase array from admin
+  const rawShowcase = Array.isArray(missionConfig?.showcaseImages) && missionConfig.showcaseImages.length > 0
+    ? missionConfig.showcaseImages
+    : (missionConfig?.missionImage ? [missionConfig.missionImage] : []);
+
+  const showcaseImages = rawShowcase.filter(Boolean);
+
+  useEffect(() => {
+    if (showcaseImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [showcaseImages.length]);
+
+  const prevShowcase = () => {
+    setCurrentShowcaseIdx((prev) => (prev === 0 ? showcaseImages.length - 1 : prev - 1));
+  };
+
+  const nextShowcase = () => {
+    setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseImages.length);
+  };
 
   const handleSupportOrder = () => {
     if (products && products.length > 0) {
@@ -40,7 +64,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             <span>{badgeText}</span>
           </div>
 
-          <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="flex items-center justify-center gap-3 mb-2">
             <span className="h-[1.5px] w-12 sm:w-24 bg-gradient-to-r from-transparent to-[#fdb927]"></span>
             <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
               {title}
@@ -48,35 +72,128 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             <span className="h-[1.5px] w-12 sm:w-24 bg-gradient-to-l from-transparent to-[#fdb927]"></span>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-2 text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
-            <p className="font-bold text-sm sm:text-base text-[#280a3e]">
+          {leadText && (
+            <p className="max-w-2xl mx-auto text-xs sm:text-sm font-semibold text-[#8a4209] leading-relaxed">
               {leadText}
             </p>
-            <p className="font-semibold text-gray-800">
-              {believeText}
-            </p>
-            <p className="text-gray-600">
-              {descText}
-            </p>
-          </div>
+          )}
         </div>
 
-        {/* Full-Screen Edge-to-Edge Mission Banner Card with about1.png */}
+        {/* Full-Screen Edge-to-Edge Mission Banner Multi-Image Showcase Carousel */}
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden mb-6 sm:mb-8 w-full"
+          className="bg-[#1b072a] rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden mb-6 sm:mb-8 w-full relative min-h-[260px] sm:min-h-[420px] md:min-h-[500px] max-h-[580px] flex items-center justify-center"
         >
-          <div className="relative group w-full">
-            <img
-              src={missionConfig?.missionImage || missionConfig?.imageUrl || "/images/about1.png"}
-              alt="Talented children with physical challenges handcrafting festive products - Seasonals"
-              className="w-full h-auto object-cover max-h-[560px] sm:max-h-[600px]"
-            />
-          </div>
+          {showcaseImages.length > 0 ? (
+            <>
+              {showcaseImages.map((imgSrc, idx) => (
+                <div
+                  key={idx}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                    idx === currentShowcaseIdx ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={`Artisanal Crafting Showcase ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+
+              {/* Prev / Next Arrows if Multiple Showcase Images */}
+              {showcaseImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevShowcase}
+                    aria-label="Previous image"
+                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextShowcase}
+                    aria-label="Next image"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
+                  </button>
+
+                  {/* Dot Indicators */}
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                    {showcaseImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCurrentShowcaseIdx(idx)}
+                        aria-label={`Go to slide ${idx + 1}`}
+                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                          idx === currentShowcaseIdx ? 'w-6 bg-[#fdb927]' : 'w-2 bg-white/50 hover:bg-white'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Image Counter Badge */}
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/70 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black text-[#fdb927]">
+                    📷 {currentShowcaseIdx + 1} / {showcaseImages.length}
+                  </div>
+                </>
+              )}
+            </>
+          ) : null}
         </motion.div>
+
+        {/* Dedicated Premium Mission Belief & Purpose Card (Rich UI/UX) */}
+        {(believeText || descText) && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="mb-6 sm:mb-8 bg-gradient-to-br from-[#1b072a] via-[#2a0b42] to-[#1b072a] rounded-3xl p-5 sm:p-7 border-2 border-[#fdb927]/50 shadow-xl relative overflow-hidden text-white"
+          >
+            {/* Background Festive Ambient Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#fdb927]/10 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 justify-between">
+              <div className="space-y-2.5 max-w-3xl">
+                <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3 py-1 rounded-full text-[11px] font-extrabold text-[#fdb927]">
+                  <span>🪔</span>
+                  <span>OUR CORE BELIEF & PURPOSE</span>
+                </div>
+
+                {believeText && (
+                  <blockquote className="font-playfair text-base sm:text-xl font-bold text-[#FFF5C0] italic leading-snug">
+                    "{believeText}"
+                  </blockquote>
+                )}
+
+                {descText && (
+                  <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-normal">
+                    {descText}
+                  </p>
+                )}
+              </div>
+
+              {/* Decorative Trust Badge */}
+              <div className="flex-shrink-0 bg-white/10 backdrop-blur-md border border-[#fdb927]/30 rounded-2xl p-3.5 text-center hidden lg:block min-w-[170px]">
+                <span className="text-2xl block mb-1">✨</span>
+                <span className="text-[11px] font-bold text-[#fdb927] uppercase tracking-wider block">
+                  100% Handcrafted
+                </span>
+                <span className="text-[10px] text-white/70 block mt-0.5">
+                  By Specially-Abled Artisans
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* 3 Core Impact Pillars - Compact & Responsive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 w-full mb-6 sm:mb-8">

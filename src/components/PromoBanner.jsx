@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
@@ -12,8 +12,21 @@ export default function PromoBanner({ onNavigate }) {
   const titleLine1 = promoConfig?.titleLine1 || "Make Every Celebration";
   const titleHighlight = promoConfig?.titleHighlight || "Extra Special";
   const subtitle = promoConfig?.subtitle || "Celebrate traditional joy, warmth, and special occasions with your family & friends. Get authentic handcrafted products delivered directly to your doorstep.";
-  const btnText = promoConfig?.btnText || "Order Now";
-  const bannerImage = promoConfig?.bannerImage || "/images/promo1.jpg";
+  const btnText = promoConfig?.btnText || "Order on WhatsApp";
+
+  const promoImages = Array.isArray(promoConfig?.bgImages) && promoConfig.bgImages.length > 0
+    ? promoConfig.bgImages
+    : (promoConfig?.bannerImage ? [promoConfig.bannerImage] : []);
+
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  useEffect(() => {
+    if (promoImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % promoImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [promoImages.length]);
 
   const handleOrderClick = () => {
     if (products && products.length > 0) {
@@ -24,7 +37,7 @@ export default function PromoBanner({ onNavigate }) {
   };
 
   const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
-  const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive collections & bulk gifting. Could you please share the details? Thank you!")}`;
+  const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I would like to place an order for Handcrafted Festive Diyas.")}`;
 
   return (
     <section className="py-5 sm:py-8 bg-white w-full font-inter">
@@ -83,7 +96,7 @@ export default function PromoBanner({ onNavigate }) {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-black text-xs sm:text-sm px-6 py-3 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] transition-all cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>{btnText}</span>
+                <span>Explore Catalog</span>
               </motion.button>
 
               <motion.a
@@ -92,30 +105,54 @@ export default function PromoBanner({ onNavigate }) {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full border border-white/20 backdrop-blur-sm transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-lg transition-all"
               >
-                <span>💬 WhatsApp Inquiry</span>
+                <span>💬 Order on WhatsApp</span>
               </motion.a>
             </div>
           </div>
 
-          {/* Right Image Banner Side */}
-          <div className="relative z-10 w-full lg:w-96 flex-shrink-0">
-            <div className="relative rounded-2xl overflow-hidden border-2 border-[#fdb927]/50 shadow-2xl group">
-              <img
-                src={bannerImage}
-                alt="Festive handmade creations - Seasonals"
-                className="w-full h-48 sm:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1b072a]/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-3 left-3 right-3 bg-[#1b072a]/90 backdrop-blur-md p-2.5 rounded-xl border border-[#fdb927]/40 text-center">
-                <span className="text-[11px] font-extrabold text-[#fdb927] flex items-center justify-center gap-1">
-                  <span>✨</span>
-                  <span>Handcrafted with Care</span>
-                </span>
+          {/* Right Image Banner Side with Smooth Multi-Image Crossfade */}
+          {promoImages.length > 0 && (
+            <div className="relative z-10 w-full lg:w-96 flex-shrink-0">
+              <div className="relative h-48 sm:h-56 lg:h-64 rounded-2xl overflow-hidden border-2 border-[#fdb927]/50 shadow-2xl group bg-black/40">
+                <AnimatePresence mode="sync">
+                  <motion.img
+                    key={currentImgIndex}
+                    src={promoImages[currentImgIndex]}
+                    alt="Festive handmade creations - Seasonals"
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </AnimatePresence>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1b072a]/70 via-transparent to-transparent pointer-events-none" />
+                
+                <div className="absolute bottom-3 left-3 right-3 bg-[#1b072a]/90 backdrop-blur-md p-2 rounded-xl border border-[#fdb927]/40 text-center flex items-center justify-between px-3">
+                  <span className="text-[11px] font-extrabold text-[#fdb927] flex items-center gap-1">
+                    <span>✨</span>
+                    <span>Handcrafted Diya Art</span>
+                  </span>
+                  
+                  {promoImages.length > 1 && (
+                    <div className="flex items-center gap-1">
+                      {promoImages.map((_, idx) => (
+                        <span
+                          key={idx}
+                          className={`h-1.5 rounded-full transition-all ${
+                            currentImgIndex === idx ? 'w-4 bg-[#fdb927]' : 'w-1.5 bg-white/40'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
         </motion.div>
       </div>

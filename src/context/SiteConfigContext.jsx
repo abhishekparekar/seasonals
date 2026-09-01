@@ -6,27 +6,42 @@ const SiteConfigContext = createContext();
 
 export const defaultReviewsList = [];
 
-const cachedHeroBg = typeof window !== 'undefined' ? (localStorage.getItem('seasonals_cached_herobg') || "") : "";
+// Safe helper for local storage cache to eliminate page refresh flash
+const getCachedConfig = (key, fallback) => {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const item = localStorage.getItem(`seasonals_cached_${key}`);
+    return item ? { ...fallback, ...JSON.parse(item) } : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
+
+const setCachedConfig = (key, data) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`seasonals_cached_${key}`, JSON.stringify(data));
+  } catch (e) {}
+};
 
 const initialHeroConfig = {
   badgeText: "✨ Pure Terracotta • Handcrafted with Gold Scalloped Rim",
   titleLine1: "Celebrate Joy.",
   titleHighlight: "Gift with Purpose.",
   subtitle: "Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities.",
-  bgImage: cachedHeroBg,
-  backgroundImage: cachedHeroBg,
+  bgImage: "",
+  backgroundImage: "",
+  bgImages: [],
   offerTag: "Special Pack: ₹120 for Pack of 4",
-  showPricePill: true,
-  primaryBtnText: "Explore Collection",
-  showPrimaryBtn: true,
-  secondaryBtnText: "Our Mission",
-  showSecondaryBtn: false
+  showPricePill: true
 };
 
 const initialShopConfig = {
   badgeText: "Shop the Season",
   title: "Made for Your Celebrations",
-  subtitle: "From festive décor to thoughtful gifts and return favours, discover handmade creations designed to make your celebrations a little more special"
+  subtitle: "From festive décor to thoughtful gifts and return favours, discover handmade creations designed to make your celebrations a little more special",
+  bgImage: "",
+  bgImages: []
 };
 
 const initialPromoConfig = {
@@ -34,9 +49,17 @@ const initialPromoConfig = {
   titleLine1: "Make Every Celebration",
   titleHighlight: "Extra Special",
   subtitle: "Celebrate traditional joy, warmth, and special occasions with your family & friends. Get authentic handcrafted products delivered directly to your doorstep.",
-  btnText: "Order Now",
-  bannerImage: "/images/promo1.jpg"
+  btnText: "Order on WhatsApp",
+  bannerImage: "",
+  bgImages: []
 };
+
+export const defaultImpactStats = [
+  { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+  { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+  { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+  { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+];
 
 const initialMissionConfig = {
   badgeText: "Our Mission",
@@ -44,7 +67,35 @@ const initialMissionConfig = {
   leadText: "Behind every handmade creation is a child with imagination, patience and talent.",
   believeText: "We believe physical challenges should never limit a child's opportunity to create, learn and contribute.",
   descText: "Our products are made with care by children with physical challenges, giving them a platform to express their creativity, develop skills and experience the pride of seeing their work become part of someone's celebration.",
-  missionImage: "/images/about1.png"
+  missionImage: "",
+  showcaseImages: [],
+  bgImage: "",
+  bgImages: [],
+  impactStats: defaultImpactStats
+};
+
+const initialStoryConfig = {
+  badgeText: "THE INSPIRING JOURNEY",
+  title: "It Started With Two Sisters, Diyas & A Lesson",
+  subtitle: "Discover how a mother's challenge to her young daughters transformed into a nationwide social initiative dedicated to celebrating children with physical challenges.",
+  bgImage: "",
+  bgImages: []
+};
+
+const initialBulkConfig = {
+  badgeText: "CORPORATE • WEDDINGS • EVENT FAVORS",
+  title: "Bespoke Corporate Festive Gifting & Bulk Orders",
+  subtitle: "Elevate your corporate gifting with meaningful, sustainable terracotta diyas crafted by specially-abled artisans. Beautifully packaged with your brand identity.",
+  bgImage: "",
+  bgImages: []
+};
+
+const initialContactConfig = {
+  badgeText: "WE ARE HERE TO HELP",
+  title: "Get in Touch with Team Seasonals",
+  subtitle: "Have questions about order status, bulk gifting, custom colors, or shipping timelines? Reach out to our dedicated support desk.",
+  bgImage: "",
+  bgImages: []
 };
 
 const initialInquiryConfig = {
@@ -55,41 +106,51 @@ const initialInquiryConfig = {
 
 const initialFooterConfig = {
   brandBio: "Thoughtfully handmade festive products that celebrate creativity, purpose and the incredible talent of children with physical challenges.",
-  specialPriceTag: "Special Pack: ₹120 for Pack of 4",
   supportPhone: "+91 91353 13565"
 };
 
 const initialWhatsappConfig = {
   phoneNumber: "9135313565",
-  defaultMessage: "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive collections & bulk gifting. Could you please share the details? Thank you!"
+  defaultMessage: "Hello Seasonals! 🪔 I would like to place an order for Handcrafted Festive Diyas."
 };
 
 export function SiteConfigProvider({ children }) {
-  // Firestore data states
+  // Firestore data states with instant local storage fallback
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  const [heroConfig, setHeroConfig] = useState(initialHeroConfig);
-  const [shopConfig, setShopConfig] = useState(initialShopConfig);
-  const [promoConfig, setPromoConfig] = useState(initialPromoConfig);
-  const [missionConfig, setMissionConfig] = useState(initialMissionConfig);
-  const [inquiryConfig, setInquiryConfig] = useState(initialInquiryConfig);
-  const [footerConfig, setFooterConfig] = useState(initialFooterConfig);
-  const [whatsappConfig, setWhatsappConfig] = useState(initialWhatsappConfig);
+  const [heroConfig, setHeroConfig] = useState(() => getCachedConfig('hero', initialHeroConfig));
+  const [shopConfig, setShopConfig] = useState(() => getCachedConfig('shop', initialShopConfig));
+  const [promoConfig, setPromoConfig] = useState(() => getCachedConfig('promo', initialPromoConfig));
+  const [missionConfig, setMissionConfig] = useState(() => getCachedConfig('mission', initialMissionConfig));
+  const [storyConfig, setStoryConfig] = useState(() => getCachedConfig('story', initialStoryConfig));
+  const [bulkConfig, setBulkConfig] = useState(() => getCachedConfig('bulk', initialBulkConfig));
+  const [contactConfig, setContactConfig] = useState(() => getCachedConfig('contact', initialContactConfig));
+  const [inquiryConfig, setInquiryConfig] = useState(() => getCachedConfig('inquiry', initialInquiryConfig));
+  const [footerConfig, setFooterConfig] = useState(() => getCachedConfig('footer', initialFooterConfig));
+  const [whatsappConfig, setWhatsappConfig] = useState(() => getCachedConfig('whatsapp', initialWhatsappConfig));
   const [loading, setLoading] = useState(true);
 
-  // 1. Real-time Firestore Products Listener
+  // 1. Products Listener
   useEffect(() => {
     const productsRef = getTenantCollection("products");
     const unsubscribe = onSnapshot(
       productsRef,
       (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setProducts(list);
+        const productList = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          productList.push({
+            id: doc.id,
+            ...data,
+            // Ensure images array
+            images: Array.isArray(data.images) && data.images.length > 0 
+              ? data.images 
+              : (data.image ? [data.image] : [])
+          });
+        });
+        setProducts(productList);
         setLoading(false);
       },
       (error) => {
@@ -102,16 +163,16 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 2. Real-time Firestore Reviews Listener
+  // 2. Reviews Listener
   useEffect(() => {
     const reviewsRef = getTenantCollection("reviews");
     const unsubscribe = onSnapshot(
       reviewsRef,
       (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const list = [];
+        snapshot.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
         setReviews(list);
         setReviewsLoading(false);
       },
@@ -134,26 +195,21 @@ export function SiteConfigProvider({ children }) {
         if (docSnap.exists()) {
           const data = docSnap.data();
           const activeBg = data.bgImage || data.backgroundImage || "";
-          if (activeBg && typeof window !== 'undefined') {
-            try { localStorage.setItem('seasonals_cached_herobg', activeBg); } catch (e) {}
-          }
-          if (data.titleLine1 === "Illuminate Your Diwali" || !data.titleLine1) {
-            setHeroConfig({
-              ...initialHeroConfig,
-              ...data,
-              bgImage: activeBg,
-              backgroundImage: activeBg,
-              titleLine1: "Celebrate Joy.",
-              titleHighlight: "Gift with Purpose."
-            });
-          } else {
-            setHeroConfig({ 
-              ...initialHeroConfig, 
-              ...data, 
-              bgImage: activeBg, 
-              backgroundImage: activeBg 
-            });
-          }
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (activeBg ? [activeBg] : []);
+
+          const updated = {
+            ...initialHeroConfig,
+            ...data,
+            bgImage: activeBg,
+            backgroundImage: activeBg,
+            bgImages: activeBgImages,
+            titleLine1: data.titleLine1 || "Celebrate Joy.",
+            titleHighlight: data.titleHighlight || "Gift with Purpose."
+          };
+          setCachedConfig('hero', updated);
+          setHeroConfig(updated);
         } else {
           setHeroConfig(initialHeroConfig);
         }
@@ -170,7 +226,13 @@ export function SiteConfigProvider({ children }) {
       shopRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setShopConfig({ ...initialShopConfig, ...docSnap.data() });
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bgImage ? [data.bgImage] : []);
+          const updated = { ...initialShopConfig, ...data, bgImages: activeBgImages };
+          setCachedConfig('shop', updated);
+          setShopConfig(updated);
         } else {
           setShopConfig(initialShopConfig);
         }
@@ -187,7 +249,13 @@ export function SiteConfigProvider({ children }) {
       promoRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setPromoConfig({ ...initialPromoConfig, ...docSnap.data() });
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bannerImage ? [data.bannerImage] : []);
+          const updated = { ...initialPromoConfig, ...data, bgImages: activeBgImages };
+          setCachedConfig('promo', updated);
+          setPromoConfig(updated);
         } else {
           setPromoConfig(initialPromoConfig);
         }
@@ -204,7 +272,25 @@ export function SiteConfigProvider({ children }) {
       missionRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setMissionConfig({ ...initialMissionConfig, ...docSnap.data() });
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bgImage ? [data.bgImage] : []);
+          const activeStats = Array.isArray(data.impactStats) && data.impactStats.length > 0
+            ? data.impactStats
+            : defaultImpactStats;
+          const activeShowcaseImages = Array.isArray(data.showcaseImages) && data.showcaseImages.length > 0
+            ? data.showcaseImages
+            : (data.missionImage ? [data.missionImage] : []);
+          const updated = {
+            ...initialMissionConfig,
+            ...data,
+            bgImages: activeBgImages,
+            impactStats: activeStats,
+            showcaseImages: activeShowcaseImages
+          };
+          setCachedConfig('mission', updated);
+          setMissionConfig(updated);
         } else {
           setMissionConfig(initialMissionConfig);
         }
@@ -214,14 +300,85 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 7. Inquiry Section Listener
+  // 7. Story Section Listener
+  useEffect(() => {
+    const storyRef = getTenantDoc("settings", "story_config");
+    const unsubscribe = onSnapshot(
+      storyRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bgImage ? [data.bgImage] : []);
+          const updated = { ...initialStoryConfig, ...data, bgImages: activeBgImages };
+          setCachedConfig('story', updated);
+          setStoryConfig(updated);
+        } else {
+          setStoryConfig(initialStoryConfig);
+        }
+      },
+      (err) => console.warn("Tenant Story config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 8. Bulk Gifting Section Listener
+  useEffect(() => {
+    const bulkRef = getTenantDoc("settings", "bulk_config");
+    const unsubscribe = onSnapshot(
+      bulkRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bgImage ? [data.bgImage] : []);
+          const updated = { ...initialBulkConfig, ...data, bgImages: activeBgImages };
+          setCachedConfig('bulk', updated);
+          setBulkConfig(updated);
+        } else {
+          setBulkConfig(initialBulkConfig);
+        }
+      },
+      (err) => console.warn("Tenant Bulk config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 9. Contact Section Listener
+  useEffect(() => {
+    const contactRef = getTenantDoc("settings", "contact_config");
+    const unsubscribe = onSnapshot(
+      contactRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+            ? data.bgImages
+            : (data.bgImage ? [data.bgImage] : []);
+          const updated = { ...initialContactConfig, ...data, bgImages: activeBgImages };
+          setCachedConfig('contact', updated);
+          setContactConfig(updated);
+        } else {
+          setContactConfig(initialContactConfig);
+        }
+      },
+      (err) => console.warn("Tenant Contact config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 10. Inquiry Section Listener
   useEffect(() => {
     const inquiryRef = getTenantDoc("settings", "inquiry_config");
     const unsubscribe = onSnapshot(
       inquiryRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setInquiryConfig({ ...initialInquiryConfig, ...docSnap.data() });
+          const updated = { ...initialInquiryConfig, ...docSnap.data() };
+          setCachedConfig('inquiry', updated);
+          setInquiryConfig(updated);
         } else {
           setInquiryConfig(initialInquiryConfig);
         }
@@ -231,14 +388,18 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 8. Footer Section Listener
+  // 11. Footer Section Listener
   useEffect(() => {
     const footerRef = getTenantDoc("settings", "footer_config");
     const unsubscribe = onSnapshot(
       footerRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setFooterConfig((prev) => ({ ...prev, ...docSnap.data() }));
+          const updated = { ...initialFooterConfig, ...docSnap.data() };
+          setCachedConfig('footer', updated);
+          setFooterConfig(updated);
+        } else {
+          setFooterConfig(initialFooterConfig);
         }
       },
       (err) => console.warn("Tenant Footer config listen note:", err)
@@ -246,14 +407,18 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // 9. WhatsApp Listener
+  // 12. WhatsApp Config Listener
   useEffect(() => {
     const waRef = getTenantDoc("settings", "whatsapp_config");
     const unsubscribe = onSnapshot(
       waRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setWhatsappConfig((prev) => ({ ...prev, ...docSnap.data() }));
+          const updated = { ...initialWhatsappConfig, ...docSnap.data() };
+          setCachedConfig('whatsapp', updated);
+          setWhatsappConfig(updated);
+        } else {
+          setWhatsappConfig(initialWhatsappConfig);
         }
       },
       (err) => console.warn("Tenant WhatsApp config listen note:", err)
@@ -265,24 +430,18 @@ export function SiteConfigProvider({ children }) {
     <SiteConfigContext.Provider
       value={{
         products,
-        setProducts,
         reviews,
-        setReviews,
         reviewsLoading,
         heroConfig,
-        setHeroConfig,
         shopConfig,
-        setShopConfig,
         promoConfig,
-        setPromoConfig,
         missionConfig,
-        setMissionConfig,
+        storyConfig,
+        bulkConfig,
+        contactConfig,
         inquiryConfig,
-        setInquiryConfig,
         footerConfig,
-        setFooterConfig,
         whatsappConfig,
-        setWhatsappConfig,
         loading
       }}
     >

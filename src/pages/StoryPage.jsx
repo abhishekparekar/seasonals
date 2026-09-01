@@ -1,8 +1,14 @@
 import React from 'react';
+import { useSiteConfig } from '../context/SiteConfigContext';
+import BannerBackground from '../components/BannerBackground';
 import { Sparkles, Heart, Clock, Compass, Star, Quote, ArrowRight, CheckCircle2, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function StoryPage({ onNavigate }) {
+  const { storyConfig } = useSiteConfig();
+  const storyImages = Array.isArray(storyConfig?.bgImages) && storyConfig.bgImages.length > 0
+    ? storyConfig.bgImages
+    : (storyConfig?.bgImage ? [storyConfig.bgImage] : []);
   const storyMilestones = [
     {
       id: 1,
@@ -71,40 +77,42 @@ export default function StoryPage({ onNavigate }) {
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
-      
-      {/* 1. Header & Breadcrumb */}
-      <section className="bg-gradient-to-r from-[#1b072a] via-[#2f084a] to-[#1b072a] text-white py-10 sm:py-16 relative overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#fdb927]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#7b1fa2]/20 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 1. Header with Dynamic Multi-Image Slider */}
+      <section className="relative text-white py-10 sm:py-14 overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg min-h-[220px] sm:min-h-[260px] md:min-h-[290px] flex items-center">
+        <BannerBackground images={storyImages} />
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fdb927]/80 mb-3">
-            <button
-              onClick={() => onNavigate('home')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Home
-            </button>
-            <span>/</span>
-            <span className="text-white">Our Story</span>
-          </div>
-
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 backdrop-blur-sm border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>THE INSPIRING JOURNEY</span>
+              <span>{storyConfig?.badgeText || "THE INSPIRING JOURNEY"}</span>
             </div>
 
-            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
-              It Started With Two Sisters, Diyas & A Lesson
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-md">
+              {storyConfig?.title || "It Started With Two Sisters, Diyas & A Lesson"}
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed max-w-2xl font-medium">
-              Discover how a mother's challenge to her young daughters transformed into a nationwide social initiative dedicated to celebrating children with physical challenges.
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
+              {storyConfig?.subtitle || "Discover how a mother's challenge to her young daughters transformed into a nationwide social initiative dedicated to celebrating children with physical challenges."}
             </p>
           </div>
         </div>
       </section>
+
+      {/* Breadcrumb Strip (Below Header Banner) */}
+      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
+        <div className="w-full flex items-center gap-2 text-xs font-bold">
+          <button
+            onClick={() => onNavigate('home')}
+            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-[#b45309] font-black">Our Story</span>
+        </div>
+      </div>
 
       {/* 2. Story Chapters Grid */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
@@ -161,7 +169,7 @@ export default function StoryPage({ onNavigate }) {
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
         <div className="bg-gradient-to-r from-[#1b072a] via-[#2c0d45] to-[#1b072a] text-white rounded-3xl p-5 sm:p-8 lg:p-10 border-2 border-[#fdb927]/40 shadow-2xl relative overflow-hidden text-center">
           <Quote className="w-10 h-10 sm:w-12 sm:h-12 text-[#fdb927]/15 absolute top-3 sm:top-4 left-4 sm:left-6 pointer-events-none" />
-          
+
           <div className="relative z-10 max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
             <span className="text-xs font-extrabold text-[#fdb927] uppercase tracking-wider block">
               The Seasonals Core Philosophy

@@ -1,12 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { useCart } from '../context/CartContext';
-import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, Award, Users, Leaf, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import BannerBackground from '../components/BannerBackground';
+import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, Award, Users, Leaf, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MissionPage({ onNavigate }) {
   const { products, missionConfig } = useSiteConfig();
   const { setQuickViewProduct } = useCart();
+  const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
+
+  const missionImages = Array.isArray(missionConfig?.bgImages) && missionConfig.bgImages.length > 0
+    ? missionConfig.bgImages
+    : (missionConfig?.bgImage ? [missionConfig.bgImage] : []);
+
+  // Multi-image showcase array from admin
+  const rawShowcase = Array.isArray(missionConfig?.showcaseImages) && missionConfig.showcaseImages.length > 0
+    ? missionConfig.showcaseImages
+    : (missionConfig?.missionImage ? [missionConfig.missionImage] : []);
+
+  const showcaseImages = rawShowcase.filter(Boolean);
+
+  useEffect(() => {
+    if (showcaseImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [showcaseImages.length]);
+
+  const prevShowcase = () => {
+    setCurrentShowcaseIdx((prev) => (prev === 0 ? showcaseImages.length - 1 : prev - 1));
+  };
+
+  const nextShowcase = () => {
+    setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseImages.length);
+  };
 
   const badgeText = missionConfig?.badgeText || "Our Mission & Purpose";
   const title = missionConfig?.title || "More Than a Product. A Story of Possibility.";
@@ -25,12 +54,15 @@ export default function MissionPage({ onNavigate }) {
   const shareText = "🪔 Seasonals - A small act of kindness empowers specially-abled artisans. This Diwali, bring home authentic handcrafted terracotta diyas made with devotion:";
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + (typeof window !== 'undefined' ? window.location.origin : ''))}`;
 
-  const impactStats = [
-    { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages", icon: Users },
-    { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth", icon: Sparkles },
-    { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically", icon: Leaf },
-    { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent", icon: Award },
-  ];
+  const defaultStatIcons = [Users, Sparkles, Leaf, Award];
+  const activeImpactStats = (Array.isArray(missionConfig?.impactStats) && missionConfig.impactStats.length > 0)
+    ? missionConfig.impactStats
+    : [
+      { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
+      { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
+      { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
+      { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
+    ];
 
   const craftSteps = [
     {
@@ -57,50 +89,48 @@ export default function MissionPage({ onNavigate }) {
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
-      
+
       {/* 1. Page Header & Breadcrumb */}
-      <section className="bg-gradient-to-r from-[#1b072a] via-[#2f084a] to-[#1b072a] text-white py-10 sm:py-16 relative overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#fdb927]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#7b1fa2]/20 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative text-white py-10 sm:py-14 overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg min-h-[220px] sm:min-h-[260px] md:min-h-[290px] flex items-center">
+        <BannerBackground images={missionImages} />
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fdb927]/80 mb-3">
-            <button
-              onClick={() => onNavigate('home')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Home
-            </button>
-            <span>/</span>
-            <span className="text-white">Our Mission (CSR)</span>
-          </div>
-
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 backdrop-blur-sm border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{badgeText}</span>
             </div>
 
-            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-md">
               {title}
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base text-[#FFF5C0] font-bold mb-2">
-              {leadText}
-            </p>
-
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed max-w-2xl">
-              {believeText} {descText}
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
+              {leadText || descText || believeText}
             </p>
           </div>
         </div>
       </section>
 
-      {/* 2. Impact Statistics Counters - 2x2 on mobile, 1x4 on desktop */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 relative z-20">
+      {/* Breadcrumb Strip (Below Header Banner) */}
+      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
+        <div className="w-full flex items-center gap-2 text-xs font-bold">
+          <button
+            onClick={() => onNavigate('home')}
+            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-[#b45309] font-black">Our Mission (CSR)</span>
+        </div>
+      </div>
+
+      {/* 2. Impact Statistics Counters */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-20">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {impactStats.map((stat, idx) => {
-            const IconComp = stat.icon;
+          {activeImpactStats.map((stat, idx) => {
+            const IconComp = defaultStatIcons[idx % defaultStatIcons.length];
             return (
               <motion.div
                 key={idx}
@@ -132,14 +162,67 @@ export default function MissionPage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 3. Hero Visual Image Banner */}
+      {/* 3. Hero Visual Image Banner / Multi-Image Showcase Carousel */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
-        <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden">
-          <img
-            src={missionConfig?.missionImage || missionConfig?.imageUrl || "/images/about1.png"}
-            alt="Talented children with physical challenges creating handmade festive products"
-            className="w-full h-auto object-cover max-h-[550px]"
-          />
+        <div className="relative bg-[#1b072a] rounded-2xl sm:rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden min-h-[260px] sm:min-h-[420px] md:min-h-[520px] max-h-[580px] flex items-center justify-center">
+          {showcaseImages.length > 0 ? (
+            <>
+              {showcaseImages.map((imgSrc, idx) => (
+                <div
+                  key={idx}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentShowcaseIdx ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'
+                    }`}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={`Artisanal Crafting Showcase ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+
+              {/* Prev / Next Arrows if Multiple Showcase Images */}
+              {showcaseImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevShowcase}
+                    aria-label="Previous image"
+                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextShowcase}
+                    aria-label="Next image"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
+                  </button>
+
+                  {/* Dot Indicators */}
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                    {showcaseImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCurrentShowcaseIdx(idx)}
+                        aria-label={`Go to slide ${idx + 1}`}
+                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === currentShowcaseIdx ? 'w-6 bg-[#fdb927]' : 'w-2 bg-white/50 hover:bg-white'
+                          }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Image Counter Badge */}
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/70 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black text-[#fdb927]">
+                    📷 {currentShowcaseIdx + 1} / {showcaseImages.length}
+                  </div>
+                </>
+              )}
+            </>
+          ) : null}
         </div>
       </section>
 
@@ -181,7 +264,7 @@ export default function MissionPage({ onNavigate }) {
       {/* 5. Core Social Mission Pillars */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-          
+
           <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-5 sm:p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-3">
               <HandHeart className="w-4 h-4 sm:w-5 sm:h-5" />

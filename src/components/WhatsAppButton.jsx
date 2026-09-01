@@ -49,7 +49,7 @@ export default function WhatsAppButton() {
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="WhatsApp Support"
+        aria-label="Order on WhatsApp"
         className="relative group flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-2xl transition-all duration-300"
       >
         {/* Soft pulse ripple */}
@@ -61,8 +61,8 @@ export default function WhatsAppButton() {
         </div>
 
         {/* Text tooltip / label */}
-        <span className="relative z-10 text-xs font-semibold tracking-wide pr-1">
-          WhatsApp Support
+        <span className="relative z-10 text-xs font-bold tracking-wide pr-1">
+          Order on WhatsApp
         </span>
       </motion.a>
     </div>

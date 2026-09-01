@@ -46,10 +46,17 @@ export default function ProductCard({ product }) {
             </span>
           )}
 
-          {/* Top-Right Pure Terracotta Badge */}
-          <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-[#fdb927] to-[#e69500] text-[#1b072a] text-[10px] font-black px-2 py-1 rounded-lg shadow-md flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
-            <span>🪔</span>
-            <span>Terracotta</span>
+          {/* Top-Right Pure Terracotta Badge & Multi-image badge */}
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+            {product.images && product.images.length > 1 && (
+              <span className="bg-[#1b072a]/90 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded-md border border-white/20">
+                📷 {product.images.length}
+              </span>
+            )}
+            <div className="bg-gradient-to-r from-[#fdb927] to-[#e69500] text-[#1b072a] text-[10px] font-black px-2 py-1 rounded-lg shadow-md flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+              <span>🪔</span>
+              <span>Terracotta</span>
+            </div>
           </div>
 
           {/* Hover Quick View Button Overlay */}

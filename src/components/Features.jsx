@@ -20,8 +20,8 @@ export default function Features() {
     },
     {
       icon: Truck,
-      title: "Pan-India Fast Dispatch",
-      subtitle: "Dispatched within 24 hours to reach your doorstep safely for your celebrations."
+      title: "Doorstep Fast Dispatch",
+      subtitle: "Dispatched promptly to reach your doorstep safely for your celebrations."
     },
     {
       icon: Sparkles,

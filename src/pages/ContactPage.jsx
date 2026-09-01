@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { saveInquiryToFirestore } from '../firebase';
+import BannerBackground from '../components/BannerBackground';
 import { Sparkles, Phone, Mail, MapPin, Clock, MessageSquare, Send, CheckCircle2, ShieldCheck, Truck, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ContactPage({ onNavigate }) {
-  const { footerConfig, whatsappConfig } = useSiteConfig();
+  const { footerConfig, whatsappConfig, contactConfig } = useSiteConfig();
+
+  const contactImages = Array.isArray(contactConfig?.bgImages) && contactConfig.bgImages.length > 0
+    ? contactConfig.bgImages
+    : (contactConfig?.bgImage ? [contactConfig.bgImage] : []);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,7 +50,7 @@ export default function ContactPage({ onNavigate }) {
   const validate = () => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Please enter your name';
-    
+
     const cleanP = (formData.phone || '').replace(/\D/g, '');
     if (!cleanP) {
       errors.phone = 'Please enter your mobile number';
@@ -83,141 +88,47 @@ export default function ContactPage({ onNavigate }) {
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
-      
-      {/* 1. Header & Breadcrumb */}
-      <section className="bg-gradient-to-r from-[#1b072a] via-[#2f084a] to-[#1b072a] text-white py-10 sm:py-16 relative overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#fdb927]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#7b1fa2]/20 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 1. Header with Dynamic Multi-Image Slider */}
+      <section className="relative text-white py-10 sm:py-14 overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg min-h-[220px] sm:min-h-[260px] md:min-h-[290px] flex items-center">
+        <BannerBackground images={contactImages} />
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fdb927]/80 mb-3">
-            <button
-              onClick={() => onNavigate('home')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Home
-            </button>
-            <span>/</span>
-            <span className="text-white">Contact Us</span>
-          </div>
-
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 backdrop-blur-sm border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>WE ARE HERE TO HELP</span>
+              <span>{contactConfig?.badgeText || "WE ARE HERE TO HELP"}</span>
             </div>
 
-            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
-              Get in Touch with Team Seasonals
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-md">
+              {contactConfig?.title || "Get in Touch with Team Seasonals"}
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed max-w-2xl font-medium">
-              Have questions about order status, bulk gifting, custom colors, or shipping timelines? Reach out to our dedicated support desk.
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
+              {contactConfig?.subtitle || "Have questions about order status, bulk gifting, custom colors, or shipping timelines? Reach out to our dedicated support desk."}
             </p>
           </div>
         </div>
       </section>
 
-      {/* 2. Contact Cards Grid: 2x2 on Mobile, 4x1 on Desktop */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
-          
-          {/* Card 1: WhatsApp */}
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all group flex flex-col justify-between"
+      {/* Breadcrumb Strip (Below Header Banner) */}
+      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
+        <div className="w-full flex items-center gap-2 text-xs font-bold">
+          <button
+            onClick={() => onNavigate('home')}
+            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
           >
-            <div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
-                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-[9px] sm:text-[10px] font-black uppercase text-emerald-600 tracking-wider block mb-0.5">
-                INSTANT CHAT
-              </span>
-              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
-                WhatsApp Chat
-              </h3>
-              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
-                {footerConfig.supportPhone || "+91 91353 13565"}
-              </p>
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold mt-2 inline-block">
-              Chat Now 💬 →
-            </span>
-          </a>
-
-          {/* Card 2: Phone Helpline */}
-          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 sm:mb-3">
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-[9px] sm:text-[10px] font-black uppercase text-[#280a3e] tracking-wider block mb-0.5">
-                HELPLINE
-              </span>
-              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
-                Direct Call
-              </h3>
-              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
-                {footerConfig.supportPhone || "+91 91353 13565"}
-              </p>
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
-              9 AM - 9 PM IST
-            </span>
-          </div>
-
-          {/* Card 3: Pan India Delivery */}
-          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 sm:mb-3">
-                <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-[9px] sm:text-[10px] font-black uppercase text-amber-700 tracking-wider block mb-0.5">
-                SHIPPING
-              </span>
-              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
-                Pan-India
-              </h3>
-              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
-                15,000+ pincodes covered.
-              </p>
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
-              3-5 business days
-            </span>
-          </div>
-
-          {/* Card 4: Operating Hours */}
-          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-2.5 sm:mb-3">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <span className="text-[9px] sm:text-[10px] font-black uppercase text-rose-700 tracking-wider block mb-0.5">
-                SUPPORT
-              </span>
-              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
-                7 Days a Week
-              </h3>
-              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
-                Live festive team assistance.
-              </p>
-            </div>
-            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
-              Quick response
-            </span>
-          </div>
-
+            Home
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-[#b45309] font-black">Contact Us</span>
         </div>
-      </section>
+      </div>
 
-      {/* 3. Contact Form & FAQ Grid */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-12">
+      {/* 2. Contact Form & Right Support Info Grid */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-          
+
           {/* Left Form */}
           <div className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-8 border border-gray-200 shadow-xl">
             <h2 className="font-playfair text-xl sm:text-2xl font-bold text-gray-900 mb-1">
@@ -246,35 +157,33 @@ export default function ContactPage({ onNavigate }) {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Your Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter your name"
-                      className={`w-full px-3.5 py-2.5 text-xs rounded-xl border ${
-                        formErrors.name ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your name"
+                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border ${formErrors.name ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
                       } focus:outline-none focus:border-[#280a3e]`}
-                    />
-                    {formErrors.name && (
-                      <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.name}</span>
-                    )}
-                  </div>
+                  />
+                  {formErrors.name && (
+                    <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.name}</span>
+                  )}
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="text-xs font-bold text-gray-700 block mb-1">
                       Mobile Number *
                     </label>
                     <div className="flex items-center">
-                      <span className="inline-flex items-center gap-1 px-3 py-2.5 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-extrabold select-none flex-shrink-0">
-                        <span>🇮🇳</span>
-                        <span>+91</span>
+                      <span className="inline-flex items-center gap-1 px-3 py-2.5 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-bold select-none flex-shrink-0">
+                        <span>🇮🇳 +91</span>
                       </span>
                       <input
                         type="tel"
@@ -282,19 +191,16 @@ export default function ContactPage({ onNavigate }) {
                         value={formData.phone}
                         onChange={handleInputChange}
                         maxLength={10}
-                        placeholder="98765 43210"
-                        className={`w-full px-3.5 py-2.5 text-xs rounded-r-xl border ${
-                          formErrors.phone ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#280a3e] font-semibold text-gray-900`}
+                        placeholder="10-digit number"
+                        className={`w-full px-3 py-2.5 text-xs rounded-r-xl border ${formErrors.phone ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+                          } focus:outline-none focus:border-[#280a3e] font-semibold`}
                       />
                     </div>
                     {formErrors.phone && (
                       <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.phone}</span>
                     )}
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="text-xs font-bold text-gray-700 block mb-1">
                       Email Address (Optional)
@@ -304,28 +210,28 @@ export default function ContactPage({ onNavigate }) {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="name@example.com"
+                      placeholder="your.email@example.com"
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:outline-none focus:border-[#280a3e]"
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Inquiry Subject
-                    </label>
-                    <select
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-white text-gray-700"
-                    >
-                      <option value="General Question">General Product Question</option>
-                      <option value="Order Tracking">Order Tracking / Status</option>
-                      <option value="Bulk Order">Bulk & Corporate Gifting</option>
-                      <option value="Custom Colors">Custom Diya Colors</option>
-                      <option value="Other">Other Query</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 block mb-1">
+                    Subject / Reason *
+                  </label>
+                  <select
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-white cursor-pointer"
+                  >
+                    <option value="General Inquiry">General Question / Inquiry</option>
+                    <option value="Order Status">Existing Order Status</option>
+                    <option value="Bulk & Corporate Order">Bulk / Corporate Gifting Order</option>
+                    <option value="Custom Colors & Packaging">Custom Colors & Bespoke Favors</option>
+                    <option value="Feedback & Support">Feedback & Customer Care</option>
+                  </select>
                 </div>
 
                 <div>
@@ -338,9 +244,8 @@ export default function ContactPage({ onNavigate }) {
                     value={formData.message}
                     onChange={handleInputChange}
                     placeholder="Type your message here..."
-                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border ${
-                      formErrors.message ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                    } focus:outline-none focus:border-[#280a3e] resize-none`}
+                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border ${formErrors.message ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+                      } focus:outline-none focus:border-[#280a3e] resize-none`}
                   />
                   {formErrors.message && (
                     <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.message}</span>
@@ -393,7 +298,7 @@ export default function ContactPage({ onNavigate }) {
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
               >
-                <span>Chat Instantly on WhatsApp 💬</span>
+                <span>Order on WhatsApp 💬</span>
               </a>
             </div>
 
@@ -417,6 +322,101 @@ export default function ContactPage({ onNavigate }) {
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Contact Action Cards Grid: 2x2 on Mobile, 4x1 on Desktop (Display After Contact Form) */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
+
+          {/* Card 1: WhatsApp */}
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all group flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
+                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-emerald-600 tracking-wider block mb-0.5">
+                INSTANT ORDERS
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                Order on WhatsApp
+              </h3>
+              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
+                {footerConfig.supportPhone || "+91 91353 13565"}
+              </p>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold mt-2 inline-block">
+              Order on WhatsApp 💬 →
+            </span>
+          </a>
+
+          {/* Card 2: Phone Helpline */}
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 sm:mb-3">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-[#280a3e] tracking-wider block mb-0.5">
+                HELPLINE
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                Direct Call
+              </h3>
+              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
+                {footerConfig.supportPhone || "+91 91353 13565"}
+              </p>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              9 AM - 9 PM IST
+            </span>
+          </div>
+
+          {/* Card 3: Doorstep Delivery */}
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 sm:mb-3">
+                <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-amber-700 tracking-wider block mb-0.5">
+                SHIPPING
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                Fast Dispatch
+              </h3>
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
+                Safe & prompt courier delivery.
+              </p>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              3-5 business days
+            </span>
+          </div>
+
+          {/* Card 4: Operating Hours */}
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-2.5 sm:mb-3">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-rose-700 tracking-wider block mb-0.5">
+                SUPPORT
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                7 Days a Week
+              </h3>
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
+                Live festive team assistance.
+              </p>
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              Quick response
+            </span>
           </div>
 
         </div>

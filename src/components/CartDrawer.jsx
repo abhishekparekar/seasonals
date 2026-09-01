@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { saveOrderToFirestore } from '../firebase';
 import { initiateRazorpayPayment } from '../services/razorpay';
+import { lookupPincode } from '../utils/pincodeHelper';
 import { 
   X, 
   Trash2, 
@@ -12,7 +13,9 @@ import {
   ShieldCheck,
   Send,
   Loader2,
-  CreditCard
+  CreditCard,
+  CheckCircle2,
+  MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,10 +35,16 @@ export default function CartDrawer() {
   const [formData, setFormData] = useState({
     name: '',
     mobileNumber: '',
-    address: '',
+    pincode: '',
+    addressLine: '',
+    city: '',
+    district: '',
+    state: '',
     orderNotes: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' (Razorpay) | 'cod'
+
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [pincodeSuccess, setPincodeSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [formErrors, setFormErrors] = useState({});
@@ -64,6 +73,39 @@ export default function CartDrawer() {
     }
   };
 
+  const handlePincodeChange = async (e) => {
+    const rawVal = e.target.value;
+    const cleanPin = rawVal.replace(/\D/g, '').slice(0, 6);
+    setFormData((prev) => ({ ...prev, pincode: cleanPin }));
+
+    if (cleanPin.length === 6) {
+      setPincodeLoading(true);
+      setPincodeSuccess(false);
+      const res = await lookupPincode(cleanPin);
+      setPincodeLoading(false);
+      if (res.success) {
+        setFormData((prev) => ({
+          ...prev,
+          city: res.city || prev.city,
+          district: res.district || prev.district,
+          state: res.state || prev.state
+        }));
+        setPincodeSuccess(true);
+        setFormErrors((prev) => ({ ...prev, pincode: '' }));
+      } else {
+        setFormErrors((prev) => ({ ...prev, pincode: res.error || 'Pincode not recognized' }));
+        setPincodeSuccess(false);
+      }
+    } else {
+      setPincodeSuccess(false);
+      if (cleanPin.length > 0 && cleanPin.length < 6) {
+        setFormErrors((prev) => ({ ...prev, pincode: `Enter ${6 - cleanPin.length} more digit(s)` }));
+      } else {
+        setFormErrors((prev) => ({ ...prev, pincode: '' }));
+      }
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
     const cleanName = formData.name.trim();
@@ -80,9 +122,28 @@ export default function CartDrawer() {
       errors.mobileNumber = 'Must start with 6, 7, 8, or 9';
     }
 
+    const cleanPin = (formData.pincode || '').replace(/\D/g, '');
+    if (!cleanPin || cleanPin.length !== 6) {
+      errors.pincode = 'Please enter a valid 6-digit Pincode';
+    }
+
+    if (!formData.addressLine.trim()) {
+      errors.addressLine = 'Please enter your street / house address';
+    }
+
+    if (!formData.city.trim()) {
+      errors.city = 'Please enter or confirm city';
+    }
+
+    if (!formData.state.trim()) {
+      errors.state = 'Please enter or confirm state';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  const fullCombinedAddress = `${formData.addressLine.trim()}, ${formData.city.trim()}, ${formData.district.trim() ? formData.district.trim() + ', ' : ''}${formData.state.trim()} - ${formData.pincode.trim()}`;
 
   const handleCartSubmit = async (e) => {
     e.preventDefault();
@@ -95,14 +156,19 @@ export default function CartDrawer() {
         amount: cartSubtotal,
         customerName: formData.name.trim(),
         customerPhone: formData.mobileNumber.trim(),
-        customerAddress: formData.address.trim(),
+        customerAddress: fullCombinedAddress,
         productName: `${totalItemsCount} Festive Cart Items`,
         onSuccess: async (razorpayResult) => {
           try {
             const orderPayload = {
               name: formData.name.trim(),
               mobileNumber: formData.mobileNumber.trim(),
-              address: formData.address.trim(),
+              pincode: formData.pincode.trim(),
+              addressLine: formData.addressLine.trim(),
+              city: formData.city.trim(),
+              district: formData.district.trim() || null,
+              state: formData.state.trim(),
+              address: fullCombinedAddress,
               orderNotes: formData.orderNotes.trim() || null,
               items: cart,
               productName: cart.map(i => `${i.name} (Qty: ${i.quantity})`).join(', '),
@@ -139,271 +205,345 @@ export default function CartDrawer() {
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
-      alert("Failed to initiate payment gateway. Please try again.");
+      alert("Could not initialize Razorpay checkout. Please order via WhatsApp.");
     }
   };
 
-  const openWhatsAppConfirmation = () => {
-    if (!orderSuccess) return;
-    const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
-    const msg = `Hello Seasonals! 🪔\n\nI placed an order on your website:\n*Order ID:* #${orderSuccess.orderId.slice(-6).toUpperCase()}\n*Customer:* ${orderSuccess.name}\n*Mobile:* ${orderSuccess.mobileNumber}\n*Items:* ${orderSuccess.productName}\n*Total Amount:* ₹${orderSuccess.totalPrice}\n*Payment Status:* ${orderSuccess.paymentStatus || 'Pending'}\n*Address:* ${orderSuccess.address}\n\nPlease confirm delivery!`;
-    const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-  };
+  const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
+  const cartItemsText = cart.map((item, idx) => `${idx + 1}. *${item.name}* (Qty: ${item.quantity}) - ₹${item.price * item.quantity}`).join('\n');
+  const whatsappCartMsg = `Hello Seasonals! 🪔 I would like to place an order for my cart:
+${cartItemsText}
+
+*Total Items:* ${totalItemsCount}
+*Total Amount:* ₹${cartSubtotal}
+*Customer Name:* ${formData.name || 'Not provided'}
+*Phone:* ${formData.mobileNumber || 'Not provided'}
+*Delivery Address:* ${fullCombinedAddress !== ',  - ' ? fullCombinedAddress : 'Will provide in chat'}`;
+
+  const whatsappCartUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappCartMsg)}`;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden font-inter">
-        {/* Backdrop */}
+    <div className="fixed inset-0 z-50 overflow-hidden font-inter">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setIsCartOpen(false)}
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+      />
+
+      {/* Drawer */}
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setIsCartOpen(false)}
-          className="fixed inset-0 bg-[#0f0417]/80 backdrop-blur-sm"
-        />
-
-        {/* Slide-over Panel */}
-        <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between border-l border-[#fdb927]/20 text-gray-900"
-          >
-            {/* Header */}
-            <div className="p-4 sm:p-5 bg-[#1b072a] text-white border-b border-[#fdb927]/20 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <ShoppingBag className="w-5 h-5 text-[#fdb927]" />
-                <h3 className="font-playfair text-lg sm:text-xl font-bold">Your Festive Cart</h3>
-                <span className="bg-[#fdb927] text-[#1b072a] text-xs font-bold px-2 py-0.5 rounded-full">
-                  {totalItemsCount}
-                </span>
-              </div>
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="p-1.5 rounded-full hover:bg-white/10 text-white transition-colors"
-                aria-label="Close cart"
-              >
-                <X className="w-5 h-5" />
-              </button>
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+          className="w-screen max-w-md bg-white shadow-2xl border-l border-[#fdb927]/30 flex flex-col justify-between"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 sm:p-5 bg-gradient-to-r from-[#1b072a] via-[#3d0f5e] to-[#1b072a] text-white border-b border-[#fdb927]/40">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-[#fdb927]" />
+              <h2 className="font-playfair text-base sm:text-lg font-bold text-[#fdb927]">
+                Shopping Cart ({totalItemsCount})
+              </h2>
             </div>
+            <button
+              onClick={() => setIsCartOpen(false)}
+              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            {/* Cart Body */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-              {orderSuccess ? (
-                <div className="text-center py-8 space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl animate-bounce">
-                    ✓
-                  </div>
-                  <div>
-                    <h4 className="font-playfair text-xl font-bold text-gray-900">
-                      {orderSuccess.paymentStatus === 'PAID' ? 'Payment & Order Placed!' : 'Order Placed Successfully!'}
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Order ID: <strong className="text-[#1b072a]">#{orderSuccess.orderId.slice(-6).toUpperCase()}</strong>
-                    </p>
-                    {orderSuccess.paymentId && (
-                      <p className="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 py-0.5 px-2 rounded inline-block mt-1">
-                        Razorpay ID: {orderSuccess.paymentId}
-                      </p>
-                    )}
-                    <p className="text-xs text-emerald-700 font-semibold mt-1">
-                      Saved to database under +91 {orderSuccess.mobileNumber}
-                    </p>
-                  </div>
-
-                  <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#fdb927]/30 text-xs text-left space-y-1">
-                    <div><strong>Items:</strong> {orderSuccess.productName}</div>
-                    <div><strong>Total Paid:</strong> ₹{orderSuccess.totalPrice} ({orderSuccess.paymentMethod})</div>
-                    <div><strong>Address:</strong> {orderSuccess.address}</div>
-                  </div>
-
-                  <button
-                    onClick={openWhatsAppConfirmation}
-                    className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <span>Confirm on WhatsApp 💬</span>
-                  </button>
+          {/* Drawer Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            {orderSuccess ? (
+              /* Success View */
+              <div className="text-center py-8 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl">
+                  ✓
                 </div>
-              ) : cart.length > 0 ? (
-                <>
-                  {/* Items List */}
-                  <div className="divide-y divide-gray-100">
-                    {cart.map((item) => (
-                      <div key={item.id} className="py-3 first:pt-0 flex gap-3 items-center">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 rounded-xl object-cover border border-gray-200 flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-playfair font-bold text-xs sm:text-sm text-gray-900 truncate">
-                            {item.name}
-                          </h4>
-                          <div className="text-xs text-gray-500 mb-1.5">
-                            ₹{item.price} each
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center border border-gray-200 rounded-lg bg-gray-50">
-                              <button
-                                onClick={() => updateQuantity(item.id, -1)}
-                                className="p-1 text-gray-600 hover:text-black"
-                              >
-                                <Minus className="w-3 h-3" />
-                              </button>
-                              <span className="px-2 text-xs font-bold text-[#1b072a]">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateQuantity(item.id, 1)}
-                                className="p-1 text-gray-600 hover:text-black"
-                              >
-                                <Plus className="w-3 h-3" />
-                              </button>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-[#1b072a]">
-                                ₹{item.price * item.quantity}
-                              </span>
-                              <button
-                                onClick={() => removeFromCart(item.id)}
-                                className="text-gray-400 hover:text-red-500 p-1"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
+                <h3 className="font-playfair text-2xl font-bold text-gray-900">
+                  Order Confirmed!
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Thank you, <strong>{orderSuccess.name}</strong>. Your payment of <strong>₹{orderSuccess.totalPrice}</strong> was received successfully.
+                </p>
+                <div className="p-3.5 bg-gray-50 rounded-2xl border text-xs text-left font-mono space-y-1">
+                  <div><strong>Order ID:</strong> #{orderSuccess.orderId.slice(-8).toUpperCase()}</div>
+                  <div><strong>Items:</strong> {orderSuccess.productName}</div>
+                  <div><strong>Address:</strong> {orderSuccess.address}</div>
+                </div>
+                <button
+                  onClick={() => {
+                    setOrderSuccess(null);
+                    setIsCartOpen(false);
+                  }}
+                  className="w-full py-3 bg-[#1b072a] text-[#fdb927] font-bold text-xs rounded-xl shadow cursor-pointer"
+                >
+                  Continue Shopping
+                </button>
+              </div>
+            ) : cart.length === 0 ? (
+              /* Empty Cart */
+              <div className="text-center py-12 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-2xl">
+                  🛒
+                </div>
+                <h3 className="font-playfair text-lg font-bold text-gray-800">
+                  Your cart is empty
+                </h3>
+                <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                  Add handcrafted terracotta diya sets from the shop to illuminate your celebrations.
+                </p>
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="mt-2 px-5 py-2.5 bg-[#1b072a] text-[#fdb927] font-bold text-xs rounded-full shadow"
+                >
+                  Browse Shop
+                </button>
+              </div>
+            ) : (
+              /* Cart Items & Checkout Form */
+              <div className="space-y-4">
+                {/* Cart Items List */}
+                <div className="space-y-2.5">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-14 h-14 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-playfair text-xs sm:text-sm font-bold text-gray-900 truncate">
+                          {item.name}
+                        </h4>
+                        <div className="text-[11px] font-bold text-[#b45309]">
+                          ₹{item.price} <span className="text-gray-400 font-normal">x {item.quantity}</span>
+                        </div>
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="w-5 h-5 rounded-md bg-white border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 hover:bg-gray-100"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-bold text-gray-800 w-4 text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-5 h-5 rounded-md bg-white border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 hover:bg-gray-100"
+                          >
+                            +
+                          </button>
                         </div>
                       </div>
-                    ))}
+
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        title="Remove item"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Subtotal Summary */}
+                <div className="p-3 bg-[#FFF8EB] rounded-2xl border border-[#fdb927]/40 flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-700">Subtotal ({totalItemsCount} items):</span>
+                  <span className="text-base font-black text-[#1b072a]">₹{cartSubtotal}</span>
+                </div>
+
+                {/* Checkout Address Form */}
+                <form onSubmit={handleCartSubmit} className="space-y-3 pt-2 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase text-gray-700 tracking-wider">
+                      Delivery Address
+                    </span>
+                    <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" /> Fast Dispatch
+                    </span>
                   </div>
 
-                  {/* Checkout Form */}
-                  <form onSubmit={handleCartSubmit} className="pt-3 border-t border-gray-200 space-y-2.5">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-gray-800">
-                      Customer Delivery Details:
-                    </h5>
-
+                  {/* Name & Phone */}
+                  <div className="space-y-2">
                     <div>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="Enter your full name *"
+                        placeholder="Your Full Name *"
                         className={`w-full px-3 py-2 text-xs rounded-xl border ${
-                          formErrors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#fdb927]`}
+                          formErrors.name ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+                        } focus:outline-none focus:border-[#280a3e]`}
                       />
                       {formErrors.name && (
-                        <span className="text-[10px] text-red-500 block mt-0.5">{formErrors.name}</span>
+                        <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.name}</span>
                       )}
                     </div>
 
                     <div>
                       <div className="flex items-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-extrabold select-none flex-shrink-0">
-                          <span>🇮🇳</span>
-                          <span>+91</span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-bold select-none flex-shrink-0">
+                          <span>🇮🇳 +91</span>
                         </span>
                         <input
                           type="tel"
                           name="mobileNumber"
                           value={formData.mobileNumber}
                           onChange={handleInputChange}
-                          placeholder="98765 43210 *"
                           maxLength={10}
+                          placeholder="10-digit Mobile Number *"
                           className={`w-full px-3 py-2 text-xs rounded-r-xl border ${
-                            formErrors.mobileNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                          } focus:outline-none focus:border-[#fdb927] font-semibold text-gray-900`}
+                            formErrors.mobileNumber ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+                          } focus:outline-none focus:border-[#280a3e] font-semibold`}
                         />
                       </div>
                       {formErrors.mobileNumber && (
-                        <span className="text-[10px] text-red-500 font-semibold block mt-0.5">{formErrors.mobileNumber}</span>
+                        <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.mobileNumber}</span>
                       )}
                     </div>
-
-                    <div>
-                      <textarea
-                        name="address"
-                        rows={2}
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="Enter your delivery address, city & pincode *"
-                        className={`w-full px-3 py-2 text-xs rounded-xl border ${
-                          formErrors.address ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#fdb927] resize-none`}
-                      />
-                      {formErrors.address && (
-                        <span className="text-[10px] text-red-500 block mt-0.5">{formErrors.address}</span>
-                      )}
-                    </div>
-
-                    {/* Secure Online Payment Note */}
-                    <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#fdb927]/40 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-[#1b072a]" />
-                        <span className="text-[11px] font-bold text-gray-900">Pay Online via Razorpay</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                        <span>100% Secure</span>
-                      </span>
-                    </div>
-
-                    <div className="pt-2">
-                      <div className="flex justify-between text-sm font-extrabold text-[#1b072a] mb-2">
-                        <span>Total Amount:</span>
-                        <span>₹{cartSubtotal}</span>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-[#1b072a] to-[#380e56] hover:from-[#25093a] hover:to-[#4a1372] text-[#fdb927] hover:text-white flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-[#fdb927]" />
-                            <span>Opening Payment Gateway...</span>
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-4 h-4 text-[#fdb927]" />
-                            <span>Pay Online with Razorpay (₹{cartSubtotal})</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                  <div className="w-14 h-14 rounded-full bg-[#fdb927]/15 flex items-center justify-center text-2xl mb-3">
-                    🪔
                   </div>
-                  <h4 className="font-playfair text-lg font-bold text-gray-900 mb-1">
-                    Your Cart is Empty
-                  </h4>
-                  <p className="text-xs text-gray-500 mb-4">
-                    Click "Order Now" on any diya pack to order or add to cart.
-                  </p>
+
+                  {/* Pincode with Auto-Fetch */}
+                  <div>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[10px] font-bold text-gray-700 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#b45309]" />
+                        <span>Pincode (Auto-fills City & State) *</span>
+                      </span>
+                      {pincodeLoading && (
+                        <span className="text-[10px] text-[#b45309] font-bold flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin" /> Fetching...
+                        </span>
+                      )}
+                      {pincodeSuccess && (
+                        <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Auto-filled
+                        </span>
+                      )}
+                    </div>
+
+                    <input
+                      type="text"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handlePincodeChange}
+                      maxLength={6}
+                      placeholder="Enter 6-digit Pincode (e.g. 400001) *"
+                      className={`w-full px-3 py-2 text-xs rounded-xl border font-bold ${
+                        formErrors.pincode 
+                          ? 'border-red-500 bg-red-50/40' 
+                          : pincodeSuccess 
+                            ? 'border-emerald-500 bg-emerald-50/30' 
+                            : 'border-gray-300'
+                      } focus:outline-none focus:border-[#280a3e]`}
+                    />
+                    {formErrors.pincode && (
+                      <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.pincode}</span>
+                    )}
+                  </div>
+
+                  {/* Street Address */}
+                  <div>
+                    <input
+                      type="text"
+                      name="addressLine"
+                      value={formData.addressLine}
+                      onChange={handleInputChange}
+                      placeholder="House / Flat No., Street, Landmark *"
+                      className={`w-full px-3 py-2 text-xs rounded-xl border ${
+                        formErrors.addressLine ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
+                      } focus:outline-none focus:border-[#280a3e]`}
+                    />
+                    {formErrors.addressLine && (
+                      <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.addressLine}</span>
+                    )}
+                  </div>
+
+                  {/* City, District, State (Auto-filled / Editable) */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      placeholder="City *"
+                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border ${
+                        formErrors.city ? 'border-red-500' : 'border-gray-300'
+                      } focus:outline-none focus:border-[#280a3e] bg-gray-50`}
+                    />
+                    <input
+                      type="text"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      placeholder="District"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-gray-50"
+                    />
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      placeholder="State *"
+                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border ${
+                        formErrors.state ? 'border-red-500' : 'border-gray-300'
+                      } focus:outline-none focus:border-[#280a3e] bg-gray-50`}
+                    />
+                  </div>
+
+                  {/* Checkout Button */}
                   <button
-                    onClick={() => setIsCartOpen(false)}
-                    className="bg-[#1b072a] text-[#fdb927] font-bold text-xs py-2.5 px-5 rounded-full"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 px-5 rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:to-[#4e1477] text-[#fdb927] hover:text-white flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50 cursor-pointer border-2 border-[#fdb927]/60 mt-2"
                   >
-                    Explore Diyas (₹120)
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#fdb927]" />
+                        <span>Processing Payment...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4 text-[#fdb927]" />
+                        <span>Pay Online ₹{cartSubtotal} (Razorpay)</span>
+                      </>
+                    )}
                   </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
+
+                  {/* Or Order on WhatsApp CTA */}
+                  <div className="pt-1">
+                    <a
+                      href={whatsappCartUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+                    >
+                      <span>💬 Order on WhatsApp</span>
+                    </a>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+        </motion.div>
       </div>
-    </AnimatePresence>
+    </div>
   );
 }

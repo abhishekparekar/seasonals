@@ -1,12 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import ProductCard from '../components/ProductCard';
+import BannerBackground from '../components/BannerBackground';
 import { Sparkles, Search, Filter, SlidersHorizontal, ArrowUpDown, X, ShieldCheck, Truck, RefreshCw, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ShopPage({ onNavigate }) {
   const { products, loading, shopConfig } = useSiteConfig();
-  
+
+  const shopImages = Array.isArray(shopConfig?.bgImages) && shopConfig.bgImages.length > 0
+    ? shopConfig.bgImages
+    : (shopConfig?.bgImage ? [shopConfig.bgImage] : []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -26,41 +31,42 @@ export default function ShopPage({ onNavigate }) {
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
-      
-      {/* 1. Shop Page Header & Breadcrumb */}
-      <section className="bg-gradient-to-r from-[#1b072a] via-[#2f084a] to-[#1b072a] text-white py-10 sm:py-14 relative overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg">
-        <div className="absolute -top-10 right-0 w-80 h-80 bg-[#fdb927]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 left-0 w-80 h-80 bg-[#7b1fa2]/20 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 1. Shop Page Header Banner with Dynamic Multi-Image Slider */}
+      <section className="relative text-white py-10 sm:py-14 overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg min-h-[220px] sm:min-h-[260px] md:min-h-[290px] flex items-center">
+        <BannerBackground images={shopImages} />
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fdb927]/80 mb-3">
-            <button
-              onClick={() => onNavigate('home')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Home
-            </button>
-            <span>/</span>
-            <span className="text-white">Shop Collection</span>
-          </div>
-
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
+            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 backdrop-blur-sm border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{shopConfig?.badgeText || "100% Pure Terracotta Handcrafted Collection"}</span>
             </div>
 
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2">
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-md">
               {shopConfig?.title || "Handcrafted Festive Diya Sets"}
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-medium">
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
               {shopConfig?.subtitle || "Explore authentic terracotta diyas meticulously hand-painted with radiant 24K gold scalloped rims by talented children with physical challenges."}
             </p>
           </div>
         </div>
       </section>
+
+      {/* Breadcrumb Strip (Below Header Banner) */}
+      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
+        <div className="w-full flex items-center gap-2 text-xs font-bold">
+          <button
+            onClick={() => onNavigate('home')}
+            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-[#b45309] font-black">Shop Collection</span>
+        </div>
+      </div>
 
       {/* 2. Search Bar */}
       <section className="sticky top-14 sm:top-16 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3.5 shadow-sm">
@@ -90,7 +96,7 @@ export default function ShopPage({ onNavigate }) {
 
       {/* 3. Product Catalog Grid */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8">
-        
+
         {/* Results Counter Display */}
         <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -153,7 +159,7 @@ export default function ShopPage({ onNavigate }) {
       {/* 4. Trust Badges Strip */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 mt-14">
         <div className="bg-gradient-to-r from-[#FAF7F2] via-white to-[#FAF7F2] rounded-3xl p-6 sm:p-8 border border-[#fdb927]/40 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-center sm:text-left">
-          
+
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
               <ShieldCheck className="w-5 h-5" />
@@ -169,7 +175,7 @@ export default function ShopPage({ onNavigate }) {
               <Truck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-gray-900">Pan-India Delivery</h4>
+              <h4 className="text-xs sm:text-sm font-bold text-gray-900">Doorstep Delivery</h4>
               <p className="text-[11px] text-gray-500">Fast doorstep courier dispatch</p>
             </div>
           </div>

@@ -321,7 +321,7 @@ export const products = [
       "3 Sealed Packs (12 Diyas)",
       "Premium Gift Box Packing",
       "Full Home Illumination",
-      "Pan-India Express Dispatch"
+      "Express Doorstep Dispatch"
     ]
   }
 ];

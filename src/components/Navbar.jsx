@@ -90,15 +90,6 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
           {/* Right Action Controls: Support Their Craft -> Cart -> Order Now + Mobile Menu Toggle */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             
-            {/* Desktop Only: Highlighted "Support Their Craft" CTA Button */}
-            <button
-              onClick={() => handleLinkClick('shop')}
-              className="hidden md:inline-flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] via-[#b45309] to-[#d97706] hover:from-[#b45309] hover:to-[#92400e] text-white font-extrabold text-[12px] xl:text-[13px] tracking-wide px-3.5 sm:px-4 py-2 rounded-full shadow-[0_4px_14px_rgba(217,119,6,0.35)] hover:shadow-[0_6px_20px_rgba(217,119,6,0.45)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fdb927]/70 cursor-pointer whitespace-nowrap"
-            >
-              <Heart className="w-3.5 h-3.5 fill-[#fdb927] text-[#fdb927] animate-pulse" />
-              <span>Support Their Craft</span>
-            </button>
-
             {/* Desktop Only: Luxury Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
@@ -218,15 +209,6 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
                   <span className="bg-[#280a3e] text-[#fdb927] font-black text-[11px] px-2 py-0.5 rounded-full border border-[#fdb927]/50">
                     {totalItemsCount}
                   </span>
-                </button>
-
-                {/* Mobile Drawer Support Their Craft Button */}
-                <button
-                  onClick={() => handleLinkClick('shop')}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#d97706] via-[#b45309] to-[#d97706] hover:from-[#b45309] hover:to-[#92400e] text-white font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
-                >
-                  <Heart className="w-4 h-4 text-[#fdb927] fill-[#fdb927] animate-pulse" />
-                  <span>Support Their Craft</span>
                 </button>
 
                 {/* Mobile Drawer Order Now Button */}

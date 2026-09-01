@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import InquiryForm from '../components/InquiryForm';
+import BannerBackground from '../components/BannerBackground';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { Sparkles, Gift, CheckCircle2, Building2, PackageCheck, Truck, ShieldCheck, ChevronDown, ChevronUp, MessageSquare, PhoneCall } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function BulkGiftingPage({ onNavigate }) {
-  const { whatsappConfig, footerConfig } = useSiteConfig();
-  
+  const { bulkConfig, whatsappConfig } = useSiteConfig();
   const [activeFaq, setActiveFaq] = useState(null);
 
-  const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
+  const cleanPhone = (whatsappConfig?.phoneNumber || "9135313565").replace(/\D/g, "");
   const directWhatsAppUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent("Hello Seasonals! 🪔 I would like to inquire about Corporate Festive Bulk Gifting packages and custom branding options.")}`;
+
+  const bulkImages = Array.isArray(bulkConfig?.bgImages) && bulkConfig.bgImages.length > 0
+    ? bulkConfig.bgImages
+    : (bulkConfig?.bgImage ? [bulkConfig.bgImage] : []);
 
   const corporateBenefits = [
     {
       icon: Gift,
-      title: "Customized Festive Packaging",
-      desc: "Add your corporate logo, custom ribbon, greeting card, or personalized message inside each premium gift box."
+      title: "Custom Brand Personalization",
+      desc: "Add your corporate logo, customized greeting cards, and bespoke festive packaging tailored to your brand identity."
     },
     {
       icon: Building2,
@@ -25,8 +29,8 @@ export default function BulkGiftingPage({ onNavigate }) {
     },
     {
       icon: Truck,
-      title: "Pan-India Multi-Location Dispatch",
-      desc: "We can ship directly to individual employee home addresses across 15,000+ pincodes or deliver in bulk to your corporate office."
+      title: "Direct Multi-Location Dispatch",
+      desc: "We can ship directly to employee home addresses or deliver in bulk directly to your corporate office."
     },
     {
       icon: ShieldCheck,
@@ -44,7 +48,7 @@ export default function BulkGiftingPage({ onNavigate }) {
       features: [
         "Assorted Vibrant Color Mix",
         "Festive Gift Box Packaging",
-        "Pan-India Express Dispatch",
+        "Express Safe Dispatch",
         "Dedicated Support Desk"
       ]
     },
@@ -58,7 +62,7 @@ export default function BulkGiftingPage({ onNavigate }) {
         "Custom Logo Greeting Card Included",
         "Choice of Custom Color Themes",
         "Priority Workshop Production",
-        "Pan-India Multi-Address Shipping",
+        "Direct Multi-Address Delivery",
         "Complimentary Cotton Wicks"
       ]
     },
@@ -68,30 +72,26 @@ export default function BulkGiftingPage({ onNavigate }) {
       diyaCount: "2,000+ Diyas",
       tag: "Mega Corporates & Events",
       features: [
-        "Full Custom Box Branding",
-        "Special Volume Tier Discounts",
-        "Dedicated Account Manager",
-        "Custom Sample Box Dispatched First",
-        "GST Invoice with Full Tax Input"
+        "Full Custom Branding & Gift Boxes",
+        "Exclusive Color Combinations",
+        "Dedicated Relationship Manager",
+        "Multi-Batch Scheduled Deliveries",
+        "Direct Impact Certificate for HR"
       ]
     }
   ];
 
-  const faqs = [
+  const corporateFaqs = [
     {
-      q: "What is the Minimum Order Quantity (MOQ) for corporate gifting?",
-      a: "Our bulk orders start at just 25 packs (100 diyas). We can cater to orders up to 5,000+ packs for large enterprise clients."
+      q: "Can we get our company logo printed on the gift boxes?",
+      a: "Yes! For orders above 50 packs, we provide custom printed logo sleeves, branded greeting cards, and customized thank-you notes crafted with your message."
     },
     {
-      q: "Can we request a physical sample before placing the full bulk order?",
-      a: "Yes! We can dispatch a sample box containing our assorted terracotta handcrafted diyas directly to your office within 2-3 business days."
+      q: "Can you ship directly to individual employee home addresses?",
+      a: "Absolutely. Provide us with an Excel sheet of addresses, and our logistics team will safely dispatch individual bubble-packed gift boxes directly to each employee."
     },
     {
-      q: "Can you deliver to employee home addresses directly?",
-      a: "Absolutely. You can share your employee or client address sheet in Excel, and we will handle end-to-end individual door-to-door delivery with tracking numbers."
-    },
-    {
-      q: "What is the delivery turnaround time for bulk orders?",
+      q: "What is the turnaround time for bulk orders?",
       a: "Standard bulk orders (50 - 500 packs) are crafted, packaged and dispatched within 3 to 6 business days. For urgent timelines, express expedited priority dispatch is available."
     },
     {
@@ -102,43 +102,116 @@ export default function BulkGiftingPage({ onNavigate }) {
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
-      
-      {/* 1. Header & Breadcrumb */}
-      <section className="bg-gradient-to-r from-[#1b072a] via-[#2f084a] to-[#1b072a] text-white py-10 sm:py-16 relative overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#fdb927]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#7b1fa2]/20 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 1. Header with Dynamic Multi-Image Slider */}
+      <section className="relative text-white py-10 sm:py-14 overflow-hidden border-b-2 border-[#fdb927]/40 shadow-lg min-h-[220px] sm:min-h-[260px] md:min-h-[290px] flex items-center">
+        <BannerBackground images={bulkImages} />
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fdb927]/80 mb-3">
-            <button
-              onClick={() => onNavigate('home')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Home
-            </button>
-            <span>/</span>
-            <span className="text-white">Bulk & Corporate Gifting</span>
-          </div>
-
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 backdrop-blur-sm border border-[#fdb927]/40 px-3.5 py-1 rounded-full text-xs font-black text-[#fdb927] mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>CORPORATE • WEDDINGS • EVENT FAVORS</span>
+              <span>{bulkConfig?.badgeText || "CORPORATE • WEDDINGS • EVENT FAVORS"}</span>
             </div>
 
-            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
-              Bespoke Corporate Festive Gifting & Bulk Orders
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-2 leading-tight drop-shadow-md">
+              {bulkConfig?.title || "Bespoke Corporate Festive Gifting & Bulk Orders"}
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/80 leading-relaxed max-w-2xl font-medium">
-              Elevate your corporate gifting with meaningful, sustainable terracotta diyas crafted by specially-abled artisans. Beautifully packaged with your brand identity.
+            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl font-medium drop-shadow-sm">
+              {bulkConfig?.subtitle || "Elevate your corporate gifting with meaningful, sustainable terracotta diyas crafted by specially-abled artisans. Beautifully packaged with your brand identity."}
             </p>
           </div>
         </div>
       </section>
 
-      {/* 2. Key Benefits */}
+      {/* Breadcrumb Strip (Below Header Banner) */}
+      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
+        <div className="w-full flex items-center gap-2 text-xs font-bold">
+          <button
+            onClick={() => onNavigate('home')}
+            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-[#b45309] font-black">Bulk & Corporate Gifting</span>
+        </div>
+      </div>
+
+      {/* 2. Bulk Tiers Cards (VOLUME PACKAGES) */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
+            <span>VOLUME PACKAGES</span>
+          </div>
+          <h2 className="font-playfair text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
+            Tailored Bulk Gifting Packages
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            Flexible tier options to fit team sizes and corporate gifting budgets.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {bulkTiers.map((tier, idx) => (
+            <div
+              key={idx}
+              className={`rounded-3xl p-5 sm:p-6 transition-all flex flex-col justify-between ${tier.highlight
+                  ? 'bg-[#1b072a] text-white border-2 border-[#fdb927] shadow-xl md:scale-[1.02]'
+                  : 'bg-white text-gray-900 border border-gray-200 shadow-sm hover:border-[#fdb927]/60'
+                }`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${tier.highlight ? 'bg-[#fdb927] text-[#1b072a]' : 'bg-gray-100 text-gray-700'
+                    }`}>
+                    {tier.tag}
+                  </span>
+                  <span className="text-xs font-bold opacity-70">
+                    {tier.diyaCount}
+                  </span>
+                </div>
+
+                <h3 className={`font-playfair text-lg sm:text-xl font-bold mb-1 ${tier.highlight ? 'text-white' : 'text-gray-900'}`}>
+                  {tier.tier}
+                </h3>
+                <div className={`text-xl sm:text-2xl font-black mb-3.5 sm:mb-4 ${tier.highlight ? 'text-[#fdb927]' : 'text-[#1b072a]'}`}>
+                  {tier.quantity}
+                </div>
+
+                <ul className="space-y-2 text-xs mb-5 sm:mb-6">
+                  {tier.features.map((feat, fIdx) => (
+                    <li key={fIdx} className="flex items-start gap-2">
+                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${tier.highlight ? 'text-[#fdb927]' : 'text-emerald-600'
+                        }`} />
+                      <span className={tier.highlight ? 'text-white/90' : 'text-gray-600'}>
+                        {feat}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <a
+                href={directWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-black text-center transition-all ${tier.highlight
+                    ? 'bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] shadow-md'
+                    : 'bg-[#1b072a] hover:bg-[#280a3e] text-[#fdb927]'
+                  }`}
+              >
+                Inquire for {tier.tier}
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. Key Benefits (Display after VOLUME PACKAGES) */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
           {corporateBenefits.map((benefit, idx) => {
             const IconComp = benefit.icon;
@@ -162,81 +235,6 @@ export default function BulkGiftingPage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 3. Bulk Tiers Cards */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
-        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>VOLUME PACKAGES</span>
-          </div>
-          <h2 className="font-playfair text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
-            Tailored Bulk Gifting Packages
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            Flexible tier options to fit team sizes and corporate gifting budgets.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-          {bulkTiers.map((tier, idx) => (
-            <div
-              key={idx}
-              className={`rounded-3xl p-5 sm:p-6 transition-all flex flex-col justify-between ${
-                tier.highlight
-                  ? 'bg-[#1b072a] text-white border-2 border-[#fdb927] shadow-xl md:scale-[1.02]'
-                  : 'bg-white text-gray-900 border border-gray-200 shadow-sm hover:border-[#fdb927]/60'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                    tier.highlight ? 'bg-[#fdb927] text-[#1b072a]' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {tier.tag}
-                  </span>
-                  <span className="text-xs font-bold opacity-70">
-                    {tier.diyaCount}
-                  </span>
-                </div>
-
-                <h3 className={`font-playfair text-lg sm:text-xl font-bold mb-1 ${tier.highlight ? 'text-white' : 'text-gray-900'}`}>
-                  {tier.tier}
-                </h3>
-                <div className={`text-xl sm:text-2xl font-black mb-3.5 sm:mb-4 ${tier.highlight ? 'text-[#fdb927]' : 'text-[#1b072a]'}`}>
-                  {tier.quantity}
-                </div>
-
-                <ul className="space-y-2 text-xs mb-5 sm:mb-6">
-                  {tier.features.map((feat, fIdx) => (
-                    <li key={fIdx} className="flex items-start gap-2">
-                      <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                        tier.highlight ? 'text-[#fdb927]' : 'text-emerald-600'
-                      }`} />
-                      <span className={tier.highlight ? 'text-white/90' : 'text-gray-600'}>
-                        {feat}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <a
-                href={directWhatsAppUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full py-2.5 px-4 rounded-xl text-xs font-black text-center transition-all ${
-                  tier.highlight
-                    ? 'bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] shadow-md'
-                    : 'bg-[#1b072a] hover:bg-[#280a3e] text-[#fdb927]'
-                }`}
-              >
-                Inquire for {tier.tier}
-              </a>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* 4. Interactive Inquiry Form */}
       <section className="w-full pt-10 sm:pt-12">
         <InquiryForm />
@@ -255,7 +253,7 @@ export default function BulkGiftingPage({ onNavigate }) {
           </div>
 
           <div className="space-y-2.5 sm:space-y-3">
-            {faqs.map((faq, idx) => (
+            {corporateFaqs.map((faq, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all shadow-sm"

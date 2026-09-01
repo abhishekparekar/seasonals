@@ -138,7 +138,7 @@ export default function LegalModal({ isOpen, onClose, activeDoc = 'privacy' }) {
 
                 <h4 className="font-bold text-gray-900 text-xs sm:text-sm">1. Dispatch & Delivery Timelines</h4>
                 <p>
-                  Orders are typically packed and dispatched within <strong>24 to 48 hours</strong>. Delivery across Maharashtra usually takes <strong>2-3 business days</strong>, and Pan-India delivery takes <strong>4-6 business days</strong> via express courier partners.
+                  Orders are typically packed and dispatched within <strong>24 to 48 hours</strong>. Standard doorstep delivery usually takes <strong>3-5 business days</strong> via express courier partners.
                 </p>
 
                 <h4 className="font-bold text-gray-900 text-xs sm:text-sm">2. Safe Transit Guarantee & Packaging</h4>

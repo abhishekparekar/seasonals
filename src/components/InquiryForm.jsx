@@ -371,7 +371,7 @@ export default function InquiryForm() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <span><strong>Pan-India Direct Dispatch:</strong> We can dispatch directly to multiple client or employee addresses.</span>
+                  <span><strong>Direct Doorstep Dispatch:</strong> We can dispatch directly to multiple client or employee addresses.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
