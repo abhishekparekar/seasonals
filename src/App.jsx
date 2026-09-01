@@ -16,7 +16,6 @@ import CartDrawer from './components/CartDrawer';
 import AdminPanel from './components/AdminPanel';
 import WhatsAppButton from './components/WhatsAppButton';
 import LegalModal from './components/LegalModal';
-import InquiryPopup from './components/InquiryPopup';
 import { AnimatePresence, motion } from 'framer-motion';
 
 function checkIsAdminRoute() {
@@ -151,9 +150,6 @@ function MainContent() {
         onClose={() => setLegalModalOpen(false)}
         activeDoc={activeLegalDoc}
       />
-
-      {/* 3-Second Lead Capture Inquiry Popup */}
-      <InquiryPopup />
     </div>
   );
 }
