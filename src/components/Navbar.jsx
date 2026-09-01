@@ -4,7 +4,7 @@ import { useSiteConfig } from '../context/SiteConfigContext';
 import { ShoppingBag, Menu, X, ChevronRight, Sparkles, PhoneCall, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Navbar() {
+export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin }) {
   const { totalItemsCount, setIsCartOpen } = useCart();
   const { footerConfig, whatsappConfig } = useSiteConfig();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,46 +19,18 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: 'Home', targetId: 'home' },
-    { name: 'Shop', targetId: 'bestsellers' },
-    { name: 'Our Mission', targetId: 'mission' },
-    { name: 'Our Story', targetId: 'story' },
-    { name: 'Bulk & Corporate Gifting', targetId: 'inquiry' },
-    { name: 'Contact', targetId: 'contact' },
+    { name: 'Home', id: 'home' },
+    { name: 'Shop', id: 'shop' },
+    { name: 'Our Mission', id: 'mission' },
+    { name: 'Our Story', id: 'story' },
+    { name: 'Bulk & Corporate Gifting', id: 'bulk-gifting' },
+    { name: 'Contact', id: 'contact' },
   ];
 
-  const handleNavClick = (e, targetId) => {
-    if (e) e.preventDefault();
+  const handleLinkClick = (pageId) => {
     setIsMobileMenuOpen(false);
-
-    const cleanId = (typeof targetId === 'string' ? targetId : (targetId?.targetId || targetId?.href || 'home')).replace(/[^a-zA-Z0-9]/g, '');
-    const element =
-      document.getElementById(cleanId) ||
-      document.querySelector(`#${cleanId}`) ||
-      (cleanId === 'bestsellers' ? document.querySelector('#products') : null);
-
-    if (element) {
-      const navOffset = 68;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const scrollToOrder = () => {
-    setIsMobileMenuOpen(false);
-    const element = document.querySelector('#bestsellers') || document.querySelector('#products');
-    if (element) {
-      const navOffset = 65;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+    if (onNavigate) {
+      onNavigate(pageId);
     }
   };
 
@@ -76,7 +48,7 @@ export default function Navbar() {
           {/* Brand Logo */}
           <div className="flex items-center">
             <button
-              onClick={(e) => handleNavClick(e, 'home')}
+              onClick={() => handleLinkClick('home')}
               className="flex items-center group focus:outline-none cursor-pointer bg-transparent border-0 p-0"
               aria-label="Seasonals Home"
             >
@@ -88,18 +60,31 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 h-full">
-            {navLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={(e) => handleNavClick(e, link.targetId)}
-                className="text-[#1b072a] hover:text-[#b37400] text-[13px] xl:text-[14px] font-semibold tracking-normal transition-colors relative group py-2 whitespace-nowrap cursor-pointer bg-transparent border-0"
-              >
-                <span>{link.name}</span>
-                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#fdb927] transition-all duration-300 group-hover:w-full rounded-full"></span>
-              </button>
-            ))}
+          {/* Desktop Navigation Links with Active Indicator */}
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-5 h-full">
+            {navLinks.map((link) => {
+              const isActive = activePage === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleLinkClick(link.id)}
+                  className={`text-[13px] xl:text-[14px] font-bold tracking-normal transition-all relative py-2 px-2 whitespace-nowrap cursor-pointer rounded-lg bg-transparent border-0 ${
+                    isActive
+                      ? 'text-[#b45309] font-black'
+                      : 'text-[#1b072a] hover:text-[#b45309]'
+                  }`}
+                >
+                  <span>{link.name}</span>
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-1 right-1 h-[2.5px] bg-[#fdb927] rounded-full shadow-sm"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Right Action Controls: Support Their Craft -> Cart -> Order Now + Mobile Menu Toggle */}
@@ -107,7 +92,7 @@ export default function Navbar() {
             
             {/* Desktop Only: Highlighted "Support Their Craft" CTA Button */}
             <button
-              onClick={scrollToOrder}
+              onClick={() => handleLinkClick('shop')}
               className="hidden md:inline-flex items-center gap-1.5 bg-gradient-to-r from-[#d97706] via-[#b45309] to-[#d97706] hover:from-[#b45309] hover:to-[#92400e] text-white font-extrabold text-[12px] xl:text-[13px] tracking-wide px-3.5 sm:px-4 py-2 rounded-full shadow-[0_4px_14px_rgba(217,119,6,0.35)] hover:shadow-[0_6px_20px_rgba(217,119,6,0.45)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fdb927]/70 cursor-pointer whitespace-nowrap"
             >
               <Heart className="w-3.5 h-3.5 fill-[#fdb927] text-[#fdb927] animate-pulse" />
@@ -137,7 +122,7 @@ export default function Navbar() {
 
             {/* Desktop Only: "Order Now" CTA Button */}
             <button
-              onClick={scrollToOrder}
+              onClick={() => handleLinkClick('shop')}
               className="hidden lg:inline-flex items-center gap-1.5 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] hover:to-[#2f084a] text-[#fdb927] hover:text-[#fff1c2] font-black text-[12px] xl:text-[13px] tracking-wide px-3.5 sm:px-4 py-2 rounded-full shadow-[0_4px_16px_rgba(34,5,54,0.35)] hover:shadow-[0_6px_22px_rgba(253,185,39,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fdb927]/70 cursor-pointer whitespace-nowrap"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#fdb927] fill-[#fdb927]" />
@@ -194,18 +179,25 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                {/* Clean Navigation Links */}
+                {/* Clean Navigation Links with Active state */}
                 <nav className="mt-4 flex flex-col space-y-1.5">
-                  {navLinks.map((link) => (
-                    <button
-                      key={link.name}
-                      onClick={(e) => handleNavClick(e, link.targetId)}
-                      className="flex items-center justify-between text-xs sm:text-sm font-bold text-[#1b072a] hover:text-[#9a6400] py-2.5 px-3 rounded-xl hover:bg-[#fdb927]/10 transition-colors border border-transparent hover:border-[#fdb927]/30 text-left bg-transparent cursor-pointer w-full"
-                    >
-                      <span>{link.name}</span>
-                      <ChevronRight className="w-4 h-4 text-[#9a6400]" />
-                    </button>
-                  ))}
+                  {navLinks.map((link) => {
+                    const isActive = activePage === link.id;
+                    return (
+                      <button
+                        key={link.id}
+                        onClick={() => handleLinkClick(link.id)}
+                        className={`flex items-center justify-between text-xs sm:text-sm font-bold py-2.5 px-3 rounded-xl transition-all border text-left cursor-pointer w-full ${
+                          isActive
+                            ? 'bg-[#1b072a] text-[#fdb927] border-[#fdb927]/60 shadow-sm'
+                            : 'text-[#1b072a] hover:text-[#9a6400] hover:bg-[#fdb927]/10 border-transparent hover:border-[#fdb927]/30'
+                        }`}
+                      >
+                        <span>{link.name}</span>
+                        <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#fdb927]' : 'text-[#9a6400]'}`} />
+                      </button>
+                    );
+                  })}
                 </nav>
               </div>
 
@@ -230,7 +222,7 @@ export default function Navbar() {
 
                 {/* Mobile Drawer Support Their Craft Button */}
                 <button
-                  onClick={scrollToOrder}
+                  onClick={() => handleLinkClick('shop')}
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#d97706] via-[#b45309] to-[#d97706] hover:from-[#b45309] hover:to-[#92400e] text-white font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
                 >
                   <Heart className="w-4 h-4 text-[#fdb927] fill-[#fdb927] animate-pulse" />
@@ -239,8 +231,8 @@ export default function Navbar() {
 
                 {/* Mobile Drawer Order Now Button */}
                 <button
-                  onClick={scrollToOrder}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:to-[#4c1374] text-[#fdb927] font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
+                  onClick={() => handleLinkClick('shop')}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] text-[#fdb927] font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-[#fdb927] fill-[#fdb927]" />
                   <span>Order Now</span>

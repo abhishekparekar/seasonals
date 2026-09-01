@@ -4,7 +4,7 @@ import { Sparkles, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 
-export default function PromoBanner() {
+export default function PromoBanner({ onNavigate }) {
   const { setQuickViewProduct } = useCart();
   const { products, promoConfig, whatsappConfig } = useSiteConfig();
 
@@ -18,9 +18,8 @@ export default function PromoBanner() {
   const handleOrderClick = () => {
     if (products && products.length > 0) {
       setQuickViewProduct(products[0]);
-    } else {
-      const elem = document.querySelector('#bestsellers');
-      if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+    } else if (onNavigate) {
+      onNavigate('shop');
     }
   };
 

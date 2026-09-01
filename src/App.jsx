@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { CartProvider, useCart } from './context/CartContext';
 import { SiteConfigProvider } from './context/SiteConfigContext';
+
+// Pages
+import HomePage from './pages/HomePage';
+import ShopPage from './pages/ShopPage';
+import MissionPage from './pages/MissionPage';
+import StoryPage from './pages/StoryPage';
+import BulkGiftingPage from './pages/BulkGiftingPage';
+import ContactPage from './pages/ContactPage';
+
+// Shared Components & Modals
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import BestSellers from './components/BestSellers';
-import Reviews from './components/Reviews';
-import AboutCSR from './components/AboutCSR';
-import OurStory from './components/OurStory';
-import PromoBanner from './components/PromoBanner';
-import Features from './components/Features';
-import InquiryForm from './components/InquiryForm';
 import Footer from './components/Footer';
 import ProductModal from './components/ProductModal';
 import CartDrawer from './components/CartDrawer';
@@ -18,27 +20,80 @@ import WhatsAppButton from './components/WhatsAppButton';
 import LegalModal from './components/LegalModal';
 import { AnimatePresence, motion } from 'framer-motion';
 
-function checkIsAdminRoute() {
+function parseCurrentRoute() {
   const path = window.location.pathname.toLowerCase();
-  const hash = window.location.hash.toLowerCase();
+  const hash = window.location.hash.toLowerCase().replace('#', '');
   const search = window.location.search.toLowerCase();
-  return (
+
+  // Admin Check
+  if (
     path === '/admin' ||
     path.startsWith('/admin/') ||
-    hash === '#admin' ||
+    hash === 'admin' ||
     search.includes('admin=true')
-  );
+  ) {
+    return 'admin';
+  }
+
+  // Shop Check
+  if (path === '/shop' || hash === 'shop' || hash === 'bestsellers' || hash === 'products') {
+    return 'shop';
+  }
+
+  // Mission Check
+  if (path === '/mission' || path === '/csr' || hash === 'mission' || hash === 'about') {
+    return 'mission';
+  }
+
+  // Story Check
+  if (path === '/story' || hash === 'story') {
+    return 'story';
+  }
+
+  // Bulk & Corporate Gifting Check
+  if (path === '/bulk-gifting' || path === '/corporate' || path === '/inquiry' || hash === 'inquiry' || hash === 'bulk-gifting') {
+    return 'bulk-gifting';
+  }
+
+  // Contact Check
+  if (path === '/contact' || hash === 'contact') {
+    return 'contact';
+  }
+
+  // Default Home
+  return 'home';
+}
+
+function getPathForRoute(pageId) {
+  switch (pageId) {
+    case 'admin':
+      return '/admin';
+    case 'shop':
+      return '/shop';
+    case 'mission':
+      return '/mission';
+    case 'story':
+      return '/story';
+    case 'bulk-gifting':
+      return '/bulk-gifting';
+    case 'contact':
+      return '/contact';
+    case 'home':
+    default:
+      return '/';
+  }
 }
 
 function MainContent() {
   const { toastMessage } = useCart();
-  const [isAdminView, setIsAdminView] = useState(() => checkIsAdminRoute());
+  const [activePage, setActivePage] = useState(() => parseCurrentRoute());
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [activeLegalDoc, setActiveLegalDoc] = useState('privacy');
 
+  // Listen to browser Back / Forward events
   useEffect(() => {
     const handleLocationChange = () => {
-      setIsAdminView(checkIsAdminRoute());
+      setActivePage(parseCurrentRoute());
     };
 
     window.addEventListener('hashchange', handleLocationChange);
@@ -49,18 +104,15 @@ function MainContent() {
     };
   }, []);
 
-  const openAdmin = () => {
+  const navigate = (pageId) => {
+    setActivePage(pageId);
     try {
-      window.history.pushState(null, '', '/admin');
-    } catch (e) {}
-    setIsAdminView(true);
-  };
-
-  const closeAdmin = () => {
-    try {
-      window.history.pushState(null, '', '/');
-    } catch (e) {}
-    setIsAdminView(false);
+      const targetPath = getPathForRoute(pageId);
+      window.history.pushState({ pageId }, '', targetPath);
+    } catch (e) {
+      window.location.hash = `#${pageId}`;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const openLegalModal = (docType = 'privacy') => {
@@ -68,25 +120,11 @@ function MainContent() {
     setLegalModalOpen(true);
   };
 
-  const scrollToProducts = () => {
-    const elem = document.querySelector('#bestsellers');
-    if (elem) {
-      const navOffset = 60;
-      const elementPosition = elem.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // If path is /admin or #admin, render Admin Panel
-  if (isAdminView) {
-    return <AdminPanel onBackToHome={closeAdmin} />;
+  // If active page is admin, show Admin Panel
+  if (activePage === 'admin') {
+    return <AdminPanel onBackToHome={() => navigate('home')} />;
   }
 
-  // Default Storefront Landing Page
   return (
     <div className="min-h-screen flex flex-col relative selection:bg-[#fdb927] selection:text-[#1b072a] font-inter bg-white text-darkText">
       {/* Toast Notification */}
@@ -103,48 +141,36 @@ function MainContent() {
         )}
       </AnimatePresence>
 
-      {/* 1. Navigation Header */}
-      <Navbar onOpenAdmin={openAdmin} />
+      {/* 1. Global Navigation Bar with active page tab */}
+      <Navbar
+        activePage={activePage}
+        onNavigate={navigate}
+        onOpenAdmin={() => navigate('admin')}
+      />
 
-      {/* 2. Compact Centered Hero Section (Dynamic Texts & Floating Popping Diyas) */}
-      <Hero />
+      {/* 2. Active Page Content with smooth transition */}
+      <main className="flex-1 w-full">
+        {activePage === 'home' && <HomePage onNavigate={navigate} />}
+        {activePage === 'shop' && <ShopPage onNavigate={navigate} />}
+        {activePage === 'mission' && <MissionPage onNavigate={navigate} />}
+        {activePage === 'story' && <StoryPage onNavigate={navigate} />}
+        {activePage === 'bulk-gifting' && <BulkGiftingPage onNavigate={navigate} />}
+        {activePage === 'contact' && <ContactPage onNavigate={navigate} />}
+      </main>
 
-      {/* 3. Products / Bestsellers Showcase (Clean Transparent Prices, No Discounts) */}
-      <div id="products">
-        <BestSellers onExploreMore={scrollToProducts} />
-      </div>
+      {/* 3. Global Footer with Multi-Page Links */}
+      <Footer onOpenLegal={openLegalModal} onNavigate={navigate} />
 
-      {/* 4. About Us & CSR Social Mission */}
-      <AboutCSR />
-
-      {/* 5. Our Story - The Inspiring Journey */}
-      <OurStory />
-
-      {/* 5. Promotional Festive Banner */}
-      <PromoBanner />
-
-      {/* 6. The Seasonals Promise / Why Choose Us */}
-      <Features />
-
-      {/* 7. Customer Testimonials & Verified Reviews (After The Seasonals Promise) */}
-      <Reviews />
-
-      {/* 8. Dedicated Inquiries & Bulk Orders Form (Connected to Firestore) */}
-      <InquiryForm />
-
-      {/* 9. Footer with Legal Policies & Direct Support */}
-      <Footer onOpenLegal={openLegalModal} />
-
-      {/* Floating WhatsApp Action Button */}
+      {/* 4. Global Floating WhatsApp Button */}
       <WhatsAppButton />
 
-      {/* Interactive Compact In-App Order Form Modal (No Image Preview, Clean Razorpay & COD) */}
+      {/* 5. In-App Order Form Modal (Razorpay + COD) */}
       <ProductModal />
 
-      {/* Cart Drawer for multi-item orders */}
+      {/* 6. Multi-Item Cart Drawer */}
       <CartDrawer />
 
-      {/* Professional Legal Policy Modal (Privacy Policy / Terms / Shipping) */}
+      {/* 7. Legal Policies Modal */}
       <LegalModal
         isOpen={legalModalOpen}
         onClose={() => setLegalModalOpen(false)}

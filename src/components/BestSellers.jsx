@@ -3,12 +3,16 @@ import { useSiteConfig } from '../context/SiteConfigContext';
 import ProductCard from './ProductCard';
 import { Sparkles } from 'lucide-react';
 
-export default function BestSellers() {
+export default function BestSellers({ onNavigate, isPreview = false }) {
   const { products, loading, shopConfig } = useSiteConfig();
 
   const badgeText = shopConfig?.badgeText || "Shop the Season";
   const title = shopConfig?.title || "Made for Your Celebrations";
   const subtitle = shopConfig?.subtitle || "From festive décor to thoughtful gifts and return favours, discover handmade creations designed to make your celebrations a little more special";
+
+  const displayProducts = isPreview && products && products.length > 8
+    ? products.slice(0, 8)
+    : products;
 
   return (
     <section id="bestsellers" className="py-8 sm:py-12 bg-white relative w-full font-inter">
@@ -36,9 +40,9 @@ export default function BestSellers() {
         </div>
 
         {/* Dynamic products grid - 4 Columns on Large Screens for perfect full-width balance */}
-        {products && products.length > 0 ? (
+        {displayProducts && displayProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product) => (
+            {displayProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Sparkles, HandHeart, ShoppingBag, Share2 } from 'lucide-react';
+import { Heart, Sparkles, HandHeart, ShoppingBag, Share2, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 
-export default function AboutCSR() {
+export default function AboutCSR({ onNavigate, isPreview = false }) {
   const { setQuickViewProduct } = useCart();
   const { products, missionConfig } = useSiteConfig();
 
@@ -17,14 +17,13 @@ export default function AboutCSR() {
   const handleSupportOrder = () => {
     if (products && products.length > 0) {
       setQuickViewProduct(products[0]);
-    } else {
-      const elem = document.querySelector('#bestsellers');
-      if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+    } else if (onNavigate) {
+      onNavigate('shop');
     }
   };
 
   const shareText = "🪔 Seasonals - A small act of kindness empowers specially-abled artisans. This Diwali, bring home authentic handcrafted terracotta diyas made with devotion:";
-  const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + window.location.origin)}`;
+  const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + (typeof window !== 'undefined' ? window.location.origin : ''))}`;
 
   return (
     <section id="mission" className="py-8 sm:py-12 bg-gradient-to-b from-[#FAF7F2] via-white to-[#FAF7F2] w-full font-inter relative overflow-hidden">
@@ -143,6 +142,19 @@ export default function AboutCSR() {
           </motion.div>
         </div>
 
+        {/* Read Full Mission CTA if Preview */}
+        {isPreview && onNavigate && (
+          <div className="text-center mb-6">
+            <button
+              onClick={() => onNavigate('mission')}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#b45309] hover:text-[#92400e] bg-[#fdb927]/15 hover:bg-[#fdb927]/25 px-5 py-2.5 rounded-full transition-all border border-[#fdb927]/40 cursor-pointer"
+            >
+              <span>Read Our Complete Social Impact Story</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Call to Action Box - Full Width English */}
         <div className="bg-[#1b072a] text-white rounded-3xl p-5 sm:p-8 w-full border border-[#fdb927]/30 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-5 text-center lg:text-left">
           <div className="space-y-1.5 max-w-2xl">
@@ -160,7 +172,7 @@ export default function AboutCSR() {
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
             <button
               onClick={handleSupportOrder}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-6 py-3 rounded-full shadow-[0_4px_16px_rgba(253,185,39,0.35)] hover:scale-105 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-6 py-3 rounded-full shadow-[0_4px_16px_rgba(253,185,39,0.35)] hover:scale-105 transition-all cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Order Handcrafted Diyas</span>

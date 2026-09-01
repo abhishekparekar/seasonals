@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 
-export default function Hero() {
+export default function Hero({ onNavigate }) {
   const { heroConfig } = useSiteConfig();
 
   const cachedBg = typeof window !== 'undefined' ? (localStorage.getItem('seasonals_cached_herobg') || "") : "";
@@ -15,16 +15,21 @@ export default function Hero() {
     }
   }, [heroBgImage]);
 
-  const scrollToProducts = () => {
-    const elem = document.querySelector('#bestsellers');
-    if (elem) {
-      const navOffset = 60;
-      const elementPosition = elem.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+  const handlePrimaryClick = () => {
+    if (onNavigate) {
+      onNavigate('shop');
+    } else {
+      const elem = document.querySelector('#bestsellers') || document.querySelector('#products');
+      if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleSecondaryClick = () => {
+    if (onNavigate) {
+      onNavigate('mission');
+    } else {
+      const elem = document.querySelector('#mission');
+      if (elem) elem.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -71,23 +76,23 @@ export default function Hero() {
           )}
 
           {/* Primary Button (Displayed only when Admin turns it ON) */}
-          {heroConfig.showPrimaryBtn !== false && heroConfig.primaryBtnText && (
+          {heroConfig.showPrimaryBtn !== false && (
             <button
-              onClick={scrollToProducts}
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#fdb927] to-[#e69500] hover:from-[#ffc84a] hover:to-[#fdb927] text-[#1b072a] font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] hover:scale-105 transition-all"
+              onClick={handlePrimaryClick}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#fdb927] to-[#e69500] hover:from-[#ffc84a] hover:to-[#fdb927] text-[#1b072a] font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] hover:scale-105 transition-all cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>{heroConfig.primaryBtnText}</span>
+              <span>{heroConfig.primaryBtnText || "Explore Collection"}</span>
             </button>
           )}
 
-          {/* Secondary Button (Displayed only when Admin turns it ON) */}
-          {heroConfig.showSecondaryBtn && heroConfig.secondaryBtnText && (
+          {/* Secondary Button */}
+          {heroConfig.showSecondaryBtn && (
             <button
-              onClick={scrollToProducts}
-              className="inline-flex items-center justify-center gap-2 bg-black/50 hover:bg-black/70 border border-[#fdb927]/60 text-white hover:text-[#fdb927] font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg hover:scale-105 transition-all backdrop-blur-md"
+              onClick={handleSecondaryClick}
+              className="inline-flex items-center justify-center gap-2 bg-black/50 hover:bg-black/70 border border-[#fdb927]/60 text-white hover:text-[#fdb927] font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg hover:scale-105 transition-all backdrop-blur-md cursor-pointer"
             >
-              <span>{heroConfig.secondaryBtnText}</span>
+              <span>{heroConfig.secondaryBtnText || "Our Mission"}</span>
             </button>
           )}
         </div>
