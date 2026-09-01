@@ -126,7 +126,7 @@ export default function BulkGiftingPage({ onNavigate }) {
               <span>CORPORATE • WEDDINGS • EVENT FAVORS</span>
             </div>
 
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
               Bespoke Corporate Festive Gifting & Bulk Orders
             </h1>
 
@@ -138,19 +138,19 @@ export default function BulkGiftingPage({ onNavigate }) {
       </section>
 
       {/* 2. Key Benefits */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
           {corporateBenefits.map((benefit, idx) => {
             const IconComp = benefit.icon;
             return (
               <div
                 key={idx}
-                className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all"
+                className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center mb-3">
-                  <IconComp className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center mb-2.5 sm:mb-3">
+                  <IconComp className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <h3 className="font-playfair text-base font-bold text-gray-900 mb-1.5">
+                <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1">
                   {benefit.title}
                 </h3>
                 <p className="text-xs text-gray-600 leading-relaxed">
@@ -163,13 +163,13 @@ export default function BulkGiftingPage({ onNavigate }) {
       </section>
 
       {/* 3. Bulk Tiers Cards */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-14">
-        <div className="text-center max-w-2xl mx-auto mb-8">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
             <span>VOLUME PACKAGES</span>
           </div>
-          <h2 className="font-playfair text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+          <h2 className="font-playfair text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
             Tailored Bulk Gifting Packages
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 mt-1">
@@ -177,13 +177,13 @@ export default function BulkGiftingPage({ onNavigate }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {bulkTiers.map((tier, idx) => (
             <div
               key={idx}
-              className={`rounded-3xl p-6 transition-all flex flex-col justify-between ${
+              className={`rounded-3xl p-5 sm:p-6 transition-all flex flex-col justify-between ${
                 tier.highlight
-                  ? 'bg-[#1b072a] text-white border-2 border-[#fdb927] shadow-xl scale-[1.02]'
+                  ? 'bg-[#1b072a] text-white border-2 border-[#fdb927] shadow-xl md:scale-[1.02]'
                   : 'bg-white text-gray-900 border border-gray-200 shadow-sm hover:border-[#fdb927]/60'
               }`}
             >
@@ -199,14 +199,14 @@ export default function BulkGiftingPage({ onNavigate }) {
                   </span>
                 </div>
 
-                <h3 className={`font-playfair text-xl font-bold mb-1 ${tier.highlight ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`font-playfair text-lg sm:text-xl font-bold mb-1 ${tier.highlight ? 'text-white' : 'text-gray-900'}`}>
                   {tier.tier}
                 </h3>
-                <div className={`text-2xl font-black mb-4 ${tier.highlight ? 'text-[#fdb927]' : 'text-[#1b072a]'}`}>
+                <div className={`text-xl sm:text-2xl font-black mb-3.5 sm:mb-4 ${tier.highlight ? 'text-[#fdb927]' : 'text-[#1b072a]'}`}>
                   {tier.quantity}
                 </div>
 
-                <ul className="space-y-2.5 text-xs mb-6">
+                <ul className="space-y-2 text-xs mb-5 sm:mb-6">
                   {tier.features.map((feat, fIdx) => (
                     <li key={fIdx} className="flex items-start gap-2">
                       <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
@@ -238,15 +238,15 @@ export default function BulkGiftingPage({ onNavigate }) {
       </section>
 
       {/* 4. Interactive Inquiry Form */}
-      <section className="w-full pt-12">
+      <section className="w-full pt-10 sm:pt-12">
         <InquiryForm />
       </section>
 
       {/* 5. FAQs Accordion */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-12">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-12">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="font-playfair text-2xl sm:text-3xl font-black text-gray-900 mb-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="font-playfair text-xl sm:text-3xl font-black text-gray-900 mb-1.5">
               Frequently Asked Questions (FAQs)
             </h2>
             <p className="text-xs sm:text-sm text-gray-600">
@@ -254,15 +254,15 @@ export default function BulkGiftingPage({ onNavigate }) {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all"
+                className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all shadow-sm"
               >
                 <button
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full p-4 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-bold text-gray-900 hover:text-[#1b072a] cursor-pointer"
+                  className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-bold text-gray-900 hover:text-[#1b072a] cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   {activeFaq === idx ? (
@@ -272,7 +272,7 @@ export default function BulkGiftingPage({ onNavigate }) {
                   )}
                 </button>
                 {activeFaq === idx && (
-                  <div className="px-4 pb-4 pt-1 text-xs text-gray-600 border-t border-gray-100 bg-[#FAF7F2]/40 leading-relaxed">
+                  <div className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 pt-1 text-xs text-gray-600 border-t border-gray-100 bg-[#FAF7F2]/40 leading-relaxed">
                     {faq.a}
                   </div>
                 )}

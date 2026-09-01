@@ -26,10 +26,10 @@ export default function MissionPage({ onNavigate }) {
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + (typeof window !== 'undefined' ? window.location.origin : ''))}`;
 
   const impactStats = [
-    { number: "50+", label: "Artisans Supported", desc: "Children & specially-abled creators receiving training and fair wages", icon: Users },
-    { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth and devotion", icon: Sparkles },
-    { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically with zero harmful chemicals", icon: Leaf },
-    { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance and artistic celebration over charity", icon: Award },
+    { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages", icon: Users },
+    { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth", icon: Sparkles },
+    { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically", icon: Leaf },
+    { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent", icon: Award },
   ];
 
   const craftSteps = [
@@ -81,11 +81,11 @@ export default function MissionPage({ onNavigate }) {
               <span>{badgeText}</span>
             </div>
 
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
               {title}
             </h1>
 
-            <p className="text-sm sm:text-base text-[#FFF5C0] font-bold mb-2">
+            <p className="text-xs sm:text-sm md:text-base text-[#FFF5C0] font-bold mb-2">
               {leadText}
             </p>
 
@@ -96,9 +96,9 @@ export default function MissionPage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 2. Impact Statistics Counters */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 -mt-6 relative z-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. Impact Statistics Counters - 2x2 on mobile, 1x4 on desktop */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 relative z-20">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {impactStats.map((stat, idx) => {
             const IconComp = stat.icon;
             return (
@@ -108,22 +108,24 @@ export default function MissionPage({ onNavigate }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white rounded-2xl p-5 border-2 border-[#fdb927]/40 shadow-lg hover:shadow-xl hover:border-[#fdb927] transition-all"
+                className="bg-white rounded-2xl p-3 sm:p-5 border-2 border-[#fdb927]/40 shadow-lg hover:shadow-xl hover:border-[#fdb927] transition-all flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-playfair text-3xl sm:text-4xl font-black text-[#1b072a]">
+                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                  <span className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-[#1b072a]">
                     {stat.number}
                   </span>
-                  <div className="w-9 h-9 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center">
-                    <IconComp className="w-5 h-5" />
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center">
+                    <IconComp className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
                 </div>
-                <h3 className="text-xs sm:text-sm font-black text-gray-900 mb-1">
-                  {stat.label}
-                </h3>
-                <p className="text-[11px] text-gray-500 leading-snug">
-                  {stat.desc}
-                </p>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-gray-900 mb-0.5 sm:mb-1">
+                    {stat.label}
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] text-gray-500 leading-snug hidden sm:block">
+                    {stat.desc}
+                  </p>
+                </div>
               </motion.div>
             );
           })}
@@ -131,8 +133,8 @@ export default function MissionPage({ onNavigate }) {
       </section>
 
       {/* 3. Hero Visual Image Banner */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10">
-        <div className="bg-white rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden">
           <img
             src={missionConfig?.missionImage || missionConfig?.imageUrl || "/images/about1.png"}
             alt="Talented children with physical challenges creating handmade festive products"
@@ -142,13 +144,13 @@ export default function MissionPage({ onNavigate }) {
       </section>
 
       {/* 4. The 4-Step Crafting Journey */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-14">
-        <div className="text-center max-w-2xl mx-auto mb-8">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
             <span>THE ARTISANAL PROCESS</span>
           </div>
-          <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+          <h2 className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
             How Every Diya Comes to Life
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 mt-1">
@@ -156,16 +158,16 @@ export default function MissionPage({ onNavigate }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
           {craftSteps.map((step, idx) => (
             <div
               key={idx}
-              className="bg-white p-5 rounded-2xl border border-gray-200 hover:border-[#fdb927]/70 shadow-sm hover:shadow-md transition-all relative overflow-hidden"
+              className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 hover:border-[#fdb927]/70 shadow-sm hover:shadow-md transition-all relative overflow-hidden"
             >
-              <div className="text-3xl font-black font-playfair text-[#fdb927]/70 mb-2">
+              <div className="text-2xl sm:text-3xl font-black font-playfair text-[#fdb927]/80 mb-1 sm:mb-2">
                 {step.step}
               </div>
-              <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1.5">
+              <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1 sm:mb-1.5">
                 {step.title}
               </h3>
               <p className="text-xs text-gray-600 leading-relaxed">
@@ -177,14 +179,14 @@ export default function MissionPage({ onNavigate }) {
       </section>
 
       {/* 5. Core Social Mission Pillars */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-14">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
           
-          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-3">
-              <HandHeart className="w-5 h-5" />
+          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-5 sm:p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-3">
+              <HandHeart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1.5">
+            <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1 sm:mb-1.5">
               Dignity Over Charity
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed">
@@ -192,11 +194,11 @@ export default function MissionPage({ onNavigate }) {
             </p>
           </div>
 
-          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
-              <Sparkles className="w-5 h-5" />
+          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-5 sm:p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1.5">
+            <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1 sm:mb-1.5">
               Preserving Indian Craft
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed">
@@ -204,11 +206,11 @@ export default function MissionPage({ onNavigate }) {
             </p>
           </div>
 
-          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
-              <Heart className="w-5 h-5" />
+          <div className="bg-gradient-to-b from-[#FAF7F2] to-white p-5 sm:p-6 rounded-2xl border border-[#fdb927]/30 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1.5">
+            <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 mb-1 sm:mb-1.5">
               Empowering Creative Talent
             </h3>
             <p className="text-xs text-gray-600 leading-relaxed">
@@ -220,8 +222,8 @@ export default function MissionPage({ onNavigate }) {
       </section>
 
       {/* 6. Call to Action Banner */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-14">
-        <div className="bg-[#1b072a] text-white rounded-3xl p-6 sm:p-10 border-2 border-[#fdb927]/50 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+        <div className="bg-[#1b072a] text-white rounded-3xl p-5 sm:p-8 lg:p-10 border-2 border-[#fdb927]/50 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
           <div className="space-y-2 max-w-2xl">
             <span className="text-[#fdb927] text-xs font-bold uppercase tracking-wider block">
               Join The Movement • Light With Purpose
@@ -237,7 +239,7 @@ export default function MissionPage({ onNavigate }) {
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
             <button
               onClick={() => onNavigate('shop')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#fdb927] to-[#e69500] hover:from-[#ffc84a] hover:to-[#fdb927] text-[#1b072a] font-black text-xs sm:text-sm px-7 py-3.5 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] hover:scale-105 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#fdb927] to-[#e69500] hover:from-[#ffc84a] hover:to-[#fdb927] text-[#1b072a] font-black text-xs sm:text-sm px-7 py-3 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] hover:scale-105 transition-all cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Explore Collection</span>
@@ -247,10 +249,10 @@ export default function MissionPage({ onNavigate }) {
               href={shareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold text-white hover:text-[#fdb927] px-6 py-3.5 rounded-full border border-white/20 hover:border-[#fdb927] bg-white/5 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold text-white hover:text-[#fdb927] px-6 py-3 rounded-full border border-white/20 hover:border-[#fdb927] bg-white/5 transition-all"
             >
               <Share2 className="w-4 h-4" />
-              <span>Share Cause on WhatsApp</span>
+              <span>Share on WhatsApp 💬</span>
             </a>
           </div>
         </div>

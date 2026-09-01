@@ -107,7 +107,7 @@ export default function ContactPage({ onNavigate }) {
               <span>WE ARE HERE TO HELP</span>
             </div>
 
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
+            <h1 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3 leading-tight">
               Get in Touch with Team Seasonals
             </h1>
 
@@ -118,88 +118,96 @@ export default function ContactPage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 2. Contact Cards Grid */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* 2. Contact Cards Grid: 2x2 on Mobile, 4x1 on Desktop */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
           
           {/* Card 1: WhatsApp */}
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all group"
+            className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all group flex flex-col justify-between"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <MessageSquare className="w-5 h-5" />
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5 sm:mb-3 group-hover:scale-105 transition-transform">
+                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-emerald-600 tracking-wider block mb-0.5">
+                INSTANT CHAT
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                WhatsApp Chat
+              </h3>
+              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
+                {footerConfig.supportPhone || "+91 91353 13565"}
+              </p>
             </div>
-            <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider block mb-0.5">
-              INSTANT CHAT
-            </span>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1">
-              WhatsApp Support
-            </h3>
-            <p className="text-xs font-mono font-bold text-gray-800">
-              {footerConfig.supportPhone || "+91 91353 13565"}
-            </p>
-            <span className="text-[11px] text-emerald-600 font-semibold mt-2 inline-block">
-              Click to Chat 💬 →
+            <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold mt-2 inline-block">
+              Chat Now 💬 →
             </span>
           </a>
 
           {/* Card 2: Phone Helpline */}
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-3">
-              <Phone className="w-5 h-5" />
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 sm:mb-3">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-[#280a3e] tracking-wider block mb-0.5">
+                HELPLINE
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                Direct Call
+              </h3>
+              <p className="text-[11px] sm:text-xs font-mono font-bold text-gray-800">
+                {footerConfig.supportPhone || "+91 91353 13565"}
+              </p>
             </div>
-            <span className="text-[10px] font-black uppercase text-[#280a3e] tracking-wider block mb-0.5">
-              HELPLINE
-            </span>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1">
-              Call Us Directly
-            </h3>
-            <p className="text-xs font-mono font-bold text-gray-800">
-              {footerConfig.supportPhone || "+91 91353 13565"}
-            </p>
-            <span className="text-[11px] text-gray-500 mt-2 block">
-              Mon - Sun: 9:00 AM - 9:00 PM
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              9 AM - 9 PM IST
             </span>
           </div>
 
           {/* Card 3: Pan India Delivery */}
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
-              <Truck className="w-5 h-5" />
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 sm:mb-3">
+                <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-amber-700 tracking-wider block mb-0.5">
+                SHIPPING
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                Pan-India
+              </h3>
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
+                15,000+ pincodes covered.
+              </p>
             </div>
-            <span className="text-[10px] font-black uppercase text-amber-700 tracking-wider block mb-0.5">
-              SHIPPING
-            </span>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1">
-              Pan-India Dispatch
-            </h3>
-            <p className="text-xs text-gray-600 leading-snug">
-              Express courier coverage across 15,000+ pincodes.
-            </p>
-            <span className="text-[11px] text-gray-500 mt-2 block">
-              3 - 5 business days delivery
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              3-5 business days
             </span>
           </div>
 
           {/* Card 4: Operating Hours */}
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-3">
-              <Clock className="w-5 h-5" />
+          <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-[#fdb927] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-2.5 sm:mb-3">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase text-rose-700 tracking-wider block mb-0.5">
+                SUPPORT
+              </span>
+              <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1">
+                7 Days a Week
+              </h3>
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-snug">
+                Live festive team assistance.
+              </p>
             </div>
-            <span className="text-[10px] font-black uppercase text-rose-700 tracking-wider block mb-0.5">
-              SUPPORT HOURS
-            </span>
-            <h3 className="font-playfair text-base font-bold text-gray-900 mb-1">
-              Workshop Schedule
-            </h3>
-            <p className="text-xs text-gray-600 leading-snug">
-              Open 7 days a week for festive support & dispatch.
-            </p>
-            <span className="text-[11px] text-gray-500 mt-2 block">
-              Quick 1-hour WhatsApp response
+            <span className="text-[10px] sm:text-[11px] text-gray-500 mt-2 block">
+              Quick response
             </span>
           </div>
 
@@ -207,16 +215,16 @@ export default function ContactPage({ onNavigate }) {
       </section>
 
       {/* 3. Contact Form & FAQ Grid */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
           
           {/* Left Form */}
-          <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-xl">
-            <h2 className="font-playfair text-2xl font-bold text-gray-900 mb-1">
+          <div className="lg:col-span-7 bg-white rounded-3xl p-5 sm:p-8 border border-gray-200 shadow-xl">
+            <h2 className="font-playfair text-xl sm:text-2xl font-bold text-gray-900 mb-1">
               Send Us a Message
             </h2>
-            <p className="text-xs text-gray-600 mb-6">
-              Fill in your details below and our team will get back to you immediately.
+            <p className="text-xs text-gray-600 mb-5 sm:mb-6">
+              Fill in your details below and our team will get back to you promptly.
             </p>
 
             {submitted ? (
@@ -224,7 +232,7 @@ export default function ContactPage({ onNavigate }) {
                 <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl">
                   ✓
                 </div>
-                <h3 className="font-playfair text-xl font-bold text-gray-900">
+                <h3 className="font-playfair text-lg sm:text-xl font-bold text-gray-900">
                   Message Sent Successfully!
                 </h3>
                 <p className="text-xs text-gray-600 max-w-sm mx-auto">
@@ -238,8 +246,8 @@ export default function ContactPage({ onNavigate }) {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="text-xs font-bold text-gray-700 block mb-1">
                       Your Name *
@@ -286,7 +294,7 @@ export default function ContactPage({ onNavigate }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <label className="text-xs font-bold text-gray-700 block mb-1">
                       Email Address (Optional)
@@ -362,14 +370,14 @@ export default function ContactPage({ onNavigate }) {
 
           {/* Right Info Cards */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="bg-[#1b072a] text-white rounded-3xl p-6 border-2 border-[#fdb927]/40 shadow-xl space-y-4">
+            <div className="bg-[#1b072a] text-white rounded-3xl p-5 sm:p-6 border-2 border-[#fdb927]/40 shadow-xl space-y-3.5">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🪔</span>
                 <div>
-                  <h3 className="font-playfair text-lg font-bold text-[#fdb927]">
+                  <h3 className="font-playfair text-base sm:text-lg font-bold text-[#fdb927]">
                     Fast Order Assistance
                   </h3>
-                  <p className="text-xs text-white/70">
+                  <p className="text-[11px] text-white/70">
                     Need instant confirmation or real-time photos?
                   </p>
                 </div>
@@ -389,8 +397,8 @@ export default function ContactPage({ onNavigate }) {
               </a>
             </div>
 
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm space-y-3">
-              <h4 className="font-playfair text-base font-bold text-gray-900 flex items-center gap-2">
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-gray-200 shadow-sm space-y-2.5">
+              <h4 className="font-playfair text-sm sm:text-base font-bold text-gray-900 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 <span>Transit & Quality Promise</span>
               </h4>
