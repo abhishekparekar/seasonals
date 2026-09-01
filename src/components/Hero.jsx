@@ -46,15 +46,15 @@ export default function Hero() {
         </div>
 
         {/* Main Centered Heading */}
-        <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white">
+        <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">
           {heroConfig.titleLine1 || "Celebrate Joy."}{' '}
-          <span className="text-[#fdb927] drop-shadow-[0_2px_15px_rgba(253,185,39,0.5)] block sm:inline">
+          <span className="text-[#FFF5C0] drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_14px_rgba(0,0,0,1),_0_0_10px_rgba(0,0,0,1)] block sm:inline font-extrabold">
             {heroConfig.titleHighlight || "Gift with Purpose."}
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-white/90 text-xs sm:text-sm md:text-base max-w-2xl mx-auto mb-4 sm:mb-5 leading-relaxed font-medium">
+        <p className="text-white text-xs sm:text-sm md:text-base max-w-2xl mx-auto mb-4 sm:mb-5 leading-relaxed font-semibold drop-shadow-[0_3px_12px_rgba(0,0,0,1)] [text-shadow:_0_1px_8px_rgba(0,0,0,1),_0_2px_4px_rgba(0,0,0,1)]">
           {heroConfig.subtitle || "Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities."}
         </p>
 
