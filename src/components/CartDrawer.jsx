@@ -44,6 +44,20 @@ export default function CartDrawer() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'mobileNumber') {
+      const cleanDigits = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, mobileNumber: cleanDigits }));
+      if (cleanDigits.length > 0 && !/^[6-9]/.test(cleanDigits)) {
+        setFormErrors((prev) => ({ ...prev, mobileNumber: 'Indian numbers start with 6, 7, 8, or 9' }));
+      } else if (cleanDigits.length > 0 && cleanDigits.length < 10) {
+        setFormErrors((prev) => ({ ...prev, mobileNumber: `Enter ${10 - cleanDigits.length} more digit(s)` }));
+      } else if (cleanDigits.length === 10 && /^[6-9]\d{9}$/.test(cleanDigits)) {
+        setFormErrors((prev) => ({ ...prev, mobileNumber: '' }));
+      } else {
+        setFormErrors((prev) => ({ ...prev, mobileNumber: '' }));
+      }
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: '' }));
@@ -57,12 +71,15 @@ export default function CartDrawer() {
       errors.name = 'Please enter your name';
     }
 
-    const cleanPhone = formData.mobileNumber.replace(/\D/g, '');
-    if (!cleanPhone || cleanPhone.length < 10) {
+    const cleanPhone = (formData.mobileNumber || '').replace(/\D/g, '');
+    if (!cleanPhone) {
       errors.mobileNumber = 'Please enter your 10-digit mobile number';
+    } else if (cleanPhone.length !== 10) {
+      errors.mobileNumber = 'Must be exactly 10 digits';
+    } else if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      errors.mobileNumber = 'Must start with 6, 7, 8, or 9';
     }
 
-    // No validation check for address
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -288,24 +305,25 @@ export default function CartDrawer() {
                     </div>
 
                     <div>
-                      <div className="flex">
-                        <span className="inline-flex items-center px-2.5 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-600 text-xs font-semibold">
-                          +91
+                      <div className="flex items-center">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-extrabold select-none flex-shrink-0">
+                          <span>🇮🇳</span>
+                          <span>+91</span>
                         </span>
                         <input
                           type="tel"
                           name="mobileNumber"
                           value={formData.mobileNumber}
                           onChange={handleInputChange}
-                          placeholder="Enter your 10-digit mobile number *"
+                          placeholder="98765 43210 *"
                           maxLength={10}
                           className={`w-full px-3 py-2 text-xs rounded-r-xl border ${
                             formErrors.mobileNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                          } focus:outline-none focus:border-[#fdb927]`}
+                          } focus:outline-none focus:border-[#fdb927] font-semibold text-gray-900`}
                         />
                       </div>
                       {formErrors.mobileNumber && (
-                        <span className="text-[10px] text-red-500 block mt-0.5">{formErrors.mobileNumber}</span>
+                        <span className="text-[10px] text-red-500 font-semibold block mt-0.5">{formErrors.mobileNumber}</span>
                       )}
                     </div>
 

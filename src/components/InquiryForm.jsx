@@ -26,6 +26,20 @@ export default function InquiryForm() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'phone') {
+      const cleanDigits = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: cleanDigits }));
+      if (cleanDigits.length > 0 && !/^[6-9]/.test(cleanDigits)) {
+        setFormErrors((prev) => ({ ...prev, phone: 'Indian numbers start with 6, 7, 8, or 9' }));
+      } else if (cleanDigits.length > 0 && cleanDigits.length < 10) {
+        setFormErrors((prev) => ({ ...prev, phone: `Enter ${10 - cleanDigits.length} more digit(s)` }));
+      } else if (cleanDigits.length === 10 && /^[6-9]\d{9}$/.test(cleanDigits)) {
+        setFormErrors((prev) => ({ ...prev, phone: '' }));
+      } else {
+        setFormErrors((prev) => ({ ...prev, phone: '' }));
+      }
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: '' }));
@@ -35,9 +49,16 @@ export default function InquiryForm() {
   const validate = () => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Please enter your name';
-    if (!formData.phone.trim() || formData.phone.replace(/\D/g, '').length < 10) {
-      errors.phone = 'Please enter a valid 10-digit mobile number';
+    
+    const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+    if (!cleanPhone) {
+      errors.phone = 'Please enter your mobile number';
+    } else if (cleanPhone.length !== 10) {
+      errors.phone = 'Must be exactly 10 digits';
+    } else if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      errors.phone = 'Must start with 6, 7, 8, or 9';
     }
+
     if (!formData.message.trim()) {
       errors.message = 'Please provide details about your inquiry';
     }
@@ -176,9 +197,10 @@ export default function InquiryForm() {
                     <label className="text-xs font-bold text-gray-700 block mb-1">
                       Mobile / WhatsApp Number *
                     </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400">
-                        +91
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-2.5 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-extrabold select-none flex-shrink-0">
+                        <span>🇮🇳</span>
+                        <span>+91</span>
                       </span>
                       <input
                         type="tel"
@@ -186,14 +208,14 @@ export default function InquiryForm() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         maxLength={10}
-                        placeholder="Enter your 10-digit mobile number"
-                        className={`w-full pl-10 pr-3.5 py-2.5 text-xs rounded-xl border ${
+                        placeholder="98765 43210"
+                        className={`w-full px-3.5 py-2.5 text-xs rounded-r-xl border ${
                           formErrors.phone ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#280a3e]`}
+                        } focus:outline-none focus:border-[#280a3e] font-semibold text-gray-900`}
                       />
                     </div>
                     {formErrors.phone && (
-                      <span className="text-[10px] text-red-500 block mt-0.5">{formErrors.phone}</span>
+                      <span className="text-[10px] text-red-500 font-semibold block mt-0.5">{formErrors.phone}</span>
                     )}
                   </div>
                 </div>
