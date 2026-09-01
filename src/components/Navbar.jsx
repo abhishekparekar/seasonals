@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { ShoppingBag, Menu, X, ChevronRight, Sparkles, PhoneCall, Heart } from 'lucide-react';
@@ -8,13 +8,43 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
   const { totalItemsCount, setIsCartOpen } = useCart();
   const { footerConfig, whatsappConfig } = useSiteConfig();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 12);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+          // Always show at top of page
+          if (currentScrollY <= 40) {
+            setIsVisible(true);
+            setIsScrolled(false);
+          } else {
+            setIsScrolled(true);
+
+            // If scrolling down by at least 8px -> hide
+            if (currentScrollY > lastScrollY.current + 8) {
+              setIsVisible(false);
+            }
+            // If scrolling up by at least 6px -> show
+            else if (currentScrollY < lastScrollY.current - 6) {
+              setIsVisible(true);
+            }
+          }
+
+          lastScrollY.current = Math.max(0, currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -36,10 +66,15 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
 
   return (
     <>
+      {/* Fixed Header with Hardware Accelerated Auto-Hide Animation */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-300 w-full font-inter ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out w-full font-inter transform-gpu ${
+          isVisible || isMobileMenuOpen
+            ? 'translate-y-0 opacity-100 pointer-events-auto'
+            : '-translate-y-full opacity-0 pointer-events-none'
+        } ${
           isScrolled
-            ? 'bg-[#FFFDF9]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(40,10,62,0.06)] border-b border-[#fdb927]/30'
+            ? 'bg-[#FFFDF9]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(40,10,62,0.08)] border-b border-[#fdb927]/30'
             : 'bg-[#FFFDF9] border-b border-[#fdb927]/20'
         }`}
       >
@@ -61,24 +96,24 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
           </div>
 
           {/* Desktop Navigation Links with Active Indicator */}
-          <nav className="hidden lg:flex items-center gap-3 xl:gap-5 h-full">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full">
             {navLinks.map((link) => {
               const isActive = activePage === link.id;
               return (
                 <button
                   key={link.id}
                   onClick={() => handleLinkClick(link.id)}
-                  className={`text-[13px] xl:text-[14px] font-bold tracking-normal transition-all relative py-2 px-2 whitespace-nowrap cursor-pointer rounded-lg bg-transparent border-0 ${
+                  className={`text-[13px] xl:text-[14px] font-extrabold tracking-tight transition-all duration-200 relative py-2 px-3 xl:px-3.5 whitespace-nowrap cursor-pointer rounded-xl border border-transparent ${
                     isActive
-                      ? 'text-[#b45309] font-black'
-                      : 'text-[#1b072a] hover:text-[#b45309]'
+                      ? 'text-[#8f3f00] font-black bg-[#fdb927]/15 border-[#fdb927]/40 shadow-xs'
+                      : 'text-[#1b072a] hover:text-[#b45309] hover:bg-[#fdb927]/10'
                   }`}
                 >
                   <span>{link.name}</span>
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-1 right-1 h-[2.5px] bg-[#fdb927] rounded-full shadow-sm"
+                      className="absolute bottom-[-2px] left-2 right-2 h-[3px] bg-gradient-to-r from-[#fdb927] via-[#ffc84a] to-[#fdb927] rounded-full shadow-[0_2px_8px_rgba(253,185,39,0.6)]"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -132,6 +167,9 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
         </div>
       </header>
 
+      {/* Spacer to guarantee proper document flow behind fixed navbar */}
+      <div className="h-14 sm:h-16 w-full flex-shrink-0 pointer-events-none" />
+
       {/* Mobile Slide-in Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -178,14 +216,14 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
                       <button
                         key={link.id}
                         onClick={() => handleLinkClick(link.id)}
-                        className={`flex items-center justify-between text-xs sm:text-sm font-bold py-2.5 px-3 rounded-xl transition-all border text-left cursor-pointer w-full ${
+                        className={`flex items-center justify-between text-xs sm:text-sm font-extrabold py-2.5 px-3.5 rounded-xl transition-all border text-left cursor-pointer w-full ${
                           isActive
-                            ? 'bg-[#1b072a] text-[#fdb927] border-[#fdb927]/60 shadow-sm'
-                            : 'text-[#1b072a] hover:text-[#9a6400] hover:bg-[#fdb927]/10 border-transparent hover:border-[#fdb927]/30'
+                            ? 'bg-gradient-to-r from-[#1b072a] via-[#330c4e] to-[#1b072a] text-[#fdb927] border-[#fdb927]/70 shadow-md font-black'
+                            : 'text-[#1b072a] hover:text-[#b45309] hover:bg-[#fdb927]/15 border-transparent hover:border-[#fdb927]/30'
                         }`}
                       >
                         <span>{link.name}</span>
-                        <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#fdb927]' : 'text-[#9a6400]'}`} />
+                        <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#fdb927]' : 'text-[#b45309]'}`} />
                       </button>
                     );
                   })}

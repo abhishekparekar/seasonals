@@ -73,52 +73,52 @@ export default function OurStory() {
           </p>
         </div>
 
-        {/* Full Width 4-Card Grid on Desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
+        {/* Full Width 4-Card Grid on Desktop & Compact Responsive Cards on Mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
           {storyMilestones.map((item, idx) => {
             const IconComponent = item.icon;
             return (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-gray-200/90 shadow-sm hover:shadow-md hover:border-[#fdb927]/50 transition-all flex flex-col justify-between group relative overflow-hidden"
+                transition={{ duration: 0.35, delay: idx * 0.08 }}
+                className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200/90 shadow-sm hover:shadow-md hover:border-[#fdb927]/50 transition-all flex flex-col justify-between group relative overflow-hidden"
               >
                 {/* Accent Top Border */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#fdb927] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div>
                   {/* Top Badge & Number */}
-                  <div className="flex items-center justify-between mb-2.5">
-                    <span className={`text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-full border ${item.badgeColor}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-[9px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-full border ${item.badgeColor}`}>
                       {item.tag}
                     </span>
-                    <span className="font-playfair text-xl sm:text-2xl font-black text-gray-300 group-hover:text-[#1b072a] transition-colors">
+                    <span className="font-playfair text-lg sm:text-2xl font-black text-gray-300 group-hover:text-[#1b072a] transition-colors">
                       {item.chapter}
                     </span>
                   </div>
 
                   {/* Title & Icon */}
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className={`p-1.5 rounded-lg ${item.iconBg}`}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`p-1.5 rounded-lg flex-shrink-0 ${item.iconBg}`}>
                       <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <h3 className="font-playfair text-sm sm:text-base font-bold text-gray-900 leading-tight">
+                    <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 leading-tight">
                       {item.title}
                     </h3>
                   </div>
 
-                  {/* Key Quote Box */}
-                  <div className="bg-[#FAF7F2] border-l-2 border-[#fdb927] px-2.5 py-1.5 rounded-r-lg my-2">
-                    <p className="text-[11px] sm:text-xs font-bold text-[#1b072a] italic">
+                  {/* Quote / Highlight */}
+                  <div className="mb-1.5 pl-2 border-l-2 border-[#fdb927]/50">
+                    <p className="text-[11px] sm:text-xs font-serif italic font-semibold text-[#8a4209] leading-snug">
                       {item.highlight}
                     </p>
                   </div>
 
-                  {/* Short Description */}
-                  <p className="text-xs text-gray-600 leading-relaxed font-normal">
+                  {/* Description */}
+                  <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
