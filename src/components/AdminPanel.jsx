@@ -12,7 +12,8 @@ import {
   deleteInquiryFromFirestore,
   addReviewToFirestore,
   updateReviewInFirestore,
-  deleteReviewFromFirestore
+  deleteReviewFromFirestore,
+  deleteImageFileFromStorage
 } from '../firebase';
 import { 
   collection, 
@@ -131,6 +132,7 @@ export default function AdminPanel({ onBackToHome }) {
   const [productForm, setProductForm] = useState({
     name: '',
     price: 120,
+    originalPrice: 160,
     pieces: 4,
     category: 'diyas',
     categoryLabel: 'Best Seller',
@@ -513,15 +515,26 @@ export default function AdminPanel({ onBackToHome }) {
       return;
     }
 
+    const sellingPrice = Number(productForm.price) || 0;
+    const regularMrp = productForm.originalPrice !== '' && productForm.originalPrice !== null && productForm.originalPrice !== undefined
+      ? Number(productForm.originalPrice)
+      : 0;
+
+    const payload = {
+      ...productForm,
+      price: sellingPrice,
+      originalPrice: regularMrp > 0 ? regularMrp : null
+    };
+
     try {
       if (editingProduct) {
         // Update Product
-        await updateProductInFirestore(editingProduct.id, productForm);
+        await updateProductInFirestore(editingProduct.id, payload);
         showToast("Product updated successfully!");
         setEditingProduct(null);
       } else {
         // Add New Product
-        await addProductToFirestore(productForm);
+        await addProductToFirestore(payload);
         showToast("New product added to store catalog!");
         setIsAddingProduct(false);
       }
@@ -529,6 +542,7 @@ export default function AdminPanel({ onBackToHome }) {
       setProductForm({
         name: '',
         price: 120,
+        originalPrice: 160,
         pieces: 4,
         category: 'diyas',
         categoryLabel: 'Best Seller',
@@ -552,7 +566,8 @@ export default function AdminPanel({ onBackToHome }) {
 
     setProductForm({
       name: prod.name || '',
-      price: prod.price || 120,
+      price: prod.price !== undefined ? prod.price : 120,
+      originalPrice: prod.originalPrice !== undefined && prod.originalPrice !== null ? prod.originalPrice : '',
       pieces: prod.pieces || 4,
       category: prod.category || 'diyas',
       categoryLabel: prod.categoryLabel || 'Best Seller',
@@ -954,12 +969,12 @@ export default function AdminPanel({ onBackToHome }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0f0417] text-white font-inter flex flex-col md:flex-row">
+    <div className="h-screen w-full overflow-hidden bg-[#0f0417] text-white font-inter flex flex-col md:flex-row">
       
       {/* ========================================================================= */}
       {/* MOBILE STICKY TOP HEADER WITH TOGGLE BUTTON (Mobile Devices) */}
       {/* ========================================================================= */}
-      <div className="md:hidden bg-[#1b072a] border-b border-[#fdb927]/25 px-3.5 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-md">
+      <div className="md:hidden bg-[#1b072a] border-b border-[#fdb927]/25 px-3.5 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-md flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
@@ -1177,9 +1192,9 @@ export default function AdminPanel({ onBackToHome }) {
       </aside>
 
       {/* ========================================================================= */}
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT AREA (Independently scrollable on all devices) */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-w-0 p-3.5 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden">
+      <main className="flex-1 min-w-0 h-[calc(100dvh-53px)] md:h-screen overflow-y-auto p-3.5 sm:p-6 lg:p-8 pb-16 space-y-6 w-full max-w-full overflow-x-hidden scroll-smooth">
         
         {/* Top Header Notification Toast */}
         <AnimatePresence>
@@ -1399,21 +1414,7 @@ export default function AdminPanel({ onBackToHome }) {
                       required
                       value={productForm.name}
                       onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                      placeholder="Enter product name"
-                      className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                    />
-                  </div>
-
-                  {/* Price */}
-                  <div>
-                    <label className="text-xs font-bold text-white/80 block mb-1">
-                      Product Price (₹) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={productForm.price}
-                      onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                      placeholder="Enter product name (e.g. Crimson Rose Handcrafted Floral Diya)"
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                     />
                   </div>
@@ -1427,12 +1428,13 @@ export default function AdminPanel({ onBackToHome }) {
                       type="number"
                       value={productForm.pieces}
                       onChange={(e) => setProductForm({ ...productForm, pieces: Number(e.target.value) })}
+                      placeholder="4"
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                     />
                   </div>
 
-                  {/* Badge Text */}
-                  <div>
+                  {/* Festive Tag / Badge */}
+                  <div className="sm:col-span-1">
                     <label className="text-xs font-bold text-white/80 block mb-1">
                       Festive Tag / Badge
                     </label>
@@ -1443,6 +1445,216 @@ export default function AdminPanel({ onBackToHome }) {
                       placeholder="🔥 Best Seller"
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                     />
+                  </div>
+
+                  {/* ========================================================= */}
+                  {/* DEDICATED PRICING & DISCOUNT CONFIGURATION SECTION       */}
+                  {/* ========================================================= */}
+                  <div className="sm:col-span-3 bg-gradient-to-br from-[#12031c] via-[#1f062e] to-[#12031c] border border-[#fdb927]/40 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#fdb927]/20 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-[#fdb927]/20 border border-[#fdb927]/40 text-[#fdb927] flex items-center justify-center font-bold text-sm">
+                          ₹
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-[#fdb927] font-playfair">
+                            Pricing & Festive Discount Configuration
+                          </h4>
+                          <p className="text-[11px] text-white/60">
+                            Set your selling price and regular MRP to display attractive strikethrough offers to customers
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Calculated Status Pill */}
+                      {(() => {
+                        const sellingPrice = Number(productForm.price) || 0;
+                        const originalMrp = Number(productForm.originalPrice) || 0;
+                        const hasDiscount = originalMrp > sellingPrice && sellingPrice > 0;
+                        const discountPercent = hasDiscount ? Math.round(((originalMrp - sellingPrice) / originalMrp) * 100) : 0;
+                        const savings = hasDiscount ? originalMrp - sellingPrice : 0;
+
+                        if (hasDiscount) {
+                          return (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold self-start sm:self-auto">
+                              <span>🎉 {discountPercent}% OFF</span>
+                              <span className="text-white/60">• Save ₹{savings}</span>
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/10 text-white/70 border border-white/15 text-xs font-semibold self-start sm:self-auto">
+                            Regular Price (No Discount)
+                          </span>
+                        );
+                      })()}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* 1. Selling Price (What Customer Pays) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-extrabold text-white flex items-center gap-1">
+                            <span>Selling Price (₹) *</span>
+                            <span className="text-[#fdb927] text-[10px] uppercase font-bold tracking-wider">(Customer Pays)</span>
+                          </label>
+                        </div>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[#fdb927] pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            required
+                            value={productForm.price}
+                            onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                            placeholder="120"
+                            className="w-full pl-8 pr-3 py-2.5 bg-black/60 border border-[#fdb927]/40 focus:border-[#fdb927] rounded-xl text-sm font-bold text-white focus:outline-none"
+                          />
+                        </div>
+                        <p className="text-[11px] text-white/50 mt-1">
+                          The actual price charged to customer in cart & checkout
+                        </p>
+                      </div>
+
+                      {/* 2. Original Price / MRP (Strikethrough Price) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-extrabold text-white flex items-center gap-1">
+                            <span>Original MRP Price (₹)</span>
+                            <span className="text-gray-400 text-[10px] uppercase font-semibold">(Strikethrough)</span>
+                          </label>
+                          {productForm.originalPrice && (
+                            <button
+                              type="button"
+                              onClick={() => setProductForm({ ...productForm, originalPrice: '' })}
+                              className="text-[10px] text-red-400 hover:text-red-300 underline"
+                            >
+                              Remove MRP
+                            </button>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-white/40 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={productForm.originalPrice}
+                            onChange={(e) => setProductForm({ ...productForm, originalPrice: e.target.value === '' ? '' : Number(e.target.value) })}
+                            placeholder="e.g. 160 (Leave empty if no discount)"
+                            className="w-full pl-8 pr-3 py-2.5 bg-black/60 border border-white/20 focus:border-[#fdb927] rounded-xl text-sm font-semibold text-white focus:outline-none"
+                          />
+                        </div>
+                        <p className="text-[11px] text-white/50 mt-1">
+                          Displayed with a strikethrough (e.g. <del className="text-gray-400">₹160</del>) to highlight savings
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Preset Discount Buttons */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[11px] font-bold text-white/70">
+                          Quick Discount Calculators (Based on MRP):
+                        </span>
+                        <span className="text-[10px] text-[#fdb927]/80">
+                          Auto-sets selling price
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {[10, 15, 20, 25, 30, 35, 50].map((percent) => (
+                          <button
+                            key={percent}
+                            type="button"
+                            onClick={() => {
+                              const mrp = Number(productForm.originalPrice) || Number(productForm.price) || 120;
+                              // If no original price is set yet, assume current price was the target selling price or MRP
+                              const baseMrp = Number(productForm.originalPrice) > 0 ? Number(productForm.originalPrice) : Math.round(mrp / (1 - percent / 100));
+                              const newSellingPrice = Math.round(baseMrp * (1 - percent / 100));
+                              setProductForm({
+                                ...productForm,
+                                originalPrice: baseMrp,
+                                price: newSellingPrice
+                              });
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#fdb927] hover:text-[#1b072a] text-white/80 text-xs font-bold border border-white/10 hover:border-[#fdb927] transition-all"
+                          >
+                            {percent}% OFF
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Set nice standard Diwali festive discount: MRP 160 -> Selling 120 (25% OFF)
+                            setProductForm({
+                              ...productForm,
+                              originalPrice: 160,
+                              price: 120
+                            });
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-[#fdb927]/20 hover:bg-[#fdb927] text-[#fdb927] hover:text-[#1b072a] text-xs font-extrabold border border-[#fdb927]/50 transition-all ml-auto"
+                        >
+                          ✨ Default: ₹160 → ₹120 (25% OFF)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Live Storefront Preview Card */}
+                    {(() => {
+                      const sellingPrice = Number(productForm.price) || 0;
+                      const originalMrp = Number(productForm.originalPrice) || 0;
+                      const hasDiscount = originalMrp > sellingPrice && sellingPrice > 0;
+                      const discountPercent = hasDiscount ? Math.round(((originalMrp - sellingPrice) / originalMrp) * 100) : 0;
+                      const savings = hasDiscount ? originalMrp - sellingPrice : 0;
+
+                      return (
+                        <div className="p-3 bg-black/40 rounded-xl border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider block">
+                              Live Customer Storefront View
+                            </span>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xl font-black text-[#fdb927]">
+                                ₹{sellingPrice}
+                              </span>
+                              {hasDiscount && (
+                                <>
+                                  <span className="text-sm font-semibold text-white/50 line-through">
+                                    ₹{originalMrp}
+                                  </span>
+                                  <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                                    {discountPercent}% OFF
+                                  </span>
+                                </>
+                              )}
+                              <span className="text-xs text-white/60">
+                                / Pack of {productForm.pieces || 4} pcs
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-left sm:text-right">
+                            {hasDiscount ? (
+                              <div className="space-y-0.5">
+                                <span className="text-xs font-bold text-emerald-400 block">
+                                  🎉 Customer Saves ₹{savings} ({discountPercent}% Discount)
+                                </span>
+                                <span className="text-[10px] text-white/50 block">
+                                  Displayed on Product Card & Checkout Modal
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-white/50">
+                                No discount applied. Showing regular ₹{sellingPrice}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Multi-Image Product Gallery Manager */}
@@ -1456,8 +1668,24 @@ export default function AdminPanel({ onBackToHome }) {
                           image: updatedImages[0] || ''
                         }));
                       }}
+                      onDeleteImage={async (removedImg, remainingImages) => {
+                        if (removedImg) await deleteImageFileFromStorage(removedImg);
+                        if (editingProduct?.id) {
+                          try {
+                            await updateProductInFirestore(editingProduct.id, {
+                              images: remainingImages,
+                              image: remainingImages[0] || ''
+                            });
+                            setEditingProduct((prev) => prev ? { ...prev, images: remainingImages, image: remainingImages[0] || '' } : null);
+                            showToast("Image permanently deleted from product in database!");
+                          } catch (err) {
+                            console.error(err);
+                            showToast("Failed to delete image from database.", "error");
+                          }
+                        }
+                      }}
                       label="Product Gallery Images (Upload Multiple Photos)"
-                      helperText="Add multiple photos for this product. Customers can preview all photos via thumbnail carousel in the quick view modal."
+                      helperText="Add multiple photos for this product. Deleting an image will immediately remove it from the product in the database."
                     />
                   </div>
 
@@ -1527,6 +1755,13 @@ export default function AdminPanel({ onBackToHome }) {
                       >
                         {prod.inStock !== false ? 'In Stock' : 'Out of Stock'}
                       </button>
+
+                      {/* Discount Tag on Image if available */}
+                      {prod.originalPrice > prod.price && (
+                        <span className="absolute bottom-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-amber-600 text-white shadow-md border border-white/20">
+                          {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
+                        </span>
+                      )}
                     </div>
 
                     <h4 className="font-playfair font-bold text-sm text-white line-clamp-1">
@@ -1539,7 +1774,22 @@ export default function AdminPanel({ onBackToHome }) {
 
                   <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
                     <div>
-                      <span className="font-bold text-sm text-[#fdb927]">₹{prod.price}</span>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="font-bold text-sm text-[#fdb927]">₹{prod.price}</span>
+                        {prod.originalPrice > prod.price && (
+                          <>
+                            <span className="text-xs text-white/40 line-through">₹{prod.originalPrice}</span>
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {prod.originalPrice > prod.price && (
+                        <span className="text-[10px] text-emerald-400/80 font-medium block mt-0.5">
+                          Save ₹{prod.originalPrice - prod.price} / pack
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -2185,8 +2435,26 @@ export default function AdminPanel({ onBackToHome }) {
                     backgroundImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...heroForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || '',
+                      backgroundImage: remainingImages[0] || ''
+                    };
+                    setHeroForm(updated);
+                    await saveSiteSettings("hero_config", updated);
+                    try { localStorage.setItem('seasonals_cached_hero', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from Hero settings in database!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Hero image from database.", "error");
+                  }
+                }}
                 label="Hero Background Images (Multi-Image Crossfade Carousel)"
-                helperText="Upload or add multiple background images. When multiple images are added, they will smoothly crossfade on the Hero banner."
+                helperText="Upload or add multiple background images. Deleting an image will immediately remove it from the Hero settings in the database."
               />
 
               {/* Price / Highlight Tag */}
@@ -2294,8 +2562,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bgImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...shopForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || ''
+                    };
+                    setShopForm(updated);
+                    await saveSiteSettings("shop_config", updated);
+                    try { localStorage.setItem('seasonals_cached_shop', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from Shop settings in database!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Shop image from database.", "error");
+                  }
+                }}
                 label="Shop Header Top Background Images (Multi-Image Crossfade Slider)"
-                helperText="Upload or add multiple background images for the Shop page top header section. When multiple images are added, they crossfade smoothly."
+                helperText="Upload or add multiple background images for the Shop page top header section. Deleting an image will immediately remove it from the Shop settings in the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
@@ -2525,8 +2810,25 @@ export default function AdminPanel({ onBackToHome }) {
                     missionImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...missionForm,
+                      showcaseImages: remainingImages,
+                      missionImage: remainingImages[0] || ''
+                    };
+                    setMissionForm(updated);
+                    await saveSiteSettings("mission_config", updated);
+                    try { localStorage.setItem('seasonals_cached_mission', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Showcase image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete showcase image from database.", "error");
+                  }
+                }}
                 label="Mission Artisanal Crafting Photos (Middle Section Showcase Gallery)"
-                helperText="Upload or add multiple photos of artisans and children creating diyas. These appear in the main showcase section on the Our Mission page with smooth crossfading, controls, and dot indicators."
+                helperText="Upload or add multiple photos of artisans and children creating diyas. Deleting an image will immediately remove it from the database."
               />
 
               {/* Multi-Image Top Header Background Manager */}
@@ -2539,8 +2841,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bgImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...missionForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || ''
+                    };
+                    setMissionForm(updated);
+                    await saveSiteSettings("mission_config", updated);
+                    try { localStorage.setItem('seasonals_cached_mission', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Header image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete header image from database.", "error");
+                  }
+                }}
                 label="Mission Page Header Top Background Images (Multi-Image Slider)"
-                helperText="Upload or add multiple background images for the Our Mission page top header section."
+                helperText="Upload or add multiple background images for the Our Mission page top header section. Deleting an image will immediately remove it from the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
@@ -2615,8 +2934,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bgImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...storyForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || ''
+                    };
+                    setStoryForm(updated);
+                    await saveSiteSettings("story_config", updated);
+                    try { localStorage.setItem('seasonals_cached_story', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Story image from database.", "error");
+                  }
+                }}
                 label="Our Story Header Top Background Images (Multi-Image Slider)"
-                helperText="Upload or add multiple background images for the Our Story page top header section."
+                helperText="Upload or add multiple background images for the Our Story page top header section. Deleting an image will immediately remove it from the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
@@ -2691,8 +3027,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bgImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...bulkForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || ''
+                    };
+                    setBulkForm(updated);
+                    await saveSiteSettings("bulk_config", updated);
+                    try { localStorage.setItem('seasonals_cached_bulk', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Bulk image from database.", "error");
+                  }
+                }}
                 label="Bulk Gifting Header Top Background Images (Multi-Image Slider)"
-                helperText="Upload or add multiple background images for the Bulk & Corporate Gifting page top header section."
+                helperText="Upload or add multiple background images for the Bulk & Corporate Gifting page top header section. Deleting an image will immediately remove it from the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
@@ -2767,8 +3120,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bgImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...contactForm,
+                      bgImages: remainingImages,
+                      bgImage: remainingImages[0] || ''
+                    };
+                    setContactForm(updated);
+                    await saveSiteSettings("contact_config", updated);
+                    try { localStorage.setItem('seasonals_cached_contact', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Contact image from database.", "error");
+                  }
+                }}
                 label="Contact Us Header Top Background Images (Multi-Image Slider)"
-                helperText="Upload or add multiple background images for the Contact Us page top header section."
+                helperText="Upload or add multiple background images for the Contact Us page top header section. Deleting an image will immediately remove it from the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">
@@ -2865,8 +3235,25 @@ export default function AdminPanel({ onBackToHome }) {
                     bannerImage: updatedImages[0] || ''
                   }));
                 }}
+                onDeleteImage={async (removedImg, remainingImages) => {
+                  if (removedImg) await deleteImageFileFromStorage(removedImg);
+                  try {
+                    const updated = {
+                      ...promoForm,
+                      bgImages: remainingImages,
+                      bannerImage: remainingImages[0] || ''
+                    };
+                    setPromoForm(updated);
+                    await saveSiteSettings("promo_config", updated);
+                    try { localStorage.setItem('seasonals_cached_promo', JSON.stringify(updated)); } catch(e) {}
+                    showToast("Image permanently deleted from database & project!");
+                  } catch (err) {
+                    console.error(err);
+                    showToast("Failed to delete Promo image from database.", "error");
+                  }
+                }}
                 label="Promo Banner Featured Images (Multi-Image Carousel)"
-                helperText="Upload or add multiple festive banner images. These will crossfade automatically inside the promo banner card."
+                helperText="Upload or add multiple festive banner images. Deleting an image will immediately remove it from the database."
               />
 
               <div className="pt-3 border-t border-white/10 flex justify-end">

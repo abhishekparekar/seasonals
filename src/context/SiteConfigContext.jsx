@@ -141,13 +141,14 @@ export function SiteConfigProvider({ children }) {
         const productList = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
+          const activeImages = Array.isArray(data.images)
+            ? data.images
+            : (data.image ? [data.image] : []);
           productList.push({
             id: doc.id,
             ...data,
-            // Ensure images array
-            images: Array.isArray(data.images) && data.images.length > 0 
-              ? data.images 
-              : (data.image ? [data.image] : [])
+            images: activeImages,
+            image: activeImages[0] || data.image || ''
           });
         });
         setProducts(productList);
@@ -194,10 +195,10 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBg = data.bgImage || data.backgroundImage || "";
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
-            : (activeBg ? [activeBg] : []);
+            : (data.bgImage || data.backgroundImage ? [data.bgImage || data.backgroundImage] : []);
+          const activeBg = activeBgImages[0] || "";
 
           const updated = {
             ...initialHeroConfig,
@@ -227,10 +228,15 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bgImage ? [data.bgImage] : []);
-          const updated = { ...initialShopConfig, ...data, bgImages: activeBgImages };
+          const updated = { 
+            ...initialShopConfig, 
+            ...data, 
+            bgImages: activeBgImages,
+            bgImage: activeBgImages[0] || ''
+          };
           setCachedConfig('shop', updated);
           setShopConfig(updated);
         } else {
@@ -250,10 +256,15 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bannerImage ? [data.bannerImage] : []);
-          const updated = { ...initialPromoConfig, ...data, bgImages: activeBgImages };
+          const updated = { 
+            ...initialPromoConfig, 
+            ...data, 
+            bgImages: activeBgImages,
+            bannerImage: activeBgImages[0] || ''
+          };
           setCachedConfig('promo', updated);
           setPromoConfig(updated);
         } else {
@@ -273,21 +284,23 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bgImage ? [data.bgImage] : []);
           const activeStats = Array.isArray(data.impactStats) && data.impactStats.length > 0
             ? data.impactStats
             : defaultImpactStats;
-          const activeShowcaseImages = Array.isArray(data.showcaseImages) && data.showcaseImages.length > 0
+          const activeShowcaseImages = Array.isArray(data.showcaseImages)
             ? data.showcaseImages
             : (data.missionImage ? [data.missionImage] : []);
           const updated = {
             ...initialMissionConfig,
             ...data,
             bgImages: activeBgImages,
+            bgImage: activeBgImages[0] || '',
             impactStats: activeStats,
-            showcaseImages: activeShowcaseImages
+            showcaseImages: activeShowcaseImages,
+            missionImage: activeShowcaseImages[0] || ''
           };
           setCachedConfig('mission', updated);
           setMissionConfig(updated);
@@ -308,10 +321,15 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bgImage ? [data.bgImage] : []);
-          const updated = { ...initialStoryConfig, ...data, bgImages: activeBgImages };
+          const updated = { 
+            ...initialStoryConfig, 
+            ...data, 
+            bgImages: activeBgImages,
+            bgImage: activeBgImages[0] || ''
+          };
           setCachedConfig('story', updated);
           setStoryConfig(updated);
         } else {
@@ -331,10 +349,15 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bgImage ? [data.bgImage] : []);
-          const updated = { ...initialBulkConfig, ...data, bgImages: activeBgImages };
+          const updated = { 
+            ...initialBulkConfig, 
+            ...data, 
+            bgImages: activeBgImages,
+            bgImage: activeBgImages[0] || ''
+          };
           setCachedConfig('bulk', updated);
           setBulkConfig(updated);
         } else {
@@ -354,10 +377,15 @@ export function SiteConfigProvider({ children }) {
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const activeBgImages = Array.isArray(data.bgImages) && data.bgImages.length > 0
+          const activeBgImages = Array.isArray(data.bgImages)
             ? data.bgImages
             : (data.bgImage ? [data.bgImage] : []);
-          const updated = { ...initialContactConfig, ...data, bgImages: activeBgImages };
+          const updated = { 
+            ...initialContactConfig, 
+            ...data, 
+            bgImages: activeBgImages,
+            bgImage: activeBgImages[0] || ''
+          };
           setCachedConfig('contact', updated);
           setContactConfig(updated);
         } else {

@@ -325,8 +325,21 @@ ${cartItemsText}
                         <h4 className="font-playfair text-xs sm:text-sm font-bold text-gray-900 truncate">
                           {item.name}
                         </h4>
-                        <div className="text-[11px] font-bold text-[#b45309]">
-                          ₹{item.price} <span className="text-gray-400 font-normal">x {item.quantity}</span>
+                        <div className="flex items-baseline gap-1.5 flex-wrap mt-0.5">
+                          <span className="text-xs font-black text-[#b45309]">
+                            ₹{item.price}
+                          </span>
+                          {item.originalPrice > item.price && (
+                            <span className="text-[10px] text-gray-400 line-through">
+                              ₹{item.originalPrice}
+                            </span>
+                          )}
+                          <span className="text-gray-400 font-normal text-[11px]">x {item.quantity}</span>
+                          {item.originalPrice > item.price && (
+                            <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1 rounded">
+                              Save ₹{(item.originalPrice - item.price) * item.quantity}
+                            </span>
+                          )}
                         </div>
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2 mt-1">
@@ -362,11 +375,37 @@ ${cartItemsText}
                   ))}
                 </div>
 
-                {/* Subtotal Summary */}
-                <div className="p-3 bg-[#FFF8EB] rounded-2xl border border-[#fdb927]/40 flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-700">Subtotal ({totalItemsCount} items):</span>
-                  <span className="text-base font-black text-[#1b072a]">₹{cartSubtotal}</span>
-                </div>
+                {/* Subtotal & Savings Summary */}
+                {(() => {
+                  const totalCartSavings = cart.reduce((sum, item) => {
+                    if (item.originalPrice && item.originalPrice > item.price) {
+                      return sum + (item.originalPrice - item.price) * item.quantity;
+                    }
+                    return sum;
+                  }, 0);
+
+                  return (
+                    <div className="p-3 bg-[#FFF8EB] rounded-2xl border border-[#fdb927]/40 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-700">Subtotal ({totalItemsCount} items):</span>
+                        <div className="flex items-baseline gap-1.5">
+                          {totalCartSavings > 0 && (
+                            <span className="text-xs text-gray-400 line-through">
+                              ₹{cartSubtotal + totalCartSavings}
+                            </span>
+                          )}
+                          <span className="text-base font-black text-[#1b072a]">₹{cartSubtotal}</span>
+                        </div>
+                      </div>
+                      {totalCartSavings > 0 && (
+                        <div className="text-[11px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-lg border border-emerald-300 flex items-center justify-between">
+                          <span>🎉 Festive Discount Applied:</span>
+                          <span>You Save ₹{totalCartSavings}!</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Checkout Address Form */}
                 <form onSubmit={handleCartSubmit} className="space-y-3 pt-2 border-t border-gray-200">

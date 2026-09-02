@@ -64,6 +64,7 @@ async function compressImageFile(file, maxWidth = 1600, maxHeight = 1600, qualit
 export default function MultiImageManager({
   images = [],
   onChange,
+  onDeleteImage,
   label = "Background Images (Slider / Carousel)",
   helperText = "Upload multiple images or paste image URLs. You can upload as many images as you like with no limits. They will smoothly crossfade automatically on the page."
 }) {
@@ -71,6 +72,7 @@ export default function MultiImageManager({
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState(null);
 
   const imageList = Array.isArray(images) ? images.filter(Boolean) : (images ? [images] : []);
 
@@ -154,14 +156,39 @@ export default function MultiImageManager({
     }
   };
 
-  const handleRemove = (indexToRemove) => {
+  const handleRemove = async (indexToRemove) => {
+    const imgToRemove = imageList[indexToRemove];
+    if (!window.confirm(`Delete image #${indexToRemove + 1}? It will be removed from the database.`)) {
+      return;
+    }
+
     const updated = imageList.filter((_, idx) => idx !== indexToRemove);
-    onChange(updated);
+    setDeletingIndex(indexToRemove);
+    try {
+      onChange(updated);
+      if (typeof onDeleteImage === 'function') {
+        await onDeleteImage(imgToRemove, updated);
+      }
+    } catch (err) {
+      console.error("Error deleting image from database:", err);
+    } finally {
+      setDeletingIndex(null);
+    }
   };
 
-  const handleClearAll = () => {
-    if (window.confirm("Are you sure you want to remove all uploaded images?")) {
-      onChange([]);
+  const handleClearAll = async () => {
+    if (window.confirm("Are you sure you want to delete all uploaded images? They will be removed from the database.")) {
+      setDeletingIndex('all');
+      try {
+        onChange([]);
+        if (typeof onDeleteImage === 'function') {
+          await onDeleteImage(null, []);
+        }
+      } catch (err) {
+        console.error("Error clearing images from database:", err);
+      } finally {
+        setDeletingIndex(null);
+      }
     }
   };
 
@@ -226,11 +253,16 @@ export default function MultiImageManager({
               {/* Remove Button */}
               <button
                 type="button"
+                disabled={deletingIndex === idx}
                 onClick={() => handleRemove(idx)}
-                className="absolute top-1 right-1 p-1 sm:p-1.5 bg-red-600/95 hover:bg-red-600 text-white rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer shadow z-10"
-                title="Remove this image"
+                className="absolute top-1 right-1 p-1 sm:p-1.5 bg-red-600/95 hover:bg-red-600 text-white rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer shadow z-10 disabled:opacity-75"
+                title="Delete this image from database"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                {deletingIndex === idx ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-3.5 h-3.5" />
+                )}
               </button>
             </div>
           ))}

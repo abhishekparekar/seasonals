@@ -53,12 +53,16 @@ export default function ProductCard({ product }) {
             </span>
           )}
 
-          {/* Top-Right Multi-Image Count Badge */}
-          {productImages.length > 1 && (
+          {/* Top-Right Discount Badge or Multi-Image Badge */}
+          {product.originalPrice > product.price ? (
+            <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-full shadow-md border border-white/40 tracking-tight z-10">
+              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+            </div>
+          ) : productImages.length > 1 ? (
             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-[#1b072a]/85 backdrop-blur-md text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded border border-white/20">
               📷 {productImages.length}
             </div>
-          )}
+          ) : null}
 
           {/* Hover Quick View Button Overlay (Desktop / Hover) */}
           <div className="absolute inset-0 bg-[#1b072a]/30 backdrop-blur-[1.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:flex items-center justify-center pointer-events-none">
@@ -104,11 +108,21 @@ export default function ProductCard({ product }) {
 
       {/* Footer Price & Order CTA Button */}
       <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-100 space-y-1.5 sm:space-y-2">
-        <div className="flex items-baseline justify-between gap-1">
-          <div className="flex items-baseline gap-1">
+        <div className="flex items-baseline justify-between gap-1 flex-wrap">
+          <div className="flex items-baseline gap-1.5 flex-wrap">
             <span className="text-sm sm:text-lg md:text-xl font-black text-[#1b072a]">
               ₹{product.price}
             </span>
+            {product.originalPrice > product.price && (
+              <>
+                <span className="text-xs sm:text-sm font-semibold text-gray-400 line-through">
+                  ₹{product.originalPrice}
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-extrabold text-emerald-700 bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-300">
+                  Save ₹{product.originalPrice - product.price}
+                </span>
+              </>
+            )}
             <span className="text-[10px] sm:text-xs font-semibold text-gray-500">
               / {product.packTitle || `${product.pieces || 4} pcs`}
             </span>

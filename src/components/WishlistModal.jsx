@@ -68,9 +68,22 @@ export default function WishlistModal() {
                       <h4 className="font-playfair font-bold text-sm text-gray-900 truncate">
                         {product.name}
                       </h4>
-                      <p className="text-xs text-gray-600 font-semibold">
-                        ₹{product.price} ({product.packTitle || `Pack of ${product.pieces || 4}`})
-                      </p>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-xs text-gray-900 font-bold">
+                          ₹{product.price}
+                        </span>
+                        {product.originalPrice > product.price && (
+                          <>
+                            <span className="text-[10px] text-gray-400 line-through">
+                              ₹{product.originalPrice}
+                            </span>
+                            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded">
+                              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                            </span>
+                          </>
+                        )}
+                        <span className="text-[11px] text-gray-500">({product.packTitle || `Pack of ${product.pieces || 4}`})</span>
+                      </div>
                     </div>
                   </div>
 

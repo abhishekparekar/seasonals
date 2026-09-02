@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   setDoc
 } from "firebase/firestore";
+import { getStorage, ref as storageRef, deleteObject } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBX19VWQ81SAB5Hy_gkMyV6Dwx9SZgy6iI",
@@ -29,6 +30,23 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+/**
+ * Universal helper to delete uploaded image files from storage if applicable
+ */
+export async function deleteImageFileFromStorage(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string') return;
+  try {
+    if (imageUrl.includes('firebasestorage.googleapis.com') || imageUrl.includes('firebasestorage.app')) {
+      const imgRef = storageRef(storage, imageUrl);
+      await deleteObject(imgRef);
+      console.log("Deleted image from Firebase Storage:", imageUrl);
+    }
+  } catch (err) {
+    console.warn("Storage deletion notice:", err);
+  }
+}
 
 // Tenant Identifier
 export const TENANT_ID = "seasonal-website";
@@ -165,7 +183,20 @@ export async function updateProductInFirestore(productId, updatedData) {
 
 export async function deleteProductFromFirestore(productId) {
   try {
-    await deleteDoc(getTenantDoc("products", productId));
+    const prodDocRef = getTenantDoc("products", productId);
+    try {
+      const snap = await getDoc(prodDocRef);
+      if (snap.exists()) {
+        const prodData = snap.data();
+        const imgs = Array.isArray(prodData.images) ? prodData.images : (prodData.image ? [prodData.image] : []);
+        for (const img of imgs) {
+          await deleteImageFileFromStorage(img);
+        }
+      }
+    } catch (fetchErr) {
+      console.warn("Product image cleanup note:", fetchErr);
+    }
+    await deleteDoc(prodDocRef);
     return { success: true };
   } catch (error) {
     console.error("Error deleting product from tenant Firestore:", error);

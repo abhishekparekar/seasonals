@@ -316,6 +316,11 @@ export default function ProductModal() {
                       {product.badge}
                     </span>
                   )}
+                  {product.originalPrice > product.price && (
+                    <span className="absolute top-2.5 right-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md border border-white/40 tracking-tight">
+                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                    </span>
+                  )}
                 </div>
 
                 {/* Multiple Images Thumbnail Gallery */}
@@ -343,8 +348,20 @@ export default function ProductModal() {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-gray-500 block">Price Per Pack</span>
-                      <span className="text-xl font-black text-[#1b072a]">₹{product.price}</span>
-                      <span className="text-[11px] text-gray-500 ml-1">/ Pack of {product.pieces || 4}</span>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-2xl font-black text-[#1b072a]">₹{product.price}</span>
+                        {product.originalPrice > product.price && (
+                          <>
+                            <span className="text-sm font-bold text-gray-400 line-through">
+                              ₹{product.originalPrice}
+                            </span>
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-gray-500">/ Pack of {product.pieces || 4}</span>
                     </div>
 
                     {/* Quantity Selector */}
@@ -367,9 +384,24 @@ export default function ProductModal() {
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-[#fdb927]/30 flex items-center justify-between text-xs font-bold text-gray-800">
-                    <span>Total Amount ({totalDiyasCount} Diyas):</span>
-                    <span className="text-base font-black text-[#280a3e]">₹{totalPrice}</span>
+                  <div className="pt-2 border-t border-[#fdb927]/30 space-y-1">
+                    <div className="flex items-center justify-between text-xs font-bold text-gray-800">
+                      <span>Total Amount ({totalDiyasCount} Diyas):</span>
+                      <div className="flex items-baseline gap-1.5">
+                        {product.originalPrice > product.price && (
+                          <span className="text-xs text-gray-400 line-through">
+                            ₹{product.originalPrice * quantity}
+                          </span>
+                        )}
+                        <span className="text-lg font-black text-[#280a3e]">₹{totalPrice}</span>
+                      </div>
+                    </div>
+                    {product.originalPrice > product.price && (
+                      <div className="text-[11px] font-bold text-emerald-700 bg-emerald-100/90 px-2.5 py-1 rounded-lg border border-emerald-300 flex items-center justify-between">
+                        <span>🎉 Total Festive Savings:</span>
+                        <span>₹{(product.originalPrice - product.price) * quantity}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

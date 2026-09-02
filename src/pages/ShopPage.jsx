@@ -145,7 +145,6 @@ export default function ShopPage({ onNavigate }) {
             <button
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory('all');
               }}
               className="px-5 py-2.5 bg-[#1b072a] text-[#fdb927] font-bold text-xs rounded-full shadow-md hover:bg-[#280a3e] transition-all cursor-pointer"
             >
