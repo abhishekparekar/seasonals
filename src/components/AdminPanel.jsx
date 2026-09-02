@@ -231,7 +231,7 @@ export default function AdminPanel({ onBackToHome }) {
     setIsLoggingIn(true);
 
     setTimeout(() => {
-      if (emailInput.trim().toLowerCase() === 'admin@gmail.com' && passwordInput === 'admin@1234') {
+      if (emailInput.trim().toLowerCase() === 'seasonalsindia@gmail.com' && passwordInput === 'Seasonals1234#') {
         sessionStorage.setItem('seasonals_admin_auth', 'true');
         setIsAuthenticated(true);
       } else {
@@ -878,7 +878,7 @@ export default function AdminPanel({ onBackToHome }) {
                   required
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="admin@gmail.com"
+                  placeholder="seasonalsindia@gmail.com"
                   className="w-full pl-9 pr-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#fdb927]"
                 />
               </div>
