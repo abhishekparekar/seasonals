@@ -21,16 +21,26 @@ import LegalModal from './components/LegalModal';
 import { AnimatePresence, motion } from 'framer-motion';
 
 function parseCurrentRoute() {
-  const path = window.location.pathname.toLowerCase();
-  const hash = window.location.hash.toLowerCase().replace('#', '');
+  const rawPath = window.location.pathname.toLowerCase();
+  const path = rawPath.replace(/\/+$/, '');
+  const hash = window.location.hash.toLowerCase().replace('#', '').replace(/\/+$/, '');
   const search = window.location.search.toLowerCase();
+
+  // Check direct admin session flag
+  const isDirectAdmin = sessionStorage.getItem('seasonals_direct_admin');
+  if (isDirectAdmin) {
+    sessionStorage.removeItem('seasonals_direct_admin');
+    return 'admin';
+  }
 
   // Admin Check
   if (
     path === '/admin' ||
-    path.startsWith('/admin/') ||
+    path.startsWith('/admin') ||
+    path.endsWith('/admin') ||
     hash === 'admin' ||
-    search.includes('admin=true')
+    search.includes('admin=true') ||
+    search.includes('admin')
   ) {
     return 'admin';
   }
