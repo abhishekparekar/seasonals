@@ -1,0 +1,9 @@
+# Robots.txt for Seasonals Website
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+
+# Sitemap location
+Sitemap: https://seasonals.in/sitemap.xml
+Sitemap: https://seasonals.vercel.app/sitemap.xml
