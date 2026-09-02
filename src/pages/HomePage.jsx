@@ -1,7 +1,6 @@
 import React from 'react';
 import Hero from '../components/Hero';
 import AboutCSR from '../components/AboutCSR';
-import OurStory from '../components/OurStory';
 import PromoBanner from '../components/PromoBanner';
 import Features from '../components/Features';
 import Reviews from '../components/Reviews';
@@ -18,12 +17,7 @@ export default function HomePage({ onNavigate }) {
         <AboutCSR onNavigate={onNavigate} isPreview={true} />
       </div>
 
-      {/* 3. Our Story Journey */}
-      <div className="relative">
-        <OurStory onNavigate={onNavigate} isPreview={true} />
-      </div>
-
-      {/* 4. Promotional Festive Banner */}
+      {/* 3. Promotional Festive Banner */}
       <PromoBanner onNavigate={onNavigate} />
 
       {/* 5. Why Choose Us / The Seasonals Promise */}
