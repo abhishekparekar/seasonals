@@ -1458,7 +1458,6 @@ export default function AdminPanel({ onBackToHome }) {
                       }}
                       label="Product Gallery Images (Upload Multiple Photos)"
                       helperText="Add multiple photos for this product. Customers can preview all photos via thumbnail carousel in the quick view modal."
-                      maxImages={6}
                     />
                   </div>
 
