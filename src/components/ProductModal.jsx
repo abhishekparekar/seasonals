@@ -432,7 +432,7 @@ export default function ProductModal() {
                   {/* Name & Phone */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                      <label className="text-[11px] font-bold text-gray-950 block mb-1">
                         Full Name *
                       </label>
                       <input
@@ -443,7 +443,7 @@ export default function ProductModal() {
                         placeholder="Your full name"
                         className={`w-full px-3 py-2 text-xs rounded-xl border ${
                           formErrors.name ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#280a3e]`}
+                        } focus:outline-none focus:border-[#280a3e] text-gray-900 font-medium`}
                       />
                       {formErrors.name && (
                         <span className="text-[10px] text-red-500 mt-0.5 block">{formErrors.name}</span>
@@ -451,11 +451,11 @@ export default function ProductModal() {
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                      <label className="text-[11px] font-bold text-gray-950 block mb-1">
                         Mobile Number *
                       </label>
                       <div className="flex items-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-bold select-none flex-shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-950 text-xs font-bold select-none flex-shrink-0">
                           <span>🇮🇳 +91</span>
                         </span>
                         <input
@@ -467,7 +467,7 @@ export default function ProductModal() {
                           placeholder="98765 43210"
                           className={`w-full px-3 py-2 text-xs rounded-r-xl border ${
                             formErrors.mobileNumber ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                          } focus:outline-none focus:border-[#280a3e] font-semibold`}
+                          } focus:outline-none focus:border-[#280a3e] font-bold text-gray-900`}
                         />
                       </div>
                       {formErrors.mobileNumber && (
@@ -479,7 +479,7 @@ export default function ProductModal() {
                   {/* Pincode with Realtime Auto-Lookup */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-bold text-gray-700 flex items-center gap-1">
+                      <label className="text-[11px] font-bold text-gray-950 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-[#b45309]" />
                         <span>Pincode (Auto-fills City & State) *</span>
                       </label>
@@ -489,7 +489,7 @@ export default function ProductModal() {
                         </span>
                       )}
                       {pincodeSuccess && (
-                        <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                        <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" /> Auto-filled successfully
                         </span>
                       )}
@@ -502,7 +502,7 @@ export default function ProductModal() {
                       onChange={handlePincodeChange}
                       maxLength={6}
                       placeholder="Enter 6-digit Pincode (e.g. 400001)"
-                      className={`w-full px-3 py-2 text-xs rounded-xl border font-bold ${
+                      className={`w-full px-3 py-2 text-xs rounded-xl border font-bold text-gray-900 ${
                         formErrors.pincode 
                           ? 'border-red-500 bg-red-50/40' 
                           : pincodeSuccess 
@@ -517,7 +517,7 @@ export default function ProductModal() {
 
                   {/* House / Street Address */}
                   <div>
-                    <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                    <label className="text-[11px] font-bold text-gray-950 block mb-1">
                       Flat / House No., Building, Street Name *
                     </label>
                     <input
@@ -526,7 +526,7 @@ export default function ProductModal() {
                       value={formData.addressLine}
                       onChange={handleInputChange}
                       placeholder="e.g. Flat 402, Lotus Towers, MG Road"
-                      className={`w-full px-3 py-2 text-xs rounded-xl border ${
+                      className={`w-full px-3 py-2 text-xs rounded-xl border text-gray-900 font-medium ${
                         formErrors.addressLine ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
                       } focus:outline-none focus:border-[#280a3e]`}
                     />
@@ -538,7 +538,7 @@ export default function ProductModal() {
                   {/* City, District, State (Auto-filled / Editable) */}
                   <div className="grid grid-cols-3 gap-2.5">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-700 block mb-0.5">
+                      <label className="text-[10px] font-bold text-gray-950 block mb-0.5">
                         City / Town *
                       </label>
                       <input
@@ -547,14 +547,14 @@ export default function ProductModal() {
                         value={formData.city}
                         onChange={handleInputChange}
                         placeholder="City"
-                        className={`w-full px-2.5 py-1.5 text-xs rounded-lg border ${
+                        className={`w-full px-2.5 py-1.5 text-xs rounded-lg border text-gray-900 ${
                           formErrors.city ? 'border-red-500' : 'border-gray-300'
-                        } focus:outline-none focus:border-[#280a3e] bg-gray-50 font-medium`}
+                        } focus:outline-none focus:border-[#280a3e] bg-gray-50 font-bold`}
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-700 block mb-0.5">
+                      <label className="text-[10px] font-bold text-gray-950 block mb-0.5">
                         District
                       </label>
                       <input
@@ -563,7 +563,7 @@ export default function ProductModal() {
                         value={formData.district}
                         onChange={handleInputChange}
                         placeholder="District"
-                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-gray-50 font-medium"
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-gray-50 font-bold text-gray-900"
                       />
                     </div>
 

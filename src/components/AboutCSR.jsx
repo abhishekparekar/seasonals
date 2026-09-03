@@ -210,10 +210,10 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <HandHeart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
               Celebrating Pure Talent & Capability
             </h3>
-            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-gray-800 leading-relaxed font-medium">
               We spotlight creativity and skill, ensuring children with physical challenges receive 100% fair compensation and full respect for their artistic talent.
             </p>
           </motion.div>
@@ -230,10 +230,10 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-[#b37400] transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-[#b37400] transition-colors">
               Handcrafted & Eco-Friendly
             </h3>
-            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-gray-800 leading-relaxed font-medium">
               Crafted from pure organic terracotta clay with traditional floral patterns and finished with festive metallic gold scalloped rims.
             </p>
           </motion.div>
@@ -250,10 +250,10 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 mb-1 leading-snug group-hover:text-emerald-700 transition-colors">
+            <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-emerald-700 transition-colors">
               Empowering Creative Talent
             </h3>
-            <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-gray-800 leading-relaxed font-medium">
               Your festive purchase directly supports skill workshops, artistic development, and long-term empowerment for children with physical challenges.
             </p>
           </motion.div>

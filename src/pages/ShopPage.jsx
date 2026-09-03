@@ -1,16 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import ProductCard from '../components/ProductCard';
-import BannerBackground from '../components/BannerBackground';
-import { Sparkles, Search, Filter, SlidersHorizontal, ArrowUpDown, X, ShieldCheck, Truck, RefreshCw, Heart } from 'lucide-react';
+import { Search, X, ShieldCheck, Truck, RefreshCw, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ShopPage({ onNavigate }) {
-  const { products, loading, shopConfig } = useSiteConfig();
-
-  const shopImages = Array.isArray(shopConfig?.bgImages) && shopConfig.bgImages.length > 0
-    ? shopConfig.bgImages
-    : (shopConfig?.bgImage ? [shopConfig.bgImage] : []);
+  const { products, loading } = useSiteConfig();
 
   const [searchQuery, setSearchQuery] = useState('');
   const filteredProducts = useMemo(() => {
@@ -32,94 +27,55 @@ export default function ShopPage({ onNavigate }) {
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
 
-      {/* 1. Shop Page Header Banner matching Hero Section Size */}
-      <section className="relative flex items-center justify-center text-white py-14 sm:py-20 md:py-24 overflow-hidden font-inter transition-all duration-300 min-h-[360px] sm:min-h-[440px] border-b-2 border-[#fdb927]/40 shadow-lg">
-        <BannerBackground images={shopImages} />
+      {/* Unified Top Navigation & Search Bar Strip */}
+      <section className="sticky top-14 sm:top-16 z-30 bg-[#FFFDF9]/95 backdrop-blur-md border-b border-[#fdb927]/30 py-2.5 px-3.5 sm:px-6 lg:px-8 shadow-xs">
+        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4">
 
-        <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center bg-[#1b072a]/85 backdrop-blur-md border border-[#fdb927]/40 px-4 py-1.5 rounded-full mb-3 sm:mb-4 shadow-lg text-xs sm:text-sm font-semibold text-[#fdb927] tracking-wide gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#fdb927]" />
-              <span>{shopConfig?.badgeText || "100% Pure Terracotta Handcrafted Collection"}</span>
-            </div>
-
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">
-              {shopConfig?.title || "Handcrafted Festive Diya Sets"}
-            </h1>
-
-            <p className="text-white text-xs sm:text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-semibold drop-shadow-[0_3px_12px_rgba(0,0,0,1)] [text-shadow:_0_1px_8px_rgba(0,0,0,1),_0_2px_4px_rgba(0,0,0,1)]">
-              {shopConfig?.subtitle || "Explore authentic terracotta diyas meticulously hand-painted with radiant 24K gold scalloped rims by talented children with physical challenges."}
-            </p>
+          {/* Left: Page Path / Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-xs font-bold whitespace-nowrap self-start md:self-center">
+            <button
+              onClick={() => onNavigate('home')}
+              className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
+            >
+              Home
+            </button>
+            <span className="text-gray-400">/</span>
+            <span className="text-[#b45309] font-black">Shop Collection</span>
           </div>
-        </div>
-      </section>
 
-      {/* Breadcrumb Strip (Below Header Banner) */}
-      <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
-        <div className="w-full flex items-center gap-2 text-xs font-bold">
-          <button
-            onClick={() => onNavigate('home')}
-            className="text-gray-500 hover:text-[#b45309] transition-colors cursor-pointer"
-          >
-            Home
-          </button>
-          <span className="text-gray-400">/</span>
-          <span className="text-[#b45309] font-black">Shop Collection</span>
-        </div>
-      </div>
-
-      {/* 2. Search Bar */}
-      <section className="sticky top-14 sm:top-16 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3.5 shadow-sm">
-        <div className="w-full px-3.5 sm:px-6 lg:px-8">
-          <div className="max-w-xl mx-auto">
-            <div className="relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by color, name, set..."
-                className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100/80 focus:bg-white border border-gray-300 rounded-xl focus:outline-none focus:border-[#280a3e] transition-all"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Product Catalog Grid */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8">
-
-        {/* Results Counter Display */}
-        <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-extrabold text-[#1b072a]">
-              Showing {filteredProducts.length} Product{filteredProducts.length === 1 ? '' : 's'}
-            </span>
+          {/* Center: Search Bar */}
+          <div className="w-full md:max-w-md lg:max-w-lg relative">
+            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by color, name, set..."
+              className="w-full pl-9 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm bg-white hover:bg-gray-50 focus:bg-white border border-[#fdb927]/40 focus:border-[#280a3e] rounded-full focus:outline-none transition-all shadow-xs"
+            />
             {searchQuery && (
-              <span className="text-xs text-gray-400">
-                (Filtered by "{searchQuery}")
-              </span>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
 
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="text-xs text-[#d97706] hover:text-[#b45309] font-bold flex items-center gap-1 underline cursor-pointer"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span>Clear Search</span>
-            </button>
-          )}
+          {/* Right: 100% Pure Terracotta Tag */}
+          <div className="hidden lg:inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1b072a] bg-[#fdb927]/15 border border-[#fdb927]/40 px-3 py-1 rounded-full whitespace-nowrap shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-[#b45309]" />
+            <span>100% Pure Terracotta Handcrafted Collection</span>
+          </div>
         </div>
+      </section>
+
+      {/* Product Catalog Grid */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6">
+
+
 
         {/* Products Grid */}
         {loading ? (

@@ -85,6 +85,8 @@ export default function AdminPanel({ onBackToHome }) {
   // Site Config Context
   const { 
     products: contextProducts, 
+    homeSectionsConfig,
+    navbarConfig,
     heroConfig, 
     shopConfig,
     promoConfig,
@@ -143,8 +145,40 @@ export default function AdminPanel({ onBackToHome }) {
     inStock: true
   });
 
+  // Home Page Sections Visibility State
+  const [homeSectionsForm, setHomeSectionsForm] = useState({
+    showHero: true,
+    showMission: true,
+    showPromo: true,
+    showFeatures: true,
+    showReviews: true,
+    showCorporateCta: true,
+    ...homeSectionsConfig
+  });
+  const [isSavingHomeSections, setIsSavingHomeSections] = useState(false);
+
+  // Navbar Navigation Visibility State
+  const [navbarForm, setNavbarForm] = useState({
+    showHome: true,
+    showShop: true,
+    showMission: true,
+    showStory: true,
+    showBulk: true,
+    showContact: true,
+    showCartBtn: true,
+    showOrderNowBtn: true,
+    ...navbarConfig
+  });
+  const [isSavingNavbar, setIsSavingNavbar] = useState(false);
+
   // Hero Section Form State
-  const [heroForm, setHeroForm] = useState({ ...heroConfig });
+  const [heroForm, setHeroForm] = useState({ 
+    showBadge: true,
+    showTitle: true,
+    showSubtitle: true,
+    showPricePill: true,
+    ...heroConfig 
+  });
   const [isSavingHero, setIsSavingHero] = useState(false);
 
   // Shop Page Form State
@@ -185,7 +219,19 @@ export default function AdminPanel({ onBackToHome }) {
 
   // Sync contexts when loaded
   useEffect(() => {
-    setHeroForm({ ...heroConfig });
+    if (homeSectionsConfig) {
+      setHomeSectionsForm((prev) => ({ ...prev, ...homeSectionsConfig }));
+    }
+  }, [homeSectionsConfig]);
+
+  useEffect(() => {
+    if (navbarConfig) {
+      setNavbarForm((prev) => ({ ...prev, ...navbarConfig }));
+    }
+  }, [navbarConfig]);
+
+  useEffect(() => {
+    setHeroForm((prev) => ({ ...prev, ...heroConfig }));
   }, [heroConfig]);
 
   useEffect(() => {
@@ -223,6 +269,56 @@ export default function AdminPanel({ onBackToHome }) {
   useEffect(() => {
     setWaForm({ ...whatsappConfig });
   }, [whatsappConfig]);
+
+  // Home Sections Save & Toggle Handlers
+  const handleSaveHomeSections = async (customConfig = null) => {
+    const payload = customConfig || homeSectionsForm;
+    setIsSavingHomeSections(true);
+    try {
+      await saveSiteSettings("home_sections_config", payload);
+      try { localStorage.setItem('seasonals_cached_home_sections', JSON.stringify(payload)); } catch(e) {}
+      showToast("Home page sections visibility updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update Home sections visibility.", "error");
+    } finally {
+      setIsSavingHomeSections(false);
+    }
+  };
+
+  const handleToggleHomeSection = async (key) => {
+    const updated = {
+      ...homeSectionsForm,
+      [key]: homeSectionsForm[key] === false ? true : false
+    };
+    setHomeSectionsForm(updated);
+    await handleSaveHomeSections(updated);
+  };
+
+  // Navbar Links Save & Toggle Handlers
+  const handleSaveNavbar = async (customConfig = null) => {
+    const payload = customConfig || navbarForm;
+    setIsSavingNavbar(true);
+    try {
+      await saveSiteSettings("navbar_config", payload);
+      try { localStorage.setItem('seasonals_cached_navbar', JSON.stringify(payload)); } catch(e) {}
+      showToast("Navbar & Navigation visibility updated live!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update Navbar settings.", "error");
+    } finally {
+      setIsSavingNavbar(false);
+    }
+  };
+
+  const handleToggleNavbarItem = async (key) => {
+    const updated = {
+      ...navbarForm,
+      [key]: navbarForm[key] === false ? true : false
+    };
+    setNavbarForm(updated);
+    await handleSaveNavbar(updated);
+  };
 
   // Handle Admin Login
   const handleLoginSubmit = (e) => {
@@ -616,17 +712,22 @@ export default function AdminPanel({ onBackToHome }) {
 
   // Save Dynamic Hero Settings
   const handleSaveHeroSettings = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setIsSavingHero(true);
     try {
       const bgToSave = (heroForm.bgImages && heroForm.bgImages[0]) || heroForm.bgImage || heroForm.backgroundImage || "";
       const updatedHero = {
         ...heroForm,
+        showBadge: heroForm.showBadge !== false,
+        showTitle: heroForm.showTitle !== false,
+        showSubtitle: heroForm.showSubtitle !== false,
+        showPricePill: heroForm.showPricePill !== false,
         bgImage: bgToSave,
         backgroundImage: bgToSave
       };
       await saveSiteSettings("hero_config", updatedHero);
-      showToast("Hero Section background image(s) & settings updated live!");
+      try { localStorage.setItem('seasonals_cached_hero', JSON.stringify(updatedHero)); } catch(e) {}
+      showToast("Hero Section settings & element visibility updated live!");
     } catch (err) {
       console.error(err);
       showToast("Failed to save Hero settings.", "error");
@@ -940,6 +1041,8 @@ export default function AdminPanel({ onBackToHome }) {
       title: "Store Management",
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
+        { id: 'home_sections', label: 'Home Page Sections', icon: Sliders, badge: 'ON/OFF' },
+        { id: 'navbar_cms', label: 'Navbar & Navigation', icon: Menu, badge: 'ON/OFF' },
         { id: 'products', label: 'Manage Products', icon: Layers, badge: `${productsList.length}` },
         { id: 'orders', label: 'Customer Orders', icon: ShoppingBag, badge: `${pendingCount > 0 ? `${pendingCount} new` : orders.length}` },
         { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: `${inquiries.length}` },
@@ -1341,6 +1444,363 @@ export default function AdminPanel({ onBackToHome }) {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Quick Home Page Sections Live Visibility Controls Card */}
+            <div className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#fdb927]/15 text-[#fdb927] flex items-center justify-center">
+                    <Sliders className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-playfair font-bold text-base sm:text-lg text-white">
+                      Home Page Sections Live Controller
+                    </h3>
+                    <p className="text-[11px] text-white/60">
+                      Instantly turn ON or OFF any section from displaying on your store's Home Page
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('home_sections')}
+                  className="text-xs text-[#fdb927] hover:underline font-bold flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <span>Open Full Manager →</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { key: 'showHero', label: '1. Hero Top Banner', desc: 'Main headline, multi-image slider & action buttons' },
+                  { key: 'showShop', label: '2. Shop Products Grid', desc: 'Handcrafted Festive Diya product collection showcase' },
+                  { key: 'showMission', label: '3. Social Mission (CSR)', desc: 'Artisan story spotlight & impact statistics' },
+                  { key: 'showPromo', label: '4. Festive Promo Banner', desc: 'Special festive countdown/announcement banner' },
+                  { key: 'showFeatures', label: '5. Seasonals Promise', desc: 'Why Choose Us trust & quality guarantee cards' },
+                  { key: 'showReviews', label: '6. Customer Reviews Wall', desc: 'Verified buyer testimonials and 5-star ratings' },
+                  { key: 'showCorporateCta', label: '7. Bulk & Corporate CTA', desc: 'Bottom corporate gifting inquiry banner' },
+                ].map((item) => {
+                  const isVisible = homeSectionsForm[item.key] !== false;
+                  return (
+                    <div
+                      key={item.key}
+                      onClick={() => handleToggleHomeSection(item.key)}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isVisible
+                          ? 'bg-black/30 border-[#fdb927]/40 hover:border-[#fdb927]'
+                          : 'bg-black/10 border-white/10 hover:border-white/20 opacity-60'
+                      }`}
+                    >
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{item.label}</span>
+                        </div>
+                        <div className="text-[10px] text-white/50 line-clamp-1">{item.desc}</div>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <div className={`w-11 h-6 rounded-full p-1 transition-colors flex items-center ${
+                          isVisible ? 'bg-emerald-600 justify-end' : 'bg-white/20 justify-start'
+                        }`}>
+                          <motion.div
+                            layout
+                            className="w-4 h-4 rounded-full bg-white shadow-md"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: HOME PAGE SECTIONS FULL VISIBILITY MANAGER */}
+        {/* ===================================================================== */}
+        {activeTab === 'home_sections' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
+                  <Sliders className="w-6 h-6 text-[#fdb927]" />
+                  <span>Home Page Sections ON / OFF Controller</span>
+                </h1>
+                <p className="text-xs text-white/60 mt-0.5">
+                  Toggle individual sections ON or OFF to show or hide them from your live Home Page instantly
+                </p>
+              </div>
+
+              <button
+                onClick={() => handleSaveHomeSections()}
+                disabled={isSavingHomeSections}
+                className="bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg transition-all cursor-pointer self-start sm:self-auto"
+              >
+                <Save className="w-4 h-4" />
+                <span>{isSavingHomeSections ? 'Saving...' : 'Save All Section Changes'}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { 
+                  key: 'showHero', 
+                  title: '1. Hero Top Banner Section', 
+                  icon: Sparkles,
+                  desc: 'The prominent top section of your store with title, background slider, and order badges.',
+                  tag: 'Top Section'
+                },
+                { 
+                  key: 'showShop', 
+                  title: '2. Handcrafted Shop Products Grid', 
+                  icon: ShoppingBag,
+                  desc: 'Displays the festive Diya handcrafted product collection cards grid directly on the Home page.',
+                  tag: 'Product Catalog'
+                },
+                { 
+                  key: 'showMission', 
+                  title: '3. Our Social Mission (CSR) Spotlight', 
+                  icon: Heart,
+                  desc: 'Highlights the artisans, child empowerment stories, and impact numbers on the home page.',
+                  tag: 'Mission'
+                },
+                { 
+                  key: 'showPromo', 
+                  title: '4. Festive Special Promo Banner', 
+                  icon: ImageIcon,
+                  desc: 'Promotional festive celebration banner with background image and direct WhatsApp button.',
+                  tag: 'Promotion'
+                },
+                { 
+                  key: 'showFeatures', 
+                  title: '5. Seasonals Promise / Why Choose Us', 
+                  icon: ShieldCheck,
+                  desc: 'Highlights safe transit packaging, pure clay, artisan pride, and doorstep delivery guarantees.',
+                  tag: 'Features'
+                },
+                { 
+                  key: 'showReviews', 
+                  title: '6. Verified Customer Reviews Wall', 
+                  icon: Star,
+                  desc: 'Customer testimonials with star ratings, city locations, and verified buyer badges.',
+                  tag: 'Social Proof'
+                },
+                { 
+                  key: 'showCorporateCta', 
+                  title: '7. Corporate & Bulk Orders CTA Banner', 
+                  icon: CreditCard,
+                  desc: 'Bottom call-to-action banner for corporate festive gifting and custom branding orders.',
+                  tag: 'Inquiry CTA'
+                },
+              ].map((section) => {
+                const isEnabled = homeSectionsForm[section.key] !== false;
+                const Icon = section.icon;
+                return (
+                  <div 
+                    key={section.key}
+                    className={`rounded-3xl border p-5 sm:p-6 transition-all relative ${
+                      isEnabled
+                        ? 'bg-[#1b072a] border-[#fdb927]/40 shadow-xl'
+                        : 'bg-[#1b072a]/40 border-white/10 opacity-70'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                          isEnabled ? 'bg-[#fdb927]/20 text-[#fdb927]' : 'bg-white/5 text-white/40'
+                        }`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                            <span>{section.title}</span>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider inline-block mt-0.5 ${
+                            isEnabled 
+                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' 
+                              : 'bg-red-950 text-red-300 border border-red-500/40'
+                          }`}>
+                            {isEnabled ? '● LIVE ON HOME PAGE' : '○ HIDDEN FROM HOME PAGE'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Interactive Toggle Switch */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleHomeSection(section.key)}
+                        className={`w-14 h-8 rounded-full p-1 transition-all cursor-pointer flex items-center shadow-inner flex-shrink-0 ${
+                          isEnabled ? 'bg-emerald-600 justify-end' : 'bg-gray-700 justify-start'
+                        }`}
+                        title={isEnabled ? 'Click to HIDE section' : 'Click to SHOW section'}
+                      >
+                        <motion.div
+                          layout
+                          className="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center text-[10px] font-black text-gray-800"
+                        >
+                          {isEnabled ? '✓' : '✕'}
+                        </motion.div>
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-white/70 leading-relaxed pl-13">
+                      {section.desc}
+                    </p>
+
+                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-white/50 pl-13">
+                      <span>Status: <strong className={isEnabled ? 'text-emerald-400' : 'text-red-400'}>{isEnabled ? 'Visible (ON)' : 'Hidden (OFF)'}</strong></span>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleHomeSection(section.key)}
+                        className="text-[#fdb927] hover:underline font-semibold cursor-pointer"
+                      >
+                        {isEnabled ? 'Hide this section' : 'Show this section'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB: NAVBAR & NAVIGATION VISIBILITY MANAGER */}
+        {/* ===================================================================== */}
+        {activeTab === 'navbar_cms' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <h1 className="font-playfair text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
+                  <Menu className="w-6 h-6 text-[#fdb927]" />
+                  <span>Navbar & Page Links Visibility Controller</span>
+                </h1>
+                <p className="text-xs text-white/60 mt-0.5">
+                  Control which page links and buttons appear in your website header navigation, mobile menu, and footer
+                </p>
+              </div>
+
+              <button
+                onClick={() => handleSaveNavbar()}
+                disabled={isSavingNavbar}
+                className="bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg transition-all cursor-pointer self-start sm:self-auto"
+              >
+                <Save className="w-4 h-4" />
+                <span>{isSavingNavbar ? 'Saving...' : 'Save Navigation Settings'}</span>
+              </button>
+            </div>
+
+            {/* Page Links Grid */}
+            <div className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5">
+              <h3 className="font-playfair text-lg font-bold text-[#fdb927] border-b border-white/10 pb-2">
+                Website Header Navigation Links
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {[
+                  { key: 'showHome', label: 'Home Page Link', route: '/', desc: 'Main landing storefront' },
+                  { key: 'showShop', label: 'Shop Collection Link', route: '/shop', desc: 'Product catalog & diya packs' },
+                  { key: 'showMission', label: 'Our Mission (CSR) Link', route: '/mission', desc: 'Social impact & child empowerment' },
+                  { key: 'showStory', label: 'Our Story Link', route: '/story', desc: 'Brand origin & founding story' },
+                  { key: 'showBulk', label: 'Bulk & Corporate Link', route: '/bulk-gifting', desc: 'Corporate gifting inquiries' },
+                  { key: 'showContact', label: 'Contact Us Link', route: '/contact', desc: 'Support desk & order assistance' },
+                ].map((item) => {
+                  const isEnabled = navbarForm[item.key] !== false;
+                  return (
+                    <div
+                      key={item.key}
+                      onClick={() => handleToggleNavbarItem(item.key)}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isEnabled
+                          ? 'bg-black/30 border-[#fdb927]/40 hover:border-[#fdb927]'
+                          : 'bg-black/10 border-white/10 hover:border-white/20 opacity-55'
+                      }`}
+                    >
+                      <div>
+                        <div className="text-xs sm:text-sm font-bold text-white">{item.label}</div>
+                        <div className="text-[10px] text-mono text-[#fdb927] mt-0.5">{item.route}</div>
+                        <div className="text-[11px] text-white/50 mt-1">{item.desc}</div>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <div className={`w-12 h-7 rounded-full p-1 transition-colors flex items-center ${
+                          isEnabled ? 'bg-emerald-600 justify-end' : 'bg-gray-700 justify-start'
+                        }`}>
+                          <motion.div
+                            layout
+                            className="w-5 h-5 rounded-full bg-white shadow-md flex items-center justify-center text-[9px] font-black text-gray-800"
+                          >
+                            {isEnabled ? '✓' : '✕'}
+                          </motion.div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Header Action Buttons Controls */}
+            <div className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4">
+              <h3 className="font-playfair text-lg font-bold text-[#fdb927] border-b border-white/10 pb-2">
+                Header Action Buttons
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Cart Button Toggle */}
+                <div
+                  onClick={() => handleToggleNavbarItem('showCartBtn')}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    navbarForm.showCartBtn !== false
+                      ? 'bg-black/30 border-[#fdb927]/40 hover:border-[#fdb927]'
+                      : 'bg-black/10 border-white/10 opacity-55'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-white">Header Shopping Cart Button</div>
+                      <div className="text-[11px] text-white/50">Show/hide cart badge button on the top right</div>
+                    </div>
+                  </div>
+
+                  <div className={`w-12 h-7 rounded-full p-1 transition-colors flex items-center flex-shrink-0 ${
+                    navbarForm.showCartBtn !== false ? 'bg-emerald-600 justify-end' : 'bg-gray-700 justify-start'
+                  }`}>
+                    <motion.div layout className="w-5 h-5 rounded-full bg-white shadow-md" />
+                  </div>
+                </div>
+
+                {/* Order Now CTA Toggle */}
+                <div
+                  onClick={() => handleToggleNavbarItem('showOrderNowBtn')}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    navbarForm.showOrderNowBtn !== false
+                      ? 'bg-black/30 border-[#fdb927]/40 hover:border-[#fdb927]'
+                      : 'bg-black/10 border-white/10 opacity-55'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-[#fdb927] flex items-center justify-center">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-white">Header "Order Now" CTA Button</div>
+                      <div className="text-[11px] text-white/50">Show/hide radiant Order Now button in navbar</div>
+                    </div>
+                  </div>
+
+                  <div className={`w-12 h-7 rounded-full p-1 transition-colors flex items-center flex-shrink-0 ${
+                    navbarForm.showOrderNowBtn !== false ? 'bg-emerald-600 justify-end' : 'bg-gray-700 justify-start'
+                  }`}>
+                    <motion.div layout className="w-5 h-5 rounded-full bg-white shadow-md" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2367,64 +2827,131 @@ export default function AdminPanel({ onBackToHome }) {
               </p>
             </div>
 
-            <form onSubmit={handleSaveHeroSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-4 max-w-3xl">
-              {/* Badge Text */}
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Top Festive Badge Text
-                </label>
+            <form onSubmit={handleSaveHeroSettings} className="bg-[#1b072a] border border-[#fdb927]/30 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5 max-w-3xl">
+              
+              {/* 1. Badge Text with ON/OFF Toggle */}
+              <div className={`p-4 rounded-2xl border transition-all ${
+                heroForm.showBadge !== false ? 'bg-black/30 border-[#fdb927]/30' : 'bg-black/15 border-white/10 opacity-70'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <label className="text-xs font-bold text-white block">
+                      Top Festive Badge Tag
+                    </label>
+                    <p className="text-[10px] text-white/50">Small rounded badge shown above the main title</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setHeroForm({ ...heroForm, showBadge: heroForm.showBadge === false ? true : false })}
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      heroForm.showBadge !== false
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-gray-700 text-white/60'
+                    }`}
+                  >
+                    <span>{heroForm.showBadge !== false ? '✓ VISIBLE (ON)' : '✕ HIDDEN (OFF)'}</span>
+                  </button>
+                </div>
+
                 <input
                   type="text"
+                  disabled={heroForm.showBadge === false}
                   value={heroForm.badgeText || ''}
                   onChange={(e) => setHeroForm({ ...heroForm, badgeText: e.target.value })}
                   placeholder="✨ Pure Terracotta • Handcrafted with Gold Scalloped Rim"
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] disabled:opacity-40"
                 />
               </div>
 
-              {/* Title Line 1 */}
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Headline Line 1
-                </label>
-                <input
-                  type="text"
-                  value={heroForm.titleLine1 || ''}
-                  onChange={(e) => setHeroForm({ ...heroForm, titleLine1: e.target.value })}
-                  placeholder="Celebrate Joy."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
-                />
+              {/* 2. Main Title Heading with ON/OFF Toggle */}
+              <div className={`p-4 rounded-2xl border transition-all ${
+                heroForm.showTitle !== false ? 'bg-black/30 border-[#fdb927]/30' : 'bg-black/15 border-white/10 opacity-70'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <label className="text-xs font-bold text-white block">
+                      Main Heading & Gold Highlight
+                    </label>
+                    <p className="text-[10px] text-white/50">Primary focal headline shown in hero banner</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setHeroForm({ ...heroForm, showTitle: heroForm.showTitle === false ? true : false })}
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      heroForm.showTitle !== false
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-gray-700 text-white/60'
+                    }`}
+                  >
+                    <span>{heroForm.showTitle !== false ? '✓ VISIBLE (ON)' : '✕ HIDDEN (OFF)'}</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-white/70 block mb-1">Headline Line 1</label>
+                    <input
+                      type="text"
+                      disabled={heroForm.showTitle === false}
+                      value={heroForm.titleLine1 || ''}
+                      onChange={(e) => setHeroForm({ ...heroForm, titleLine1: e.target.value })}
+                      placeholder="Celebrate Joy."
+                      className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] disabled:opacity-40"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-[#fdb927] block mb-1">Headline Golden Highlight (Line 2)</label>
+                    <input
+                      type="text"
+                      disabled={heroForm.showTitle === false}
+                      value={heroForm.titleHighlight || ''}
+                      onChange={(e) => setHeroForm({ ...heroForm, titleHighlight: e.target.value })}
+                      placeholder="Gift with Purpose."
+                      className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-[#fdb927] font-bold focus:outline-none focus:border-[#fdb927] disabled:opacity-40"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Title Highlight */}
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Headline Golden Highlight (Line 2)
-                </label>
-                <input
-                  type="text"
-                  value={heroForm.titleHighlight || ''}
-                  onChange={(e) => setHeroForm({ ...heroForm, titleHighlight: e.target.value })}
-                  placeholder="Gift with Purpose."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-[#fdb927] font-bold focus:outline-none focus:border-[#fdb927]"
-                />
-              </div>
+              {/* 3. Subtitle Description with ON/OFF Toggle */}
+              <div className={`p-4 rounded-2xl border transition-all ${
+                heroForm.showSubtitle !== false ? 'bg-black/30 border-[#fdb927]/30' : 'bg-black/15 border-white/10 opacity-70'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <label className="text-xs font-bold text-white block">
+                      Subtitle / Description Paragraph
+                    </label>
+                    <p className="text-[10px] text-white/50">Story explanation text below the main heading</p>
+                  </div>
 
-              {/* Subtitle */}
-              <div>
-                <label className="text-xs font-bold text-white/80 block mb-1">
-                  Subtitle / Description Paragraph
-                </label>
+                  <button
+                    type="button"
+                    onClick={() => setHeroForm({ ...heroForm, showSubtitle: heroForm.showSubtitle === false ? true : false })}
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      heroForm.showSubtitle !== false
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-gray-700 text-white/60'
+                    }`}
+                  >
+                    <span>{heroForm.showSubtitle !== false ? '✓ VISIBLE (ON)' : '✕ HIDDEN (OFF)'}</span>
+                  </button>
+                </div>
+
                 <textarea
                   rows={3}
+                  disabled={heroForm.showSubtitle === false}
                   value={heroForm.subtitle || ''}
                   onChange={(e) => setHeroForm({ ...heroForm, subtitle: e.target.value })}
                   placeholder="Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities."
-                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none disabled:opacity-40"
                 />
               </div>
 
-              {/* Multi-Image Hero Background Slider Manager */}
+              {/* 4. Multi-Image Hero Background Slider Manager */}
               <MultiImageManager
                 images={heroForm.bgImages || (heroForm.bgImage ? [heroForm.bgImage] : [])}
                 onChange={(updatedImages) => {
@@ -2457,9 +2984,11 @@ export default function AdminPanel({ onBackToHome }) {
                 helperText="Upload or add multiple background images. Deleting an image will immediately remove it from the Hero settings in the database."
               />
 
-              {/* Price / Highlight Tag */}
-              <div className="bg-black/20 p-4 rounded-2xl border border-[#fdb927]/20 space-y-3">
-                <div className="flex items-center justify-between">
+              {/* 5. Price / Highlight Tag with ON/OFF Toggle */}
+              <div className={`p-4 rounded-2xl border transition-all ${
+                heroForm.showPricePill !== false ? 'bg-black/30 border-[#fdb927]/30' : 'bg-black/15 border-white/10 opacity-70'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
                   <div>
                     <label className="text-xs font-bold text-white block">
                       Price Pill Tag
@@ -2470,13 +2999,13 @@ export default function AdminPanel({ onBackToHome }) {
                   <button
                     type="button"
                     onClick={() => setHeroForm({ ...heroForm, showPricePill: heroForm.showPricePill === false ? true : false })}
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
                       heroForm.showPricePill !== false
                         ? 'bg-emerald-600 text-white shadow-md'
-                        : 'bg-white/10 text-white/50 hover:bg-white/20'
+                        : 'bg-gray-700 text-white/60'
                     }`}
                   >
-                    <span>{heroForm.showPricePill !== false ? '✓ ENABLED (ON)' : '✕ HIDDEN (OFF)'}</span>
+                    <span>{heroForm.showPricePill !== false ? '✓ VISIBLE (ON)' : '✕ HIDDEN (OFF)'}</span>
                   </button>
                 </div>
 
@@ -2494,7 +3023,7 @@ export default function AdminPanel({ onBackToHome }) {
                 <button
                   type="submit"
                   disabled={isSavingHero}
-                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-6 py-3 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-sm shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSavingHero ? 'Publishing Live...' : 'Publish Hero Section Changes'}</span>

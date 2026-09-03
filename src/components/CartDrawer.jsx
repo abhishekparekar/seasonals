@@ -326,17 +326,17 @@ ${cartItemsText}
                           {item.name}
                         </h4>
                         <div className="flex items-baseline gap-1.5 flex-wrap mt-0.5">
-                          <span className="text-xs font-black text-[#b45309]">
+                          <span className="text-xs font-black text-gray-950">
                             ₹{item.price}
                           </span>
                           {item.originalPrice > item.price && (
-                            <span className="text-[10px] text-gray-400 line-through">
+                            <span className="text-[10px] text-gray-600 font-bold line-through">
                               ₹{item.originalPrice}
                             </span>
                           )}
-                          <span className="text-gray-400 font-normal text-[11px]">x {item.quantity}</span>
+                          <span className="text-gray-700 font-bold text-[11px]">x {item.quantity}</span>
                           {item.originalPrice > item.price && (
-                            <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1 rounded">
+                            <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-1 rounded">
                               Save ₹{(item.originalPrice - item.price) * item.quantity}
                             </span>
                           )}
@@ -346,17 +346,17 @@ ${cartItemsText}
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-5 h-5 rounded-md bg-white border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 hover:bg-gray-100"
+                            className="w-5 h-5 rounded-md bg-white border border-gray-400 flex items-center justify-center text-xs font-bold text-gray-900 hover:bg-gray-100 cursor-pointer"
                           >
                             -
                           </button>
-                          <span className="text-xs font-bold text-gray-800 w-4 text-center">
+                          <span className="text-xs font-black text-gray-950 w-4 text-center">
                             {item.quantity}
                           </span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-5 h-5 rounded-md bg-white border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 hover:bg-gray-100"
+                            className="w-5 h-5 rounded-md bg-white border border-gray-400 flex items-center justify-center text-xs font-bold text-gray-900 hover:bg-gray-100 cursor-pointer"
                           >
                             +
                           </button>
@@ -366,7 +366,7 @@ ${cartItemsText}
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1.5 text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
                         title="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -378,31 +378,30 @@ ${cartItemsText}
                 {/* Subtotal & Savings Summary */}
                 {(() => {
                   const totalCartSavings = cart.reduce((sum, item) => {
-                    if (item.originalPrice && item.originalPrice > item.price) {
-                      return sum + (item.originalPrice - item.price) * item.quantity;
-                    }
-                    return sum;
+                    const orig = item.originalPrice || item.price;
+                    return sum + Math.max(0, orig - item.price) * item.quantity;
                   }, 0);
 
                   return (
-                    <div className="p-3 bg-[#FFF8EB] rounded-2xl border border-[#fdb927]/40 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-700">Subtotal ({totalItemsCount} items):</span>
-                        <div className="flex items-baseline gap-1.5">
-                          {totalCartSavings > 0 && (
-                            <span className="text-xs text-gray-400 line-through">
-                              ₹{cartSubtotal + totalCartSavings}
-                            </span>
-                          )}
-                          <span className="text-base font-black text-[#1b072a]">₹{cartSubtotal}</span>
-                        </div>
+                    <div className="p-3 bg-[#FFF8EB] rounded-2xl border border-[#fdb927]/60 space-y-1.5 text-xs font-mono">
+                      <div className="flex items-center justify-between text-gray-800 font-bold">
+                        <span>Items Subtotal:</span>
+                        <span className="font-sans font-bold">₹{cartSubtotal}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-emerald-800 font-bold">
+                        <span>Delivery / Shipping:</span>
+                        <span className="font-bold font-sans">FREE (Special Offer)</span>
                       </div>
                       {totalCartSavings > 0 && (
-                        <div className="text-[11px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-lg border border-emerald-300 flex items-center justify-between">
-                          <span>🎉 Festive Discount Applied:</span>
-                          <span>You Save ₹{totalCartSavings}!</span>
+                        <div className="flex items-center justify-between text-emerald-800 font-bold">
+                          <span>Total Savings:</span>
+                          <span className="font-bold font-sans">₹{totalCartSavings}</span>
                         </div>
                       )}
+                      <div className="pt-1.5 border-t border-[#fdb927]/40 flex items-center justify-between font-black text-sm text-[#1b072a]">
+                        <span>Grand Total:</span>
+                        <span className="text-base font-sans text-[#1b072a]">₹{cartSubtotal}</span>
+                      </div>
                     </div>
                   );
                 })()}
@@ -410,11 +409,12 @@ ${cartItemsText}
                 {/* Checkout Address Form */}
                 <form onSubmit={handleCartSubmit} className="space-y-3 pt-2 border-t border-gray-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase text-gray-700 tracking-wider">
+                    <span className="text-xs font-bold text-gray-950 uppercase tracking-wide">
                       Delivery Address
                     </span>
-                    <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Fast Dispatch
+                    <span className="text-[10px] text-emerald-800 font-bold flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                      <span>Zero Risk Checkout</span>
                     </span>
                   </div>
 
@@ -426,8 +426,8 @@ ${cartItemsText}
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="Your Full Name *"
-                        className={`w-full px-3 py-2 text-xs rounded-xl border ${
+                        placeholder="Full Name *"
+                        className={`w-full px-3 py-2 text-xs rounded-xl border text-gray-900 font-medium ${
                           formErrors.name ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
                         } focus:outline-none focus:border-[#280a3e]`}
                       />
@@ -438,7 +438,7 @@ ${cartItemsText}
 
                     <div>
                       <div className="flex items-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-700 text-xs font-bold select-none flex-shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-2 rounded-l-xl border border-r-0 border-gray-300 bg-gray-100 text-gray-950 text-xs font-bold select-none flex-shrink-0">
                           <span>🇮🇳 +91</span>
                         </span>
                         <input
@@ -448,9 +448,9 @@ ${cartItemsText}
                           onChange={handleInputChange}
                           maxLength={10}
                           placeholder="10-digit Mobile Number *"
-                          className={`w-full px-3 py-2 text-xs rounded-r-xl border ${
+                          className={`w-full px-3 py-2 text-xs rounded-r-xl border text-gray-900 ${
                             formErrors.mobileNumber ? 'border-red-500 bg-red-50/40' : 'border-gray-300'
-                          } focus:outline-none focus:border-[#280a3e] font-semibold`}
+                          } focus:outline-none focus:border-[#280a3e] font-bold`}
                         />
                       </div>
                       {formErrors.mobileNumber && (
@@ -462,7 +462,7 @@ ${cartItemsText}
                   {/* Pincode with Auto-Fetch */}
                   <div>
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-bold text-gray-700 flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-gray-950 flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-[#b45309]" />
                         <span>Pincode (Auto-fills City & State) *</span>
                       </span>
@@ -472,7 +472,7 @@ ${cartItemsText}
                         </span>
                       )}
                       {pincodeSuccess && (
-                        <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                        <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" /> Auto-filled
                         </span>
                       )}
@@ -523,7 +523,7 @@ ${cartItemsText}
                       value={formData.city}
                       onChange={handleInputChange}
                       placeholder="City *"
-                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border ${
+                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border text-gray-900 font-bold ${
                         formErrors.city ? 'border-red-500' : 'border-gray-300'
                       } focus:outline-none focus:border-[#280a3e] bg-gray-50`}
                     />
@@ -533,7 +533,7 @@ ${cartItemsText}
                       value={formData.district}
                       onChange={handleInputChange}
                       placeholder="District"
-                      className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:border-[#280a3e] bg-gray-50"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg border text-gray-900 font-bold border-gray-300 focus:outline-none focus:border-[#280a3e] bg-gray-50"
                     />
                     <input
                       type="text"
@@ -541,7 +541,7 @@ ${cartItemsText}
                       value={formData.state}
                       onChange={handleInputChange}
                       placeholder="State *"
-                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border ${
+                      className={`w-full px-2.5 py-1.5 text-xs rounded-lg border text-gray-900 font-bold ${
                         formErrors.state ? 'border-red-500' : 'border-gray-300'
                       } focus:outline-none focus:border-[#280a3e] bg-gray-50`}
                     />

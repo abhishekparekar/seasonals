@@ -28,23 +28,39 @@ export default function BestSellers({ onNavigate, isPreview = false }) {
 
           <div className="flex items-center justify-center gap-3 mb-2">
             <span className="h-[1.5px] w-10 sm:w-20 bg-gradient-to-r from-transparent to-[#fdb927]"></span>
-            <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-950 tracking-tight">
               {title}
             </h2>
             <span className="h-[1.5px] w-10 sm:w-20 bg-gradient-to-l from-transparent to-[#fdb927]"></span>
           </div>
 
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+          <p className="text-xs sm:text-sm text-gray-900 leading-relaxed font-semibold">
             {subtitle}
           </p>
         </div>
 
-        {/* Dynamic products grid - 4 Columns on Large Screens for perfect full-width balance */}
+        {/* Dynamic products grid - 2 Columns on Mobile, 4 Columns on Large Screens */}
         {displayProducts && displayProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {displayProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+              {displayProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* View Full Collection Button on Home Page */}
+            {onNavigate && (
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('shop')}
+                  className="inline-flex items-center justify-center gap-2 bg-[#1b072a] hover:bg-[#2e0948] text-[#fdb927] font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full border-2 border-[#fdb927]/60 shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-[#fdb927]" />
+                  <span>Explore Complete Festive Shop Collection →</span>
+                </button>
+              </div>
+            )}
           </div>
         ) : loading ? (
           <div className="text-center py-12">

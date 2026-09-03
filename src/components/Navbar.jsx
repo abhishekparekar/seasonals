@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin }) {
   const { totalItemsCount, setIsCartOpen } = useCart();
-  const { footerConfig, whatsappConfig } = useSiteConfig();
+  const { footerConfig, whatsappConfig, navbarConfig } = useSiteConfig();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,14 +48,19 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Home', id: 'home' },
-    { name: 'Shop', id: 'shop' },
-    { name: 'Our Mission', id: 'mission' },
-    { name: 'Our Story', id: 'story' },
-    { name: 'Bulk & Corporate Gifting', id: 'bulk-gifting' },
-    { name: 'Contact', id: 'contact' },
+  const allNavLinks = [
+    { name: 'Home', id: 'home', enabled: navbarConfig?.showHome !== false },
+    { name: 'Shop', id: 'shop', enabled: navbarConfig?.showShop !== false },
+    { name: 'Our Mission', id: 'mission', enabled: navbarConfig?.showMission !== false },
+    { name: 'Our Story', id: 'story', enabled: navbarConfig?.showStory !== false },
+    { name: 'Bulk & Corporate Gifting', id: 'bulk-gifting', enabled: navbarConfig?.showBulk !== false },
+    { name: 'Contact', id: 'contact', enabled: navbarConfig?.showContact !== false },
   ];
+
+  const navLinks = allNavLinks.filter((link) => link.enabled);
+
+  const showCartBtn = navbarConfig?.showCartBtn !== false;
+  const showOrderNowBtn = navbarConfig?.showOrderNowBtn !== false;
 
   const handleLinkClick = (pageId) => {
     setIsMobileMenuOpen(false);
@@ -126,34 +131,38 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
           <div className="flex items-center gap-2 sm:gap-2.5">
             
             {/* Desktop Only: Luxury Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              aria-label="View Shopping Cart"
-              className="hidden md:inline-flex relative items-center gap-1.5 sm:gap-2 bg-[#FFF8EB] hover:bg-[#FFF1D6] active:scale-95 text-[#1b072a] font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl border-2 border-[#fdb927]/80 shadow-[0_2px_10px_rgba(253,185,39,0.2)] hover:shadow-[0_4px_14px_rgba(253,185,39,0.35)] transition-all cursor-pointer group"
-            >
-              <div className="relative flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-[#9a6400] group-hover:scale-110 transition-transform" />
-              </div>
+            {showCartBtn && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                aria-label="View Shopping Cart"
+                className="hidden md:inline-flex relative items-center gap-1.5 sm:gap-2 bg-[#FFF8EB] hover:bg-[#FFF1D6] active:scale-95 text-[#1b072a] font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl border-2 border-[#fdb927]/80 shadow-[0_2px_10px_rgba(253,185,39,0.2)] hover:shadow-[0_4px_14px_rgba(253,185,39,0.35)] transition-all cursor-pointer group"
+              >
+                <div className="relative flex items-center justify-center">
+                  <ShoppingBag className="w-4 h-4 text-[#9a6400] group-hover:scale-110 transition-transform" />
+                </div>
 
-              <span className="text-[12px] xl:text-[13px] font-extrabold text-[#1b072a]">
-                Cart
-              </span>
-
-              {totalItemsCount > 0 && (
-                <span className="inline-flex items-center justify-center bg-[#280a3e] text-[#fdb927] text-[10px] md:text-[11px] font-black px-2 py-0.5 rounded-full border border-[#fdb927]/60 shadow-sm animate-pulse">
-                  {totalItemsCount}
+                <span className="text-[12px] xl:text-[13px] font-extrabold text-[#1b072a]">
+                  Cart
                 </span>
-              )}
-            </button>
+
+                {totalItemsCount > 0 && (
+                  <span className="inline-flex items-center justify-center bg-[#280a3e] text-[#fdb927] text-[10px] md:text-[11px] font-black px-2 py-0.5 rounded-full border border-[#fdb927]/60 shadow-sm animate-pulse">
+                    {totalItemsCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Desktop Only: "Order Now" CTA Button */}
-            <button
-              onClick={() => handleLinkClick('shop')}
-              className="hidden lg:inline-flex items-center gap-1.5 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] hover:to-[#2f084a] text-[#fdb927] hover:text-[#fff1c2] font-black text-[12px] xl:text-[13px] tracking-wide px-3.5 sm:px-4 py-2 rounded-full shadow-[0_4px_16px_rgba(34,5,54,0.35)] hover:shadow-[0_6px_22px_rgba(253,185,39,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fdb927]/70 cursor-pointer whitespace-nowrap"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#fdb927] fill-[#fdb927]" />
-              <span>Order Now</span>
-            </button>
+            {showOrderNowBtn && (
+              <button
+                onClick={() => handleLinkClick('shop')}
+                className="hidden lg:inline-flex items-center gap-1.5 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] hover:to-[#2f084a] text-[#fdb927] hover:text-[#fff1c2] font-black text-[12px] xl:text-[13px] tracking-wide px-3.5 sm:px-4 py-2 rounded-full shadow-[0_4px_16px_rgba(34,5,54,0.35)] hover:shadow-[0_6px_22px_rgba(253,185,39,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fdb927]/70 cursor-pointer whitespace-nowrap"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#fdb927] fill-[#fdb927]" />
+                <span>Order Now</span>
+              </button>
+            )}
 
             {/* Mobile / Tablet Hamburger Toggle Button */}
             <button
@@ -233,30 +242,34 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
               {/* Drawer Quick Actions */}
               <div className="pt-4 border-t border-[#fdb927]/25 space-y-2.5">
                 {/* Mobile Drawer Cart Button */}
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setIsCartOpen(true);
-                  }}
-                  className="w-full flex items-center justify-between bg-[#FFF8EB] hover:bg-[#FFF1D6] text-[#1b072a] font-bold text-xs py-2.5 px-4 rounded-xl border border-[#fdb927]/60 shadow-sm active:scale-95 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <ShoppingBag className="w-4 h-4 text-[#9a6400]" />
-                    <span>My Shopping Cart</span>
-                  </div>
-                  <span className="bg-[#280a3e] text-[#fdb927] font-black text-[11px] px-2 py-0.5 rounded-full border border-[#fdb927]/50">
-                    {totalItemsCount}
-                  </span>
-                </button>
+                {showCartBtn && (
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsCartOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between bg-[#FFF8EB] hover:bg-[#FFF1D6] text-[#1b072a] font-bold text-xs py-2.5 px-4 rounded-xl border border-[#fdb927]/60 shadow-sm active:scale-95 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag className="w-4 h-4 text-[#9a6400]" />
+                      <span>My Shopping Cart</span>
+                    </div>
+                    <span className="bg-[#280a3e] text-[#fdb927] font-black text-[11px] px-2 py-0.5 rounded-full border border-[#fdb927]/50">
+                      {totalItemsCount}
+                    </span>
+                  </button>
+                )}
 
                 {/* Mobile Drawer Order Now Button */}
-                <button
-                  onClick={() => handleLinkClick('shop')}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] text-[#fdb927] font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-[#fdb927] fill-[#fdb927]" />
-                  <span>Order Now</span>
-                </button>
+                {showOrderNowBtn && (
+                  <button
+                    onClick={() => handleLinkClick('shop')}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#220536] via-[#3d0f5e] to-[#220536] hover:from-[#2f084a] hover:via-[#4c1374] text-[#fdb927] font-black text-xs py-2.5 rounded-xl shadow-md transition-transform active:scale-95 border-2 border-[#fdb927]/60 cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#fdb927] fill-[#fdb927]" />
+                    <span>Order Now</span>
+                  </button>
+                )}
 
                 {/* Direct WhatsApp Support */}
                 <div className="text-center pt-1">
@@ -264,7 +277,7 @@ export default function Navbar({ activePage = 'home', onNavigate, onOpenAdmin })
                     href={`https://wa.me/91${(whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "")}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive Clay Diya Sets.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[11px] text-gray-600 hover:text-[#280a3e] font-semibold"
+                    className="inline-flex items-center gap-1.5 text-[11px] text-gray-900 hover:text-[#280a3e] font-bold"
                   >
                     <PhoneCall className="w-3 h-3 text-[#280a3e]" />
                     <span>WhatsApp: <strong className="text-[#280a3e] underline">{footerConfig.supportPhone || "+91 91353 13565"}</strong></span>

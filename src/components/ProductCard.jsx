@@ -91,7 +91,7 @@ export default function ProductCard({ product }) {
 
           {/* Product Title */}
           <h3
-            className="font-playfair font-extrabold text-xs sm:text-base text-gray-900 line-clamp-1 group-hover:text-[#280a3e] transition-colors leading-snug"
+            className="font-playfair font-extrabold text-xs sm:text-base text-gray-950 line-clamp-1 group-hover:text-[#280a3e] transition-colors leading-snug"
             title={product.name}
           >
             {product.name}
@@ -99,7 +99,7 @@ export default function ProductCard({ product }) {
 
           {/* Description (Desktop only to prevent mobile clutter) */}
           {product.description && (
-            <p className="text-gray-500 text-xs line-clamp-1 font-medium hidden sm:block">
+            <p className="text-gray-800 text-xs line-clamp-1 font-medium hidden sm:block">
               {product.description}
             </p>
           )}
@@ -110,25 +110,25 @@ export default function ProductCard({ product }) {
       <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-100 space-y-1.5 sm:space-y-2">
         <div className="flex items-baseline justify-between gap-1 flex-wrap">
           <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-sm sm:text-lg md:text-xl font-black text-[#1b072a]">
+            <span className="text-sm sm:text-lg md:text-xl font-black text-gray-950">
               ₹{product.price}
             </span>
             {product.originalPrice > product.price && (
               <>
-                <span className="text-xs sm:text-sm font-semibold text-gray-400 line-through">
+                <span className="text-xs sm:text-sm font-bold text-gray-600 line-through">
                   ₹{product.originalPrice}
                 </span>
-                <span className="text-[8px] sm:text-[9px] font-extrabold text-emerald-700 bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-300">
+                <span className="text-[8px] sm:text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">
                   Save ₹{product.originalPrice - product.price}
                 </span>
               </>
             )}
-            <span className="text-[10px] sm:text-xs font-semibold text-gray-500">
+            <span className="text-[10px] sm:text-xs font-bold text-gray-700">
               / {product.packTitle || `${product.pieces || 4} pcs`}
             </span>
           </div>
 
-          <span className="text-[8px] sm:text-[10px] font-bold text-[#b37400] bg-[#fdb927]/15 px-1.5 py-0.5 rounded border border-[#fdb927]/30 hidden sm:inline-block">
+          <span className="text-[8px] sm:text-[10px] font-bold text-[#8c5700] bg-[#fdb927]/20 px-1.5 py-0.5 rounded border border-[#fdb927]/40 hidden sm:inline-block">
             🪔 Inclusive All
           </span>
         </div>

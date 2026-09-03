@@ -26,14 +26,38 @@ const setCachedConfig = (key, data) => {
 
 const initialHeroConfig = {
   badgeText: "✨ Pure Terracotta • Handcrafted with Gold Scalloped Rim",
+  showBadge: true,
   titleLine1: "Celebrate Joy.",
   titleHighlight: "Gift with Purpose.",
+  showTitle: true,
   subtitle: "Discover beautiful handmade festive products, thoughtfully created by talented children with physical challenges. Every purchase celebrates their creativity and helps create meaningful opportunities.",
+  showSubtitle: true,
   bgImage: "",
   backgroundImage: "",
   bgImages: [],
   offerTag: "Special Pack: ₹120 for Pack of 4",
   showPricePill: true
+};
+
+const initialHomeSectionsConfig = {
+  showHero: true,
+  showShop: true,
+  showMission: true,
+  showPromo: true,
+  showFeatures: true,
+  showReviews: true,
+  showCorporateCta: true
+};
+
+const initialNavbarConfig = {
+  showHome: true,
+  showShop: true,
+  showMission: true,
+  showStory: true,
+  showBulk: true,
+  showContact: true,
+  showCartBtn: true,
+  showOrderNowBtn: true
 };
 
 const initialShopConfig = {
@@ -120,6 +144,8 @@ export function SiteConfigProvider({ children }) {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
+  const [homeSectionsConfig, setHomeSectionsConfig] = useState(() => getCachedConfig('home_sections', initialHomeSectionsConfig));
+  const [navbarConfig, setNavbarConfig] = useState(() => getCachedConfig('navbar', initialNavbarConfig));
   const [heroConfig, setHeroConfig] = useState(() => getCachedConfig('hero', initialHeroConfig));
   const [shopConfig, setShopConfig] = useState(() => getCachedConfig('shop', initialShopConfig));
   const [promoConfig, setPromoConfig] = useState(() => getCachedConfig('promo', initialPromoConfig));
@@ -187,6 +213,52 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
+  // 2b. Home Sections Visibility Listener
+  useEffect(() => {
+    const homeSectionsRef = getTenantDoc("settings", "home_sections_config");
+    const unsubscribe = onSnapshot(
+      homeSectionsRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const updated = {
+            ...initialHomeSectionsConfig,
+            ...data
+          };
+          setCachedConfig('home_sections', updated);
+          setHomeSectionsConfig(updated);
+        } else {
+          setHomeSectionsConfig(initialHomeSectionsConfig);
+        }
+      },
+      (err) => console.warn("Tenant Home Sections config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // 2c. Navbar & Navigation Visibility Listener
+  useEffect(() => {
+    const navbarRef = getTenantDoc("settings", "navbar_config");
+    const unsubscribe = onSnapshot(
+      navbarRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const updated = {
+            ...initialNavbarConfig,
+            ...data
+          };
+          setCachedConfig('navbar', updated);
+          setNavbarConfig(updated);
+        } else {
+          setNavbarConfig(initialNavbarConfig);
+        }
+      },
+      (err) => console.warn("Tenant Navbar config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
   // 3. Hero Section Listener
   useEffect(() => {
     const heroRef = getTenantDoc("settings", "hero_config");
@@ -207,7 +279,11 @@ export function SiteConfigProvider({ children }) {
             backgroundImage: activeBg,
             bgImages: activeBgImages,
             titleLine1: data.titleLine1 || "Celebrate Joy.",
-            titleHighlight: data.titleHighlight || "Gift with Purpose."
+            titleHighlight: data.titleHighlight || "Gift with Purpose.",
+            showBadge: data.showBadge !== undefined ? data.showBadge : true,
+            showTitle: data.showTitle !== undefined ? data.showTitle : true,
+            showSubtitle: data.showSubtitle !== undefined ? data.showSubtitle : true,
+            showPricePill: data.showPricePill !== undefined ? data.showPricePill : true
           };
           setCachedConfig('hero', updated);
           setHeroConfig(updated);
@@ -460,6 +536,8 @@ export function SiteConfigProvider({ children }) {
         products,
         reviews,
         reviewsLoading,
+        homeSectionsConfig,
+        navbarConfig,
         heroConfig,
         shopConfig,
         promoConfig,

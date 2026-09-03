@@ -3,7 +3,7 @@ import { Sparkles, ShieldCheck, MapPin, Lock, FileText, Truck, HeartHandshake } 
 import { useSiteConfig } from '../context/SiteConfigContext';
 
 export default function Footer({ onOpenLegal, onNavigate }) {
-  const { footerConfig, whatsappConfig } = useSiteConfig();
+  const { footerConfig, whatsappConfig, navbarConfig } = useSiteConfig();
 
   const cleanPhone = (whatsappConfig.phoneNumber || "9135313565").replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive Clay Diya Sets. Could you please share product availability & delivery details? Thank you!")}`;
@@ -14,6 +14,13 @@ export default function Footer({ onOpenLegal, onNavigate }) {
       onNavigate(pageId);
     }
   };
+
+  const showHome = navbarConfig?.showHome !== false;
+  const showShop = navbarConfig?.showShop !== false;
+  const showMission = navbarConfig?.showMission !== false;
+  const showStory = navbarConfig?.showStory !== false;
+  const showBulk = navbarConfig?.showBulk !== false;
+  const showContact = navbarConfig?.showContact !== false;
 
   return (
     <footer id="contact" className="bg-gradient-to-b from-[#180528] via-[#120220] to-[#0a0112] text-white border-t-2 border-[#fdb927]/30 pt-8 sm:pt-10 pb-5 sm:pb-6 relative overflow-hidden font-inter w-full shadow-2xl">
@@ -51,26 +58,34 @@ export default function Footer({ onOpenLegal, onNavigate }) {
               Explore Pages
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-white/80">
-              <li>
-                <button onClick={(e) => handleLink(e, 'home')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Home Page
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'shop')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Handcrafted Diya Shop
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'mission')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Our Social Mission (CSR)
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'story')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> The Seasonals Story
-                </button>
-              </li>
+              {showHome && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'home')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Home Page
+                  </button>
+                </li>
+              )}
+              {showShop && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'shop')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Handcrafted Diya Shop
+                  </button>
+                </li>
+              )}
+              {showMission && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'mission')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Our Social Mission (CSR)
+                  </button>
+                </li>
+              )}
+              {showStory && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'story')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> The Seasonals Story
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -80,26 +95,34 @@ export default function Footer({ onOpenLegal, onNavigate }) {
               Services & Gifting
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-white/80">
-              <li>
-                <button onClick={(e) => handleLink(e, 'bulk-gifting')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Bulk & Corporate Gifting
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'contact')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Contact & Support Desk
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'bulk-gifting')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Custom Color Inquiries
-                </button>
-              </li>
-              <li>
-                <button onClick={(e) => handleLink(e, 'shop')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
-                  <span className="text-[#fdb927] text-xs font-bold">›</span> Value Combos & Sets
-                </button>
-              </li>
+              {showBulk && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'bulk-gifting')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Bulk & Corporate Gifting
+                  </button>
+                </li>
+              )}
+              {showContact && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'contact')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Contact & Support Desk
+                  </button>
+                </li>
+              )}
+              {showBulk && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'bulk-gifting')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Custom Color Inquiries
+                  </button>
+                </li>
+              )}
+              {showShop && (
+                <li>
+                  <button onClick={(e) => handleLink(e, 'shop')} className="hover:text-[#fdb927] transition-colors flex items-center gap-1.5 cursor-pointer text-left">
+                    <span className="text-[#fdb927] text-xs font-bold">›</span> Value Combos & Sets
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

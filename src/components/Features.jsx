@@ -43,7 +43,7 @@ export default function Features() {
             </span>
             <span className="h-[1px] w-8 sm:w-16 bg-[#fdb927]/60"></span>
           </div>
-          <h2 className="font-playfair text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="font-playfair text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-950 tracking-tight">
             Why Choose Our Handcrafted Creations?
           </h2>
         </div>
@@ -69,18 +69,18 @@ export default function Features() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-playfair font-bold text-xs sm:text-base text-gray-900 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
+                  <h3 className="font-playfair font-bold text-xs sm:text-base text-gray-950 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
                     {badge.title}
                   </h3>
 
                   {/* Subtitle */}
-                  <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-gray-800 leading-relaxed font-medium">
                     {badge.subtitle}
                   </p>
                 </div>
 
                 {/* Bottom Verified Tag */}
-                <div className="pt-2 mt-2 border-t border-gray-100 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-700">
+                <div className="pt-2 mt-2 border-t border-gray-100 flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-800">
                   <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600" />
                   <span>Verified Festive Quality</span>
                 </div>

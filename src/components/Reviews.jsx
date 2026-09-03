@@ -143,7 +143,7 @@ export default function Reviews() {
             <span className="h-[1.5px] w-10 sm:w-16 bg-gradient-to-l from-transparent to-[#fdb927]"></span>
           </div>
 
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3.5">
+          <p className="text-xs sm:text-sm text-gray-900 leading-relaxed mb-3.5 font-medium">
             Hear from families across India who celebrated their Diwali with our authentic handcrafted clay diyas.
           </p>
 
@@ -225,34 +225,34 @@ export default function Reviews() {
                             ))}
                           </div>
 
-                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">
                             <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                             <span>{rev.tag || 'Verified'}</span>
                           </span>
                         </div>
 
                         {/* Review Content */}
-                        <p className="text-xs text-gray-700 leading-relaxed line-clamp-4 mb-3">
+                        <p className="text-xs text-gray-950 leading-relaxed font-medium line-clamp-4 mb-3">
                           "{rev.review}"
                         </p>
                       </div>
 
                       {/* Author Tag */}
                       <div className="pt-2.5 border-t border-gray-100 flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-full ${rev.avatarBg || 'bg-amber-100 text-amber-800'} flex items-center justify-center font-black text-xs flex-shrink-0 shadow-inner`}>
+                        <div className={`w-8 h-8 rounded-full ${rev.avatarBg || 'bg-amber-100 text-amber-900'} flex items-center justify-center font-black text-xs flex-shrink-0 shadow-inner`}>
                           {(rev.name || 'C').charAt(0).toUpperCase()}
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="font-playfair font-bold text-xs text-gray-900 truncate">
+                          <div className="font-playfair font-bold text-xs text-gray-950 truncate">
                             {rev.name}
                           </div>
-                          <div className="text-[10px] text-gray-500 flex items-center gap-1 truncate">
+                          <div className="text-[10px] text-gray-800 font-semibold flex items-center gap-1 truncate">
                             <span>{rev.city || 'India'}</span>
                             {rev.product && (
                               <>
                                 <span>•</span>
-                                <span className="text-[#b37400] font-medium truncate">{rev.product}</span>
+                                <span className="text-[#8c5700] font-bold truncate">{rev.product}</span>
                               </>
                             )}
                           </div>
@@ -328,34 +328,34 @@ export default function Reviews() {
                           ))}
                         </div>
 
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           <span>{rev.tag || 'Verified Buyer'}</span>
                         </span>
                       </div>
 
                       {/* Review Text */}
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed mb-4">
+                      <p className="text-xs sm:text-sm text-gray-950 leading-relaxed font-medium mb-4">
                         "{rev.review}"
                       </p>
                     </div>
 
                     {/* Author & Product Info */}
                     <div className="pt-3 border-t border-gray-100 flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full ${rev.avatarBg || 'bg-amber-100 text-amber-800'} flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-inner`}>
+                      <div className={`w-9 h-9 rounded-full ${rev.avatarBg || 'bg-amber-100 text-amber-900'} flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-inner`}>
                         {(rev.name || 'C').charAt(0).toUpperCase()}
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="font-playfair font-bold text-xs sm:text-sm text-gray-900 truncate">
+                        <div className="font-playfair font-bold text-xs sm:text-sm text-gray-950 truncate">
                           {rev.name}
                         </div>
-                        <div className="text-[10px] text-gray-500 flex items-center gap-1">
+                        <div className="text-[10px] text-gray-800 font-semibold flex items-center gap-1">
                           <span>{rev.city || 'India'}</span>
                           {rev.product && (
                             <>
                               <span>•</span>
-                              <span className="text-[#b37400] font-medium truncate">{rev.product}</span>
+                              <span className="text-[#8c5700] font-bold truncate">{rev.product}</span>
                             </>
                           )}
                         </div>
