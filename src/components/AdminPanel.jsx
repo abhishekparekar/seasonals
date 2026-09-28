@@ -3901,6 +3901,32 @@ export default function AdminPanel({ onBackToHome }) {
                 />
               </div>
 
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">
+                  Instagram Profile URL
+                </label>
+                <input
+                  type="url"
+                  value={footerForm.instagramUrl || ''}
+                  onChange={(e) => setFooterForm({ ...footerForm, instagramUrl: e.target.value })}
+                  placeholder="https://www.instagram.com/seasonals_india"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-white/80 block mb-1">
+                  YouTube Channel URL
+                </label>
+                <input
+                  type="url"
+                  value={footerForm.youtubeUrl || ''}
+                  onChange={(e) => setFooterForm({ ...footerForm, youtubeUrl: e.target.value })}
+                  placeholder="https://www.youtube.com/@SeasonalsIndia"
+                  className="w-full px-3 py-2.5 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
+                />
+              </div>
+
               <div className="pt-3 border-t border-white/10 flex justify-end">
                 <button
                   type="submit"

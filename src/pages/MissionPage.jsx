@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { useCart } from '../context/CartContext';
-import BannerBackground from '../components/BannerBackground';
-import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, Award, Users, Leaf, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, Award, Users, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function MissionPage({ onNavigate }) {
   const { products, missionConfig } = useSiteConfig();
   const { setQuickViewProduct } = useCart();
   const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
-
-  const missionImages = Array.isArray(missionConfig?.bgImages) && missionConfig.bgImages.length > 0
-    ? missionConfig.bgImages
-    : (missionConfig?.bgImage ? [missionConfig.bgImage] : []);
 
   // Multi-image showcase array from admin
   const rawShowcase = Array.isArray(missionConfig?.showcaseImages) && missionConfig.showcaseImages.length > 0
@@ -36,12 +31,6 @@ export default function MissionPage({ onNavigate }) {
   const nextShowcase = () => {
     setCurrentShowcaseIdx((prev) => (prev + 1) % showcaseImages.length);
   };
-
-  const badgeText = missionConfig?.badgeText || "Our Mission & Purpose";
-  const title = missionConfig?.title || "More Than a Product. A Story of Possibility.";
-  const leadText = missionConfig?.leadText || "Behind every handmade creation is a child with imagination, patience and talent.";
-  const believeText = missionConfig?.believeText || "We believe physical challenges should never limit a child's opportunity to create, learn and contribute.";
-  const descText = missionConfig?.descText || "Our products are made with care by children with physical challenges, giving them a platform to express their creativity, develop skills and experience the pride of seeing their work become part of someone's celebration.";
 
   const handleSupportOrder = () => {
     if (products && products.length > 0) {
@@ -90,29 +79,7 @@ export default function MissionPage({ onNavigate }) {
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
 
-      {/* 1. Page Header matching Hero Section Size */}
-      <section className="relative flex items-center justify-center text-white py-14 sm:py-20 md:py-24 overflow-hidden font-inter transition-all duration-300 min-h-[360px] sm:min-h-[440px] border-b-2 border-[#fdb927]/40 shadow-lg">
-        <BannerBackground images={missionImages} />
-
-        <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center bg-[#1b072a]/85 backdrop-blur-md border border-[#fdb927]/40 px-4 py-1.5 rounded-full mb-3 sm:mb-4 shadow-lg text-xs sm:text-sm font-semibold text-[#fdb927] tracking-wide gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#fdb927]" />
-              <span>{badgeText}</span>
-            </div>
-
-            <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">
-              {title}
-            </h1>
-
-            <p className="text-white text-xs sm:text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-semibold drop-shadow-[0_3px_12px_rgba(0,0,0,1)] [text-shadow:_0_1px_8px_rgba(0,0,0,1),_0_2px_4px_rgba(0,0,0,1)]">
-              {leadText || descText || believeText}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Breadcrumb Strip (Below Header Banner) */}
+      {/* Breadcrumb Strip */}
       <div className="bg-[#FAF7F2] border-b border-[#fdb927]/25 py-2.5 px-3.5 sm:px-6 lg:px-8">
         <div className="w-full flex items-center gap-2 text-xs font-bold">
           <button
@@ -126,44 +93,8 @@ export default function MissionPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* 2. Impact Statistics Counters */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {activeImpactStats.map((stat, idx) => {
-            const IconComp = defaultStatIcons[idx % defaultStatIcons.length];
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white rounded-2xl p-3 sm:p-5 border-2 border-[#fdb927]/40 shadow-lg hover:shadow-xl hover:border-[#fdb927] transition-all flex flex-col justify-between"
-              >
-                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                  <span className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-[#1b072a]">
-                    {stat.number}
-                  </span>
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center">
-                    <IconComp className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-black text-gray-900 mb-0.5 sm:mb-1">
-                    {stat.label}
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-gray-500 leading-snug hidden sm:block">
-                    {stat.desc}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 3. Hero Visual Image Banner / Multi-Image Showcase Carousel */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
+      {/* 1. Hero Visual Image Banner / Multi-Image Showcase Carousel */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="relative bg-[#1b072a] rounded-2xl sm:rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden min-h-[260px] sm:min-h-[420px] md:min-h-[520px] max-h-[580px] flex items-center justify-center">
           {showcaseImages.length > 0 ? (
             <>
@@ -223,6 +154,42 @@ export default function MissionPage({ onNavigate }) {
               )}
             </>
           ) : null}
+        </div>
+      </section>
+
+      {/* 2. Impact Statistics Counters */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-20">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          {activeImpactStats.map((stat, idx) => {
+            const IconComp = defaultStatIcons[idx % defaultStatIcons.length];
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="bg-white rounded-2xl p-3 sm:p-5 border-2 border-[#fdb927]/40 shadow-lg hover:shadow-xl hover:border-[#fdb927] transition-all flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                  <span className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-[#1b072a]">
+                    {stat.number}
+                  </span>
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center">
+                    <IconComp className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-gray-900 mb-0.5 sm:mb-1">
+                    {stat.label}
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] text-gray-500 leading-snug hidden sm:block">
+                    {stat.desc}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 

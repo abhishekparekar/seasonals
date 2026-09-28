@@ -130,7 +130,9 @@ const initialInquiryConfig = {
 
 const initialFooterConfig = {
   brandBio: "Thoughtfully handmade festive products that celebrate creativity, purpose and the incredible talent of children with physical challenges.",
-  supportPhone: "+91 91353 13565"
+  supportPhone: "+91 91353 13565",
+  instagramUrl: "https://www.instagram.com/seasonals_india?utm_source=qr&stkn=eTZxbjBybGFmMG9o",
+  youtubeUrl: "https://www.youtube.com/@SeasonalsIndia"
 };
 
 const initialWhatsappConfig = {

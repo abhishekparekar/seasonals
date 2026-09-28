@@ -23,7 +23,7 @@ export default function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(whatsappConfig.defaultMessage || "Hello Seasonals! 🪔 I have an inquiry regarding your Handcrafted Festive Clay Diya Sets. Could you please share product details, pricing, and bulk delivery options? Thank you!")}`;
 
   return (
-    <div className="fixed bottom-10 sm:bottom-12 right-3.5 sm:right-6 z-40 flex flex-col items-end gap-3 pointer-events-auto font-inter">
+    <div className="fixed bottom-4 sm:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end gap-2 sm:gap-2.5 pointer-events-auto font-inter">
       {/* Scroll to Top Button */}
       <AnimatePresence>
         {showScrollTop && (
@@ -33,9 +33,9 @@ export default function WhatsAppButton() {
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             onClick={scrollToTop}
             aria-label="Scroll back to top"
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1b072a] text-[#fdb927] border border-[#fdb927]/40 shadow-lg hover:bg-[#fdb927] hover:text-[#1b072a] flex items-center justify-center transition-all duration-300 group"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#1b072a] text-[#fdb927] border border-[#fdb927]/40 shadow-lg hover:bg-[#fdb927] hover:text-[#1b072a] flex items-center justify-center transition-all duration-300 group"
           >
-            <ArrowUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:-translate-y-0.5 transition-transform" />
           </motion.button>
         )}
       </AnimatePresence>
