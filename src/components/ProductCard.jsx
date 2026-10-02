@@ -12,10 +12,10 @@ export default function ProductCard({ product }) {
   };
 
   const productImages = Array.isArray(product.images) && product.images.length > 0
-    ? product.images
+    ? product.images.filter(Boolean)
     : (product.image ? [product.image] : []);
 
-  const mainImage = productImages[0] || product.image || '/images/logo3.png';
+  const mainImage = productImages[0] || product.image || '';
 
   return (
     <motion.div
@@ -32,24 +32,28 @@ export default function ProductCard({ product }) {
 
       <div>
         {/* Top Product Image Container with Clean Aspect Ratio */}
-        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] mb-2 sm:mb-3 border border-gray-100/90 shadow-inner">
-          <img
-            src={mainImage}
-            alt={product.name}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-          />
+        <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden bg-[#FAF7F2] mb-2 sm:mb-3 border border-gray-100/90 shadow-inner flex items-center justify-center">
+          {mainImage ? (
+            <img
+              src={mainImage}
+              alt={product.name}
+              loading="lazy"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-[#1b072a] p-4 text-center">
+              <span className="text-3xl mb-1">🪔</span>
+              <span className="text-[11px] font-bold text-gray-500 font-playfair line-clamp-2">
+                {product.name}
+              </span>
+            </div>
+          )}
 
           {/* Top-Left Festive Badge */}
-          {product.badge ? (
+          {product.badge && (
             <span className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-[#1b072a]/90 backdrop-blur-md text-[#fdb927] text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-sm border border-[#fdb927]/40 flex items-center gap-1">
               <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#fdb927]" />
               <span className="line-clamp-1">{product.badge}</span>
-            </span>
-          ) : (
-            <span className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 bg-[#1b072a]/90 backdrop-blur-md text-[#fdb927] text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-sm border border-[#fdb927]/40 flex items-center gap-1">
-              <span>✨</span>
-              <span>Handmade</span>
             </span>
           )}
 
@@ -84,9 +88,18 @@ export default function ProductCard({ product }) {
 
         {/* Product Info Section */}
         <div className="space-y-1 sm:space-y-1.5">
-          {/* Pack Quantity Pill */}
-          <div className="inline-flex items-center gap-1 bg-[#fdb927]/15 border border-[#fdb927]/30 text-[#1b072a] text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-md">
-            <span>{product.packTitle || `Pack of ${product.pieces || 4} Pcs`}</span>
+          {/* Category & Pack Quantity Pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {product.category && (
+              <span className="inline-flex items-center gap-1 bg-[#1b072a]/5 text-[#1b072a] text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-gray-200">
+                {product.category === 'lantern' || product.category === 'lanterns' ? '🏮 Lantern' : product.category === 'rangoli' ? '🌸 Rangoli' : '🪔 Diya'}
+              </span>
+            )}
+            {(product.packTitle || product.pieces) && (
+              <div className="inline-flex items-center gap-1 bg-[#fdb927]/15 border border-[#fdb927]/30 text-[#1b072a] text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-md">
+                <span>{product.packTitle || `Pack of ${product.pieces} Pcs`}</span>
+              </div>
+            )}
           </div>
 
           {/* Product Title */}

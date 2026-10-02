@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   db, 
   getTenantCollection,
@@ -18,11 +18,11 @@ import {
 import { 
   collection, 
   onSnapshot, 
+  getDocs,
   query, 
   orderBy 
 } from 'firebase/firestore';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { products as defaultProducts } from '../data/products';
 import MultiImageManager from './MultiImageManager';
 import { 
   CheckCircle2, 
@@ -131,17 +131,18 @@ export default function AdminPanel({ onBackToHome }) {
   const [editingProduct, setEditingProduct] = useState(null);
   const [imageInputMode, setImageInputMode] = useState('upload'); // 'upload' | 'url'
   const [isCompressingImg, setIsCompressingImg] = useState(false);
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [productForm, setProductForm] = useState({
     name: '',
-    price: 120,
-    originalPrice: 160,
+    price: '',
+    originalPrice: '',
     pieces: 4,
-    category: 'diyas',
-    categoryLabel: 'Best Seller',
-    badge: '🔥 Best Seller',
-    image: '/images/diya-pack-of-4.jpg',
-    images: ['/images/diya-pack-of-4.jpg'],
-    description: '100% handmade terracotta clay with metallic golden rim & embossed floral rosette.',
+    category: 'diya',
+    categoryLabel: '',
+    badge: '',
+    image: '',
+    images: [],
+    description: '',
     inStock: true
   });
 
@@ -379,10 +380,14 @@ export default function AdminPanel({ onBackToHome }) {
     const unsubscribe = onSnapshot(
       productsRef,
       (snapshot) => {
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const list = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            ...data,
+            id: doc.id,
+            docId: doc.id
+          };
+        });
         setProductsList(list);
       },
       (error) => {
@@ -393,6 +398,30 @@ export default function AdminPanel({ onBackToHome }) {
 
     return () => unsubscribe();
   }, [isAuthenticated]);
+
+  // Product Category Counts for Admin Filtering
+  const adminCategoryCounts = useMemo(() => {
+    const counts = { all: productsList.length, diya: 0, lantern: 0, rangoli: 0 };
+    productsList.forEach((p) => {
+      const cat = (p.category || 'diya').toLowerCase();
+      if (cat === 'diya' || cat === 'diyas') counts.diya++;
+      else if (cat === 'lantern' || cat === 'lanterns') counts.lantern++;
+      else if (cat === 'rangoli') counts.rangoli++;
+    });
+    return counts;
+  }, [productsList]);
+
+  // Products filtered by selected category in Admin
+  const displayedAdminProducts = useMemo(() => {
+    if (productCategoryFilter === 'all') return productsList;
+    return productsList.filter((p) => {
+      const cat = (p.category || 'diya').toLowerCase();
+      if (productCategoryFilter === 'diya') return cat === 'diya' || cat === 'diyas';
+      if (productCategoryFilter === 'lantern') return cat === 'lantern' || cat === 'lanterns';
+      if (productCategoryFilter === 'rangoli') return cat === 'rangoli';
+      return cat === productCategoryFilter;
+    });
+  }, [productsList, productCategoryFilter]);
 
   // Real-time Firestore Inquiries Listener under tenant 'seasonal-website'
   useEffect(() => {
@@ -607,19 +636,36 @@ export default function AdminPanel({ onBackToHome }) {
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!productForm.name.trim()) {
-      alert("Please enter product name");
+      showToast("Please enter product name", "error");
       return;
     }
 
-    const sellingPrice = Number(productForm.price) || 0;
+    const sellingPrice = Number(productForm.price);
+    if (!sellingPrice || sellingPrice <= 0) {
+      showToast("Please enter a valid selling price (> 0)", "error");
+      return;
+    }
+
     const regularMrp = productForm.originalPrice !== '' && productForm.originalPrice !== null && productForm.originalPrice !== undefined
       ? Number(productForm.originalPrice)
-      : 0;
+      : null;
+
+    const activeImages = Array.isArray(productForm.images) && productForm.images.length > 0
+      ? productForm.images.filter(Boolean)
+      : (productForm.image ? [productForm.image] : []);
 
     const payload = {
-      ...productForm,
+      name: productForm.name.trim(),
       price: sellingPrice,
-      originalPrice: regularMrp > 0 ? regularMrp : null
+      originalPrice: regularMrp && regularMrp > 0 ? regularMrp : null,
+      pieces: Number(productForm.pieces) || 4,
+      category: productForm.category || 'diya',
+      categoryLabel: (productForm.categoryLabel || '').trim(),
+      badge: (productForm.badge || '').trim(),
+      image: activeImages[0] || '',
+      images: activeImages,
+      description: (productForm.description || '').trim(),
+      inStock: productForm.inStock !== false
     };
 
     try {
@@ -634,18 +680,18 @@ export default function AdminPanel({ onBackToHome }) {
         showToast("New product added to store catalog!");
         setIsAddingProduct(false);
       }
-      // Reset form
+      // Reset form to clean empty state
       setProductForm({
         name: '',
-        price: 120,
-        originalPrice: 160,
+        price: '',
+        originalPrice: '',
         pieces: 4,
-        category: 'diyas',
-        categoryLabel: 'Best Seller',
-        badge: '🔥 Best Seller',
-        image: '/images/diya-pack-of-4.jpg',
-        images: ['/images/diya-pack-of-4.jpg'],
-        description: '100% handmade terracotta clay with metallic golden rim & embossed floral rosette.',
+        category: 'diya',
+        categoryLabel: '',
+        badge: '',
+        image: '',
+        images: [],
+        description: '',
         inStock: true
       });
     } catch (err) {
@@ -657,18 +703,18 @@ export default function AdminPanel({ onBackToHome }) {
   const handleEditProductClick = (prod) => {
     setEditingProduct(prod);
     const prodImages = Array.isArray(prod.images) && prod.images.length > 0
-      ? prod.images
-      : (prod.image ? [prod.image] : ['/images/diya-pack-of-4.jpg']);
+      ? prod.images.filter(Boolean)
+      : (prod.image ? [prod.image] : []);
 
     setProductForm({
       name: prod.name || '',
-      price: prod.price !== undefined ? prod.price : 120,
+      price: prod.price !== undefined && prod.price !== null ? prod.price : '',
       originalPrice: prod.originalPrice !== undefined && prod.originalPrice !== null ? prod.originalPrice : '',
       pieces: prod.pieces || 4,
-      category: prod.category || 'diyas',
-      categoryLabel: prod.categoryLabel || 'Best Seller',
-      badge: prod.badge || '🔥 Best Seller',
-      image: prod.image || prodImages[0] || '/images/diya-pack-of-4.jpg',
+      category: prod.category || 'diya',
+      categoryLabel: prod.categoryLabel || '',
+      badge: prod.badge || '',
+      image: prodImages[0] || prod.image || '',
       images: prodImages,
       description: prod.description || '',
       inStock: prod.inStock !== false
@@ -677,10 +723,14 @@ export default function AdminPanel({ onBackToHome }) {
   };
 
   const handleDeleteProduct = async (prod) => {
-    if (!window.confirm(`Delete product "${prod.name}"?`)) return;
+    const productName = prod.name || "this product";
+    if (!window.confirm(`Permanently delete "${productName}" from the website? This will remove it completely.`)) return;
     try {
-      await deleteProductFromFirestore(prod.id);
-      showToast("Product deleted from catalog.");
+      const targetId = prod.docId || prod.id;
+      // Immediately remove from UI list so admin sees instant feedback
+      setProductsList((prev) => prev.filter((p) => (p.docId || p.id) !== targetId && p.id !== prod.id));
+      await deleteProductFromFirestore(targetId);
+      showToast(`Product "${productName}" deleted completely from website.`);
     } catch (err) {
       console.error(err);
       showToast("Error deleting product.", "error");
@@ -696,17 +746,26 @@ export default function AdminPanel({ onBackToHome }) {
     }
   };
 
-  // Seed default products to Firestore
-  const handleSeedProducts = async () => {
-    if (!window.confirm("Seed all 12 initial handcrafted Diya products into Firestore?")) return;
+  // Permanently delete all products to allow starting completely fresh
+  const handleClearAllProducts = async () => {
+    if (productsList.length === 0) return;
+    if (!window.confirm(`Are you sure you want to permanently delete ALL ${productsList.length} products from the store? This will completely remove them from the website.`)) return;
+    if (!window.confirm("Please confirm again: this will wipe all products so you can start completely fresh. Proceed?")) return;
     try {
-      for (const p of defaultProducts) {
-        await addProductToFirestore(p);
+      const currentList = [...productsList];
+      setProductsList([]);
+      for (const prod of currentList) {
+        await deleteProductFromFirestore(prod.docId || prod.id);
       }
-      showToast("All default products seeded to Firestore successfully!");
+      // Also fetch and clean any remaining documents in products collection
+      const snap = await getDocs(getTenantCollection("products"));
+      for (const d of snap.docs) {
+        await deleteProductFromFirestore(d.id);
+      }
+      showToast("All products have been completely deleted from the website.");
     } catch (err) {
       console.error(err);
-      showToast("Error seeding products.", "error");
+      showToast("Error deleting products.", "error");
     }
   };
 
@@ -1821,17 +1880,36 @@ export default function AdminPanel({ onBackToHome }) {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleSeedProducts}
-                  className="bg-white/10 hover:bg-white/15 text-white font-semibold text-xs px-3 py-2 rounded-xl border border-white/15 transition-all"
-                  title="Import default handcrafted Diya catalogue to Firestore"
-                >
-                  Import 12 Default Sets
-                </button>
+                {productsList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearAllProducts}
+                    className="bg-red-500/15 hover:bg-red-500/25 text-red-300 hover:text-red-200 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/30 transition-all flex items-center gap-1.5"
+                    title="Delete all products from store catalog"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear All Products ({productsList.length})</span>
+                  </button>
+                )}
                 <button
                   onClick={() => {
+                    if (!isAddingProduct) {
+                      setProductForm({
+                        name: '',
+                        price: '',
+                        originalPrice: '',
+                        pieces: 4,
+                        category: 'diya',
+                        categoryLabel: '',
+                        badge: '',
+                        image: '',
+                        images: [],
+                        description: '',
+                        inStock: true
+                      });
+                      setEditingProduct(null);
+                    }
                     setIsAddingProduct(!isAddingProduct);
-                    setEditingProduct(null);
                   }}
                   className="bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow"
                 >
@@ -1874,7 +1952,7 @@ export default function AdminPanel({ onBackToHome }) {
                       required
                       value={productForm.name}
                       onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                      placeholder="Enter product name (e.g. Crimson Rose Handcrafted Floral Diya)"
+                      placeholder="Enter product name (e.g. Royal Turquoise Festive Diya Set)"
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                     />
                   </div>
@@ -1893,6 +1971,56 @@ export default function AdminPanel({ onBackToHome }) {
                     />
                   </div>
 
+                  {/* Product Category Selection */}
+                  <div className="sm:col-span-3 bg-black/40 border border-[#fdb927]/30 rounded-2xl p-3 sm:p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-[#fdb927] flex items-center gap-1.5">
+                        <span>Product Category *</span>
+                        <span className="text-[10px] text-white/50 font-normal">(Select whether this product is a Diya, Lantern, or Rangoli)</span>
+                      </label>
+                      <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
+                        Active: {productForm.category === 'lantern' || productForm.category === 'lanterns' ? '🏮 Lantern' : productForm.category === 'rangoli' ? '🌸 Rangoli' : '🪔 Diya'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {[
+                        { id: 'diya', label: '🪔 Diya / Diya Set', desc: 'Handcrafted Clay Diyas' },
+                        { id: 'lantern', label: '🏮 Lantern / Kandil', desc: 'Festive Lanterns' },
+                        { id: 'rangoli', label: '🌸 Rangoli Product', desc: 'Rangoli Sets & Décor' }
+                      ].map((cat) => {
+                        const isSelected = productForm.category === cat.id || (cat.id === 'diya' && productForm.category === 'diyas') || (cat.id === 'lantern' && productForm.category === 'lanterns');
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setProductForm({ ...productForm, category: cat.id })}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                              isSelected
+                                ? 'bg-[#fdb927] text-[#1b072a] border-[#fdb927] shadow font-black scale-102'
+                                : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
+                            }`}
+                          >
+                            <span>{cat.label}</span>
+                          </button>
+                        );
+                      })}
+
+                      {/* Custom Category input */}
+                      <input
+                        type="text"
+                        value={!['diya', 'diyas', 'lantern', 'lanterns', 'rangoli'].includes(productForm.category) ? productForm.category : ''}
+                        onChange={(e) => setProductForm({ ...productForm, category: e.target.value.toLowerCase().trim() })}
+                        placeholder="+ Custom Category..."
+                        className={`px-3 py-1.5 bg-black/60 border rounded-xl text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#fdb927] ${
+                          !['diya', 'diyas', 'lantern', 'lanterns', 'rangoli'].includes(productForm.category) && productForm.category
+                            ? 'border-[#fdb927] text-[#fdb927] font-bold'
+                            : 'border-white/20'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
                   {/* Festive Tag / Badge */}
                   <div className="sm:col-span-1">
                     <label className="text-xs font-bold text-white/80 block mb-1">
@@ -1902,7 +2030,7 @@ export default function AdminPanel({ onBackToHome }) {
                       type="text"
                       value={productForm.badge}
                       onChange={(e) => setProductForm({ ...productForm, badge: e.target.value })}
-                      placeholder="🔥 Best Seller"
+                      placeholder="e.g. 🔥 Best Seller, ✨ Trending (Optional)"
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927]"
                     />
                   </div>
@@ -2030,8 +2158,8 @@ export default function AdminPanel({ onBackToHome }) {
                             key={percent}
                             type="button"
                             onClick={() => {
-                              const mrp = Number(productForm.originalPrice) || Number(productForm.price) || 120;
-                              // If no original price is set yet, assume current price was the target selling price or MRP
+                              const mrp = Number(productForm.originalPrice) || Number(productForm.price) || 0;
+                              if (!mrp) return;
                               const baseMrp = Number(productForm.originalPrice) > 0 ? Number(productForm.originalPrice) : Math.round(mrp / (1 - percent / 100));
                               const newSellingPrice = Math.round(baseMrp * (1 - percent / 100));
                               setProductForm({
@@ -2045,20 +2173,6 @@ export default function AdminPanel({ onBackToHome }) {
                             {percent}% OFF
                           </button>
                         ))}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            // Set nice standard Diwali festive discount: MRP 160 -> Selling 120 (25% OFF)
-                            setProductForm({
-                              ...productForm,
-                              originalPrice: 160,
-                              price: 120
-                            });
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-[#fdb927]/20 hover:bg-[#fdb927] text-[#fdb927] hover:text-[#1b072a] text-xs font-extrabold border border-[#fdb927]/50 transition-all ml-auto"
-                        >
-                          ✨ Default: ₹160 → ₹120 (25% OFF)
-                        </button>
                       </div>
                     </div>
 
@@ -2158,7 +2272,7 @@ export default function AdminPanel({ onBackToHome }) {
                       rows={2}
                       value={productForm.description}
                       onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                      placeholder="100% handmade terracotta clay with metallic golden rim & embossed floral rosette."
+                      placeholder="Enter product description, handcrafted materials, special features..."
                       className="w-full px-3 py-2 bg-black/40 border border-[#fdb927]/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-[#fdb927] resize-none"
                     />
                   </div>
@@ -2186,92 +2300,178 @@ export default function AdminPanel({ onBackToHome }) {
               </motion.div>
             )}
 
+            {/* Category Filter Tabs in Admin Products List */}
+            {productsList.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                {[
+                  { id: 'all', label: 'All Products', icon: '✨', count: adminCategoryCounts.all },
+                  { id: 'diya', label: 'Diyas', icon: '🪔', count: adminCategoryCounts.diya },
+                  { id: 'lantern', label: 'Lanterns', icon: '🏮', count: adminCategoryCounts.lantern },
+                  { id: 'rangoli', label: 'Rangoli', icon: '🌸', count: adminCategoryCounts.rangoli },
+                ].map((cat) => {
+                  const isSelected = productCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setProductCategoryFilter(cat.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#fdb927] text-[#1b072a] font-bold shadow'
+                          : 'bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.label} ({cat.count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Product Catalog Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {productsList.map((prod) => (
-                <div
-                  key={prod.id}
-                  className="bg-[#1b072a] rounded-2xl p-4 border border-[#fdb927]/20 shadow-md flex flex-col justify-between group hover:border-[#fdb927]/50 transition-all"
-                >
-                  <div>
-                    {/* Image Preview & Badge */}
-                    <div className="relative rounded-xl overflow-hidden mb-3 aspect-square bg-black/40 border border-white/5">
-                      <img
-                        src={prod.image || '/images/diya-pack-of-4.jpg'}
-                        alt={prod.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1b072a]/90 text-[#fdb927] border border-[#fdb927]/40">
-                        {prod.badge || 'Pack of 4'}
-                      </span>
-
-                      {/* Stock indicator badge */}
-                      <button
-                        onClick={() => handleToggleProductStock(prod)}
-                        className={`absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full shadow ${
-                          prod.inStock !== false ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
-                        }`}
-                        title="Click to toggle stock status"
-                      >
-                        {prod.inStock !== false ? 'In Stock' : 'Out of Stock'}
-                      </button>
-
-                      {/* Discount Tag on Image if available */}
-                      {prod.originalPrice > prod.price && (
-                        <span className="absolute bottom-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-amber-600 text-white shadow-md border border-white/20">
-                          {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
-                        </span>
-                      )}
-                    </div>
-
-                    <h4 className="font-playfair font-bold text-sm text-white line-clamp-1">
-                      {prod.name}
-                    </h4>
-                    <p className="text-[11px] text-white/60 line-clamp-2 mt-1">
-                      {prod.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+            {displayedAdminProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {displayedAdminProducts.map((prod) => (
+                  <div
+                    key={prod.id}
+                    className="bg-[#1b072a] rounded-2xl p-4 border border-[#fdb927]/20 shadow-md flex flex-col justify-between group hover:border-[#fdb927]/50 transition-all"
+                  >
                     <div>
-                      <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="font-bold text-sm text-[#fdb927]">₹{prod.price}</span>
+                      {/* Image Preview & Badge */}
+                      <div className="relative rounded-xl overflow-hidden mb-3 aspect-square bg-black/40 border border-white/5 flex items-center justify-center">
+                        {(prod.image || (prod.images && prod.images[0])) ? (
+                          <img
+                            src={prod.image || prod.images[0]}
+                            alt={prod.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-white/40 p-3 text-center bg-white/5">
+                            <Package className="w-8 h-8 text-[#fdb927]/60 mb-1" />
+                            <span className="text-[10px]">No Image Uploaded</span>
+                          </div>
+                        )}
+
+                        {/* Category Badge on Product Card */}
+                        <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1b072a]/90 text-[#fdb927] border border-[#fdb927]/40 flex items-center gap-1">
+                          {prod.category === 'lantern' || prod.category === 'lanterns' ? '🏮 Lantern' : prod.category === 'rangoli' ? '🌸 Rangoli' : '🪔 Diya'}
+                        </span>
+
+                        {prod.badge && (
+                          <span className="absolute bottom-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1b072a]/90 text-amber-300 border border-amber-300/40">
+                            {prod.badge}
+                          </span>
+                        )}
+
+                        {/* Stock indicator badge */}
+                        <button
+                          onClick={() => handleToggleProductStock(prod)}
+                          className={`absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full shadow ${
+                            prod.inStock !== false ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
+                          }`}
+                          title="Click to toggle stock status"
+                        >
+                          {prod.inStock !== false ? 'In Stock' : 'Out of Stock'}
+                        </button>
+
+                        {/* Discount Tag on Image if available */}
                         {prod.originalPrice > prod.price && (
-                          <>
-                            <span className="text-xs text-white/40 line-through">₹{prod.originalPrice}</span>
-                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                              {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
-                            </span>
-                          </>
+                          <span className="absolute bottom-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-amber-600 text-white shadow-md border border-white/20">
+                            {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
+                          </span>
                         )}
                       </div>
-                      {prod.originalPrice > prod.price && (
-                        <span className="text-[10px] text-emerald-400/80 font-medium block mt-0.5">
-                          Save ₹{prod.originalPrice - prod.price} / pack
-                        </span>
+
+                      <h4 className="font-playfair font-bold text-sm text-white line-clamp-1">
+                        {prod.name}
+                      </h4>
+                      {prod.description && (
+                        <p className="text-[11px] text-white/60 line-clamp-2 mt-1">
+                          {prod.description}
+                        </p>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => handleEditProductClick(prod)}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-[#fdb927] hover:text-[#1b072a] text-white transition-colors"
-                        title="Edit Product"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(prod)}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-red-600 text-white/60 hover:text-white transition-colors"
-                        title="Delete Product"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+                      <div>
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                          <span className="font-bold text-sm text-[#fdb927]">₹{prod.price}</span>
+                          {prod.originalPrice > prod.price && (
+                            <>
+                              <span className="text-xs text-white/40 line-through">₹{prod.originalPrice}</span>
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                {Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)}% OFF
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {prod.originalPrice > prod.price && (
+                          <span className="text-[10px] text-emerald-400/80 font-medium block mt-0.5">
+                            Save ₹{prod.originalPrice - prod.price} / pack
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleEditProductClick(prod)}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-[#fdb927] hover:text-[#1b072a] text-white transition-colors"
+                          title="Edit Product"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(prod)}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-red-600 text-white/60 hover:text-white transition-colors"
+                          title="Delete Product"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-[#1b072a] rounded-3xl p-8 sm:p-12 border border-[#fdb927]/30 text-center max-w-md mx-auto space-y-4 shadow-xl">
+                <div className="w-16 h-16 rounded-2xl bg-[#fdb927]/15 border border-[#fdb927]/30 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                  📦
                 </div>
-              ))}
-            </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white font-playfair">
+                    No Products in Catalogue
+                  </h3>
+                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                    Only products you add here will appear on the website. No demo or default products will be shown.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductForm({
+                      name: '',
+                      price: '',
+                      originalPrice: '',
+                      pieces: 4,
+                      category: 'diyas',
+                      categoryLabel: '',
+                      badge: '',
+                      image: '',
+                      images: [],
+                      description: '',
+                      inStock: true
+                    });
+                    setEditingProduct(null);
+                    setIsAddingProduct(true);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs inline-flex items-center gap-2 shadow-lg hover:scale-105 transition-all cursor-pointer"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Add First Product</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 

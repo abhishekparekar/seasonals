@@ -8,13 +8,39 @@ export default function ShopPage({ onNavigate }) {
   const { products, loading } = useSiteConfig();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categoryCounts = useMemo(() => {
+    const counts = { all: products?.length || 0, diya: 0, lantern: 0, rangoli: 0 };
+    if (!products) return counts;
+    products.forEach((p) => {
+      const cat = (p.category || 'diya').toLowerCase();
+      if (cat === 'diya' || cat === 'diyas') counts.diya++;
+      else if (cat === 'lantern' || cat === 'lanterns') counts.lantern++;
+      else if (cat === 'rangoli') counts.rangoli++;
+    });
+    return counts;
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     if (!products) return [];
 
-    if (!searchQuery.trim()) return products;
+    let list = products;
+
+    if (selectedCategory !== 'all') {
+      list = list.filter((p) => {
+        const cat = (p.category || 'diya').toLowerCase();
+        if (selectedCategory === 'diya') return cat === 'diya' || cat === 'diyas';
+        if (selectedCategory === 'lantern') return cat === 'lantern' || cat === 'lanterns';
+        if (selectedCategory === 'rangoli') return cat === 'rangoli';
+        return cat === selectedCategory;
+      });
+    }
+
+    if (!searchQuery.trim()) return list;
 
     const query = searchQuery.toLowerCase();
-    return products.filter((product) => {
+    return list.filter((product) => {
       const matchName = product.name?.toLowerCase().includes(query);
       const matchColor = product.colorName?.toLowerCase().includes(query);
       const matchDesc = product.description?.toLowerCase().includes(query);
@@ -22,7 +48,7 @@ export default function ShopPage({ onNavigate }) {
       const matchCategoryLabel = product.categoryLabel?.toLowerCase().includes(query);
       return matchName || matchColor || matchDesc || matchCategory || matchCategoryLabel;
     });
-  }, [products, searchQuery]);
+  }, [products, searchQuery, selectedCategory]);
 
   return (
     <div className="w-full font-inter bg-[#FFFDF9] min-h-screen pb-16">
@@ -64,16 +90,47 @@ export default function ShopPage({ onNavigate }) {
             )}
           </div>
 
-          {/* Right: 100% Pure Terracotta Tag */}
+          {/* Right: Category Count Pill */}
           <div className="hidden lg:inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1b072a] bg-[#fdb927]/15 border border-[#fdb927]/40 px-3 py-1 rounded-full whitespace-nowrap shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-[#b45309]" />
-            <span>100% Pure Terracotta Handcrafted Collection</span>
+            <span>Handcrafted Festive Collection ({products.length})</span>
           </div>
         </div>
       </section>
 
+      {/* Category Filter Tabs Bar */}
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-4 pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {[
+            { id: 'all', label: 'All Products', icon: '✨', count: categoryCounts.all },
+            { id: 'diya', label: 'Diyas', icon: '🪔', count: categoryCounts.diya },
+            { id: 'lantern', label: 'Lanterns', icon: '🏮', count: categoryCounts.lantern },
+            { id: 'rangoli', label: 'Rangoli', icon: '🌸', count: categoryCounts.rangoli },
+          ].map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                  isSelected
+                    ? 'bg-[#1b072a] text-[#fdb927] border-2 border-[#fdb927] scale-102 shadow-sm'
+                    : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-[#fdb927]/20 text-[#fdb927]' : 'bg-gray-100 text-gray-500'}`}>
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Product Catalog Grid */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6">
+      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-4">
 
 
 
@@ -91,21 +148,25 @@ export default function ShopPage({ onNavigate }) {
           </div>
         ) : (
           <div className="text-center py-16 bg-white rounded-3xl border border-[#fdb927]/30 max-w-lg mx-auto p-8 shadow-sm">
-            <span className="text-4xl mb-3 block">🔍</span>
+            <span className="text-4xl mb-3 block">{searchQuery ? '🔍' : '🪔'}</span>
             <h3 className="font-playfair text-lg sm:text-xl font-bold text-gray-900 mb-1.5">
-              No Matching Products Found
+              {searchQuery ? 'No Matching Products Found' : 'Festive Collection Coming Soon'}
             </h3>
             <p className="text-xs text-gray-600 mb-4 leading-relaxed">
-              We couldn't find any products matching "{searchQuery}". Try searching for another color or browse all products.
+              {searchQuery
+                ? `We couldn't find any products matching "${searchQuery}". Try searching for another keyword or browse all products.`
+                : 'Handcrafted products added by the store administrator will appear here.'}
             </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-              }}
-              className="px-5 py-2.5 bg-[#1b072a] text-[#fdb927] font-bold text-xs rounded-full shadow-md hover:bg-[#280a3e] transition-all cursor-pointer"
-            >
-              Show All Festive Products
-            </button>
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                }}
+                className="px-5 py-2.5 bg-[#1b072a] text-[#fdb927] font-bold text-xs rounded-full shadow-md hover:bg-[#280a3e] transition-all cursor-pointer"
+              >
+                Show All Festive Products
+              </button>
+            )}
           </div>
         )}
 

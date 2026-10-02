@@ -10,6 +10,7 @@ import {
   deleteDoc, 
   onSnapshot, 
   query, 
+  where,
   orderBy, 
   serverTimestamp,
   setDoc
@@ -182,8 +183,10 @@ export async function updateProductInFirestore(productId, updatedData) {
 }
 
 export async function deleteProductFromFirestore(productId) {
+  if (!productId) return { success: false };
   try {
-    const prodDocRef = getTenantDoc("products", productId);
+    const idStr = String(productId);
+    const prodDocRef = getTenantDoc("products", idStr);
     try {
       const snap = await getDoc(prodDocRef);
       if (snap.exists()) {
@@ -192,11 +195,42 @@ export async function deleteProductFromFirestore(productId) {
         for (const img of imgs) {
           await deleteImageFileFromStorage(img);
         }
+        await deleteDoc(prodDocRef);
       }
     } catch (fetchErr) {
-      console.warn("Product image cleanup note:", fetchErr);
+      console.warn("Product direct doc delete notice:", fetchErr);
     }
-    await deleteDoc(prodDocRef);
+
+    // Also delete any document in 'products' where field 'id' matches productId
+    // (This guarantees seeded products with legacy numeric/string 'id' properties are deleted)
+    try {
+      const productsRef = getTenantCollection("products");
+      
+      // Check numeric id match if productId is numeric
+      if (!isNaN(Number(productId))) {
+        const qNum = query(productsRef, where("id", "==", Number(productId)));
+        const snapNum = await getDocs(qNum);
+        for (const d of snapNum.docs) {
+          const dData = d.data();
+          const imgs = Array.isArray(dData.images) ? dData.images : (dData.image ? [dData.image] : []);
+          for (const img of imgs) await deleteImageFileFromStorage(img);
+          await deleteDoc(d.ref);
+        }
+      }
+
+      // Check string id match
+      const qStr = query(productsRef, where("id", "==", idStr));
+      const snapStr = await getDocs(qStr);
+      for (const d of snapStr.docs) {
+        const dData = d.data();
+        const imgs = Array.isArray(dData.images) ? dData.images : (dData.image ? [dData.image] : []);
+        for (const img of imgs) await deleteImageFileFromStorage(img);
+        await deleteDoc(d.ref);
+      }
+    } catch (queryErr) {
+      console.warn("Product query cleanup note:", queryErr);
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Error deleting product from tenant Firestore:", error);

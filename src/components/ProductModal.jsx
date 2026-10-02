@@ -251,7 +251,7 @@ export default function ProductModal() {
                 {product.name}
               </h2>
               <p className="text-[10px] text-white/70">
-                100% Pure Organic Terracotta • Gold Rim
+                {product.categoryLabel || (product.pieces ? `Pack of ${product.pieces} Handcrafted Pieces` : 'Handcrafted Festive Collection')}
               </p>
             </div>
           </div>
@@ -297,19 +297,26 @@ export default function ProductModal() {
               <div className="md:col-span-5 space-y-3.5">
                 
                 {/* Main Active Image with Zoom */}
-                <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#FAF7F2] border border-gray-200 shadow-inner group">
-                  <AnimatePresence mode="sync">
-                    <motion.img
-                      key={currentMainImage}
-                      src={currentMainImage}
-                      alt={product.name}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </AnimatePresence>
+                <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#FAF7F2] border border-gray-200 shadow-inner group flex items-center justify-center">
+                  {currentMainImage ? (
+                    <AnimatePresence mode="sync">
+                      <motion.img
+                        key={currentMainImage}
+                        src={currentMainImage}
+                        alt={product.name}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </AnimatePresence>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 text-[#1b072a] p-4 text-center">
+                      <span className="text-4xl mb-2">🪔</span>
+                      <span className="text-xs font-bold text-gray-700 font-playfair">{product.name}</span>
+                    </div>
+                  )}
                   
                   {product.badge && (
                     <span className="absolute top-2.5 left-2.5 bg-[#1b072a]/90 text-[#fdb927] text-[10px] font-bold px-2.5 py-1 rounded-md border border-[#fdb927]/40 shadow-sm">
@@ -386,7 +393,7 @@ export default function ProductModal() {
 
                   <div className="pt-2 border-t border-[#fdb927]/30 space-y-1">
                     <div className="flex items-center justify-between text-xs font-bold text-gray-800">
-                      <span>Total Amount ({totalDiyasCount} Diyas):</span>
+                      <span>Total Amount ({totalDiyasCount} {product.pieces ? 'Pieces' : 'Items'}):</span>
                       <div className="flex items-baseline gap-1.5">
                         {product.originalPrice > product.price && (
                           <span className="text-xs text-gray-400 line-through">

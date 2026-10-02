@@ -173,8 +173,9 @@ export function SiteConfigProvider({ children }) {
             ? data.images
             : (data.image ? [data.image] : []);
           productList.push({
-            id: doc.id,
             ...data,
+            id: doc.id,
+            docId: doc.id,
             images: activeImages,
             image: activeImages[0] || data.image || ''
           });
