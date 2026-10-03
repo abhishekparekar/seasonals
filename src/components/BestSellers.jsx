@@ -6,7 +6,6 @@ import { Sparkles } from 'lucide-react';
 export default function BestSellers({ onNavigate, isPreview = false }) {
   const { products, loading, shopConfig } = useSiteConfig();
 
-  const badgeText = shopConfig?.badgeText || "Shop the Season";
   const title = shopConfig?.title || "Made for Your Celebrations";
   const subtitle = shopConfig?.subtitle || "From festive décor to thoughtful gifts and return favours, discover handmade creations designed to make your celebrations a little more special";
 
@@ -21,11 +20,6 @@ export default function BestSellers({ onNavigate, isPreview = false }) {
         {/* Section Heading with Festive Ornamentation */}
         <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
           
-          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/35 px-3.5 py-1 rounded-full text-xs font-extrabold text-[#1b072a] mb-2 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>{badgeText}</span>
-          </div>
-
           <div className="flex items-center justify-center gap-3 mb-2">
             <span className="h-[1.5px] w-10 sm:w-20 bg-gradient-to-r from-transparent to-[#fdb927]"></span>
             <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-950 tracking-tight">

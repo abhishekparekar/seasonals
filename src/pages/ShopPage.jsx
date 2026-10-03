@@ -1,26 +1,36 @@
 import React, { useState, useMemo } from 'react';
-import { useSiteConfig } from '../context/SiteConfigContext';
+import { useSiteConfig, initialCategoriesConfig } from '../context/SiteConfigContext';
 import ProductCard from '../components/ProductCard';
 import { Search, X, ShieldCheck, Truck, RefreshCw, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ShopPage({ onNavigate }) {
-  const { products, loading } = useSiteConfig();
+  const { products, categories, loading } = useSiteConfig();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  const activeCategories = useMemo(() => {
+    return Array.isArray(categories) && categories.length > 0 ? categories : initialCategoriesConfig;
+  }, [categories]);
+
   const categoryCounts = useMemo(() => {
-    const counts = { all: products?.length || 0, diya: 0, lantern: 0, rangoli: 0 };
+    const counts = { all: products?.length || 0 };
+    activeCategories.forEach((c) => { counts[c.id] = 0; });
     if (!products) return counts;
     products.forEach((p) => {
       const cat = (p.category || 'diya').toLowerCase();
-      if (cat === 'diya' || cat === 'diyas') counts.diya++;
-      else if (cat === 'lantern' || cat === 'lanterns') counts.lantern++;
-      else if (cat === 'rangoli') counts.rangoli++;
+      const matched = activeCategories.find(
+        (c) => c.id === cat || (c.id === 'diya' && cat === 'diyas') || (c.id === 'lantern' && cat === 'lanterns')
+      );
+      if (matched) {
+        counts[matched.id] = (counts[matched.id] || 0) + 1;
+      } else {
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
     });
     return counts;
-  }, [products]);
+  }, [products, activeCategories]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -32,7 +42,6 @@ export default function ShopPage({ onNavigate }) {
         const cat = (p.category || 'diya').toLowerCase();
         if (selectedCategory === 'diya') return cat === 'diya' || cat === 'diyas';
         if (selectedCategory === 'lantern') return cat === 'lantern' || cat === 'lanterns';
-        if (selectedCategory === 'rangoli') return cat === 'rangoli';
         return cat === selectedCategory;
       });
     }
@@ -89,12 +98,6 @@ export default function ShopPage({ onNavigate }) {
               </button>
             )}
           </div>
-
-          {/* Right: Category Count Pill */}
-          <div className="hidden lg:inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1b072a] bg-[#fdb927]/15 border border-[#fdb927]/40 px-3 py-1 rounded-full whitespace-nowrap shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#b45309]" />
-            <span>Handcrafted Festive Collection ({products.length})</span>
-          </div>
         </div>
       </section>
 
@@ -103,9 +106,12 @@ export default function ShopPage({ onNavigate }) {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {[
             { id: 'all', label: 'All Products', icon: '✨', count: categoryCounts.all },
-            { id: 'diya', label: 'Diyas', icon: '🪔', count: categoryCounts.diya },
-            { id: 'lantern', label: 'Lanterns', icon: '🏮', count: categoryCounts.lantern },
-            { id: 'rangoli', label: 'Rangoli', icon: '🌸', count: categoryCounts.rangoli },
+            ...activeCategories.map((c) => ({
+              id: c.id,
+              label: c.label,
+              icon: c.icon || '✨',
+              count: categoryCounts[c.id] || 0
+            }))
           ].map((cat) => {
             const isSelected = selectedCategory === cat.id;
             return (
@@ -211,7 +217,7 @@ export default function ShopPage({ onNavigate }) {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs sm:text-sm font-bold text-gray-900">Pure Terracotta Clay</h4>
+              <h4 className="text-xs sm:text-sm font-bold text-gray-900">Natural & Eco-Friendly Materials</h4>
               <p className="text-[11px] text-gray-500">100% Eco-friendly & non-toxic gold paints</p>
             </div>
           </div>

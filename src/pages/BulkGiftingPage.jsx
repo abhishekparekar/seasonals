@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import InquiryForm from '../components/InquiryForm';
 import BannerBackground from '../components/BannerBackground';
 import { useSiteConfig } from '../context/SiteConfigContext';
-import { Sparkles, Gift, CheckCircle2, Building2, PackageCheck, Truck, ShieldCheck, ChevronDown, ChevronUp, MessageSquare, PhoneCall } from 'lucide-react';
+import { Gift, CheckCircle2, Building2, PackageCheck, Truck, ShieldCheck, ChevronDown, ChevronUp, MessageSquare, PhoneCall } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function BulkGiftingPage({ onNavigate }) {
@@ -109,11 +109,6 @@ export default function BulkGiftingPage({ onNavigate }) {
 
         <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center bg-[#1b072a]/85 backdrop-blur-md border border-[#fdb927]/40 px-4 py-1.5 rounded-full mb-3 sm:mb-4 shadow-lg text-xs sm:text-sm font-semibold text-[#fdb927] tracking-wide gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#fdb927]" />
-              <span>{bulkConfig?.badgeText || "CORPORATE • WEDDINGS • EVENT FAVORS"}</span>
-            </div>
-
             <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">
               {bulkConfig?.title || "Bespoke Corporate Festive Gifting & Bulk Orders"}
             </h1>
@@ -142,10 +137,6 @@ export default function BulkGiftingPage({ onNavigate }) {
       {/* 2. Bulk Tiers Cards (VOLUME PACKAGES) */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-8 sm:pt-10">
         <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>VOLUME PACKAGES</span>
-          </div>
           <h2 className="font-playfair text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
             Tailored Bulk Gifting Packages
           </h2>

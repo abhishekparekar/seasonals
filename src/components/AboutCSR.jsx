@@ -9,7 +9,6 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
   const { products, missionConfig } = useSiteConfig();
   const [currentShowcaseIdx, setCurrentShowcaseIdx] = useState(0);
 
-  const badgeText = missionConfig?.badgeText || "Our Mission";
   const title = missionConfig?.title || "More Than a Product. A Story of Possibility.";
   const leadText = missionConfig?.leadText || "Behind every handmade creation is a child with imagination, patience and talent.";
   const believeText = missionConfig?.believeText || "We believe physical challenges should never limit a child's opportunity to create, learn and contribute.";
@@ -59,11 +58,6 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
         
         {/* Section Heading matching exact Bestsellers design */}
         <div className="text-center w-full mx-auto mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/35 px-3.5 py-1 rounded-full text-xs font-extrabold text-[#1b072a] mb-2.5 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>{badgeText}</span>
-          </div>
-
           <div className="flex items-center justify-center gap-3 mb-2">
             <span className="h-[1.5px] w-12 sm:w-24 bg-gradient-to-r from-transparent to-[#fdb927]"></span>
             <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
@@ -85,7 +79,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="bg-[#1b072a] rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden mb-6 sm:mb-8 w-full relative min-h-[260px] sm:min-h-[420px] md:min-h-[500px] max-h-[580px] flex items-center justify-center"
+          className="bg-[#1b072a] rounded-none border border-[#fdb927]/40 shadow-xl overflow-hidden mb-6 sm:mb-8 w-full relative min-h-[260px] sm:min-h-[420px] md:min-h-[500px] max-h-[580px] flex items-center justify-center"
         >
           {showcaseImages.length > 0 ? (
             <>
@@ -99,7 +93,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
                   <img
                     src={imgSrc}
                     alt={`Artisanal Crafting Showcase ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-none select-none"
                   />
                 </div>
               ))}
@@ -111,7 +105,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
                     type="button"
                     onClick={prevShowcase}
                     aria-label="Previous image"
-                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-black/75 hover:bg-black/95 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
@@ -119,20 +113,20 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
                     type="button"
                     onClick={nextShowcase}
                     aria-label="Next image"
-                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-black/75 hover:bg-black/95 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
 
                   {/* Dot Indicators */}
-                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-none border border-white/20">
                     {showcaseImages.map((_, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => setCurrentShowcaseIdx(idx)}
                         aria-label={`Go to slide ${idx + 1}`}
-                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        className={`h-1.5 rounded-none transition-all duration-300 cursor-pointer ${
                           idx === currentShowcaseIdx ? 'w-6 bg-[#fdb927]' : 'w-2 bg-white/50 hover:bg-white'
                         }`}
                       />
@@ -140,7 +134,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
                   </div>
 
                   {/* Image Counter Badge */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/70 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black text-[#fdb927]">
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/75 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-none text-[10px] sm:text-xs font-black text-[#fdb927]">
                     📷 {currentShowcaseIdx + 1} / {showcaseImages.length}
                   </div>
                 </>
@@ -149,21 +143,21 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
           ) : null}
         </motion.div>
 
-        {/* Dedicated Premium Mission Belief & Purpose Card (Rich UI/UX) */}
+        {/* Dedicated Premium Mission Belief & Purpose Card (Rich UI/UX, Straight Corners) */}
         {(believeText || descText) && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="mb-6 sm:mb-8 bg-gradient-to-br from-[#1b072a] via-[#2a0b42] to-[#1b072a] rounded-3xl p-5 sm:p-7 border-2 border-[#fdb927]/50 shadow-xl relative overflow-hidden text-white"
+            className="mb-6 sm:mb-8 bg-gradient-to-br from-[#1b072a] via-[#2a0b42] to-[#1b072a] rounded-none p-5 sm:p-7 border border-[#fdb927]/50 shadow-xl relative overflow-hidden text-white"
           >
             {/* Background Festive Ambient Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#fdb927]/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#fdb927]/10 pointer-events-none"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 justify-between">
               <div className="space-y-2.5 max-w-3xl">
-                <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3 py-1 rounded-full text-[11px] font-extrabold text-[#fdb927]">
+                <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/20 border border-[#fdb927]/40 px-3 py-1 rounded-none text-[11px] font-extrabold text-[#fdb927]">
                   <span>🪔</span>
                   <span>OUR CORE BELIEF & PURPOSE</span>
                 </div>
@@ -182,7 +176,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
               </div>
 
               {/* Decorative Trust Badge */}
-              <div className="flex-shrink-0 bg-white/10 backdrop-blur-md border border-[#fdb927]/30 rounded-2xl p-3.5 text-center hidden lg:block min-w-[170px]">
+              <div className="flex-shrink-0 bg-white/10 backdrop-blur-md border border-[#fdb927]/30 rounded-none p-3.5 text-center hidden lg:block min-w-[170px]">
                 <span className="text-2xl block mb-1">✨</span>
                 <span className="text-[11px] font-bold text-[#fdb927] uppercase tracking-wider block">
                   100% Handcrafted
@@ -205,9 +199,9 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             viewport={{ once: true }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             transition={{ duration: 0.35, delay: 0.1 }}
-            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(40,10,62,0.12)] transition-all group"
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-none border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(40,10,62,0.12)] transition-all group"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-none bg-purple-100 text-[#280a3e] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <HandHeart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-[#280a3e] transition-colors">
@@ -225,9 +219,9 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             viewport={{ once: true }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             transition={{ duration: 0.35, delay: 0.2 }}
-            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(253,185,39,0.18)] transition-all group"
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-none border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(253,185,39,0.18)] transition-all group"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-none bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-[#b37400] transition-colors">
@@ -245,9 +239,9 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
             viewport={{ once: true }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             transition={{ duration: 0.35, delay: 0.3 }}
-            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-2xl border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(16,185,129,0.12)] transition-all group"
+            className="bg-gradient-to-b from-[#FAF7F2] via-white to-white p-3.5 sm:p-5 rounded-none border border-[#fdb927]/30 shadow-sm hover:border-[#fdb927] hover:shadow-[0_8px_20px_rgba(16,185,129,0.12)] transition-all group"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-none bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
               <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-950 mb-1 leading-snug group-hover:text-emerald-700 transition-colors">
@@ -264,7 +258,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
           <div className="text-center mb-6">
             <button
               onClick={() => onNavigate('mission')}
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#b45309] hover:text-[#92400e] bg-[#fdb927]/15 hover:bg-[#fdb927]/25 px-5 py-2.5 rounded-full transition-all border border-[#fdb927]/40 cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#b45309] hover:text-[#92400e] bg-[#fdb927]/15 hover:bg-[#fdb927]/25 px-5 py-2.5 rounded-none transition-all border border-[#fdb927]/40 cursor-pointer"
             >
               <span>Read Our Complete Social Impact Story</span>
               <ArrowRight className="w-4 h-4" />
@@ -273,7 +267,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
         )}
 
         {/* Call to Action Box - Full Width English */}
-        <div className="bg-[#1b072a] text-white rounded-3xl p-5 sm:p-8 w-full border border-[#fdb927]/30 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-5 text-center lg:text-left">
+        <div className="bg-[#1b072a] text-white rounded-none p-5 sm:p-8 w-full border border-[#fdb927]/30 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-5 text-center lg:text-left">
           <div className="space-y-1.5 max-w-2xl">
             <span className="text-[#fdb927] text-xs font-bold uppercase tracking-wider block">
               Celebrate With Purpose • The True Joy of Giving
@@ -289,7 +283,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
             <button
               onClick={handleSupportOrder}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-6 py-3 rounded-full shadow-[0_4px_16px_rgba(253,185,39,0.35)] hover:scale-105 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm px-6 py-3 rounded-none shadow-[0_4px_16px_rgba(253,185,39,0.35)] hover:scale-105 transition-all cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Order Handcrafted Diyas</span>
@@ -299,7 +293,7 @@ export default function AboutCSR({ onNavigate, isPreview = false }) {
               href={shareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs text-white/90 hover:text-[#fdb927] px-5 py-3 rounded-full border border-white/20 hover:border-[#fdb927] bg-white/5 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs text-white/90 hover:text-[#fdb927] px-5 py-3 rounded-none border border-white/20 hover:border-[#fdb927] bg-white/5 transition-all"
               title="Share cause on WhatsApp"
             >
               <Share2 className="w-3.5 h-3.5" />

@@ -22,16 +22,6 @@ export default function Hero({ onNavigate }) {
       {/* Centered Content Container for all devices */}
       <div className="w-full px-3.5 sm:px-6 lg:px-8 text-center relative z-10">
 
-        {/* Festive Badge Tag */}
-        {heroConfig.showBadge !== false && (
-          <div className="inline-flex items-center justify-center bg-[#1b072a]/85 backdrop-blur-md border border-[#fdb927]/40 px-4 py-1.5 rounded-full mb-4 shadow-lg">
-            <span className="text-xs sm:text-sm font-semibold text-[#fdb927] tracking-wide flex items-center gap-1.5">
-              <span>✨</span>
-              <span>{heroConfig.badgeText || "Pure Terracotta • Handcrafted with Gold Scalloped Rim"}</span>
-            </span>
-          </div>
-        )}
-
         {/* Main Centered Heading */}
         {heroConfig.showTitle !== false && (
           <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">

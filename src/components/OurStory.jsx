@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Heart, Clock, Compass, Star, Quote, ArrowRight } from 'lucide-react';
+import { Heart, Clock, Compass, Star, Quote, ArrowRight } from 'lucide-react';
 
 export default function OurStory() {
   const storyMilestones = [
@@ -59,11 +59,6 @@ export default function OurStory() {
         
         {/* Compact Header */}
         <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-[#1b072a] text-[#fdb927] border border-[#fdb927]/50 px-3.5 py-1 rounded-full text-xs font-extrabold mb-3 shadow-md">
-            <Sparkles className="w-3.5 h-3.5 text-[#fdb927]" />
-            <span>OUR STORY</span>
-          </div>
-
           <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-black text-[#1b072a] tracking-tight leading-snug mb-2">
             It Started With Two Sisters, Diyas & A Lesson
           </h2>
@@ -84,7 +79,7 @@ export default function OurStory() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: idx * 0.08 }}
-                className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-gray-200/90 shadow-sm hover:shadow-md hover:border-[#fdb927]/50 transition-all flex flex-col justify-between group relative overflow-hidden"
+                className="bg-white/95 backdrop-blur-md rounded-none p-3.5 sm:p-5 border border-gray-200/90 shadow-sm hover:shadow-md hover:border-[#fdb927]/50 transition-all flex flex-col justify-between group relative overflow-hidden"
               >
                 {/* Accent Top Border */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#fdb927] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -92,7 +87,7 @@ export default function OurStory() {
                 <div>
                   {/* Top Badge & Number */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`text-[9px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-full border ${item.badgeColor}`}>
+                    <span className={`text-[9px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-none border ${item.badgeColor}`}>
                       {item.tag}
                     </span>
                     <span className="font-playfair text-lg sm:text-2xl font-black text-gray-300 group-hover:text-[#1b072a] transition-colors">
@@ -102,7 +97,7 @@ export default function OurStory() {
 
                   {/* Title & Icon */}
                   <div className="flex items-center gap-2 mb-1.5">
-                    <div className={`p-1.5 rounded-lg flex-shrink-0 ${item.iconBg}`}>
+                    <div className={`p-1.5 rounded-none flex-shrink-0 ${item.iconBg}`}>
                       <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                     <h3 className="font-playfair text-xs sm:text-base font-bold text-gray-900 leading-tight">
@@ -132,7 +127,7 @@ export default function OurStory() {
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-[#1b072a] via-[#2c0d45] to-[#1b072a] text-white rounded-2xl p-4 sm:p-6 border border-[#fdb927]/40 shadow-xl relative overflow-hidden text-center w-full"
+          className="bg-gradient-to-r from-[#1b072a] via-[#2c0d45] to-[#1b072a] text-white rounded-none p-4 sm:p-6 border border-[#fdb927]/40 shadow-xl relative overflow-hidden text-center w-full"
         >
           <Quote className="w-8 h-8 text-[#fdb927]/20 absolute top-3 left-4 pointer-events-none" />
           

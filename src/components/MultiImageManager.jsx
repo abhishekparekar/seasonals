@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
 import { Upload, Plus, Trash2, Image as ImageIcon, Sparkles, Loader2 } from 'lucide-react';
+import { uploadImageFileToStorage } from '../firebase';
 
 /**
- * Smart Client-side Canvas Image Compression
- * Shrinks multi-megabyte files down to optimized ~70-120KB without quality loss,
- * ensuring Firestore document limit (1MB) is never exceeded even when uploading dozens of images!
+ * High-Speed Universal Image Processor
+ * 1. Checks Firebase Storage with circuit-breaker timeout
+ * 2. Falls back to ultra-fast native Canvas WebP/JPEG compression using ObjectURL (under 50ms)
  */
-async function compressImageFile(file, maxWidth = 1600, maxHeight = 1600, quality = 0.8) {
+async function compressImageFile(file, maxWidth = 800, maxHeight = 800, quality = 0.72) {
+  // First attempt: Direct Firebase Storage upload (guarded with 1.5s circuit breaker)
+  try {
+    const storageUrl = await uploadImageFileToStorage(file, "gallery");
+    if (storageUrl) {
+      return storageUrl;
+    }
+  } catch (err) {
+    // Quick bypass to instant local canvas
+  }
+
+  // Second attempt: Lightning-fast Canvas WebP/JPEG compression using Blob URL
   return new Promise((resolve) => {
-    // If SVG or animated GIF, keep original
     if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target?.result || null);
@@ -17,47 +28,99 @@ async function compressImageFile(file, maxWidth = 1600, maxHeight = 1600, qualit
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
 
-        // Maintain exact aspect ratio while scaling within bounds
-        if (width > maxWidth) {
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      let { width, height } = img;
+
+      // Maintain aspect ratio within 800px bounds
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
-        }
-        if (height > maxHeight) {
+        } else {
           width = Math.round((width * maxHeight) / height);
           height = maxHeight;
         }
+      }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
 
-        // Try WebP first for optimal compression, fallback to JPEG
-        try {
-          const dataUrl = canvas.toDataURL('image/webp', quality);
+      // Try WebP first for optimal ~25KB compact output, fallback to JPEG
+      try {
+        const dataUrl = canvas.toDataURL('image/webp', quality);
+        if (dataUrl && dataUrl.startsWith('data:image/webp') && dataUrl.length > 50) {
           resolve(dataUrl);
-        } catch {
-          try {
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            resolve(dataUrl);
-          } catch {
-            resolve(e.target?.result || null);
-          }
+          return;
         }
-      };
-      img.onerror = () => resolve(e.target?.result || null);
-      img.src = e.target?.result;
+      } catch {}
+
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      } catch {
+        resolve(null);
+      }
     };
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      // Fallback to FileReader if ObjectURL fails on older environments
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result || null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    };
+
+    img.src = objectUrl;
+  });
+}
+
+/**
+ * Downscales an existing base64 data URL to fit within compact byte boundaries
+ */
+export async function downscaleDataUrl(dataUrl, maxDim = 650, quality = 0.62) {
+  if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      try {
+        const result = canvas.toDataURL('image/webp', quality);
+        if (result && result.length > 50) return resolve(result);
+      } catch {}
+
+      try {
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
   });
 }
 
@@ -94,18 +157,32 @@ export default function MultiImageManager({
     setUploadProgress({ current: 0, total: files.length });
 
     try {
-      const compressedResults = [];
-      for (let i = 0; i < files.length; i++) {
-        setUploadProgress({ current: i + 1, total: files.length });
-        const compressed = await compressImageFile(files[i]);
-        if (compressed) {
-          compressedResults.push(compressed);
-        }
-      }
+      let completedCount = 0;
+      // Parallel fast processing for all files at once
+      const compressedResults = await Promise.all(
+        files.map(async (file) => {
+          const res = await compressImageFile(file);
+          completedCount++;
+          setUploadProgress({ current: completedCount, total: files.length });
+          return res;
+        })
+      );
 
-      if (compressedResults.length > 0) {
-        // No slice limit - upload as many images as desired!
-        onChange([...imageList, ...compressedResults]);
+      const validResults = compressedResults.filter(Boolean);
+      if (validResults.length > 0) {
+        const combined = [...imageList, ...validResults];
+        const totalBase64Len = combined.reduce((acc, str) => acc + (typeof str === 'string' && str.startsWith('data:') ? str.length : 0), 0);
+        if (totalBase64Len > 650000) {
+          const optimized = await Promise.all(combined.map(async (img) => {
+            if (typeof img === 'string' && img.startsWith('data:image/') && img.length > 60000) {
+              return await downscaleDataUrl(img, 650, 0.62);
+            }
+            return img;
+          }));
+          onChange(optimized);
+        } else {
+          onChange(combined);
+        }
       }
     } catch (err) {
       console.error("Error processing uploaded images:", err);
@@ -136,17 +213,32 @@ export default function MultiImageManager({
     setUploadProgress({ current: 0, total: files.length });
 
     try {
-      const compressedResults = [];
-      for (let i = 0; i < files.length; i++) {
-        setUploadProgress({ current: i + 1, total: files.length });
-        const compressed = await compressImageFile(files[i]);
-        if (compressed) {
-          compressedResults.push(compressed);
-        }
-      }
+      let completedCount = 0;
+      // Parallel fast processing for all files at once
+      const compressedResults = await Promise.all(
+        files.map(async (file) => {
+          const res = await compressImageFile(file);
+          completedCount++;
+          setUploadProgress({ current: completedCount, total: files.length });
+          return res;
+        })
+      );
 
-      if (compressedResults.length > 0) {
-        onChange([...imageList, ...compressedResults]);
+      const validResults = compressedResults.filter(Boolean);
+      if (validResults.length > 0) {
+        const combined = [...imageList, ...validResults];
+        const totalBase64Len = combined.reduce((acc, str) => acc + (typeof str === 'string' && str.startsWith('data:') ? str.length : 0), 0);
+        if (totalBase64Len > 650000) {
+          const optimized = await Promise.all(combined.map(async (img) => {
+            if (typeof img === 'string' && img.startsWith('data:image/') && img.length > 60000) {
+              return await downscaleDataUrl(img, 650, 0.62);
+            }
+            return img;
+          }));
+          onChange(optimized);
+        } else {
+          onChange(combined);
+        }
       }
     } catch (err) {
       console.error("Error processing dropped images:", err);

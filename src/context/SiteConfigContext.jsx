@@ -140,12 +140,19 @@ const initialWhatsappConfig = {
   defaultMessage: "Hello Seasonals! 🪔 I would like to place an order for Handcrafted Festive Diyas."
 };
 
+export const initialCategoriesConfig = [
+  { id: 'diya', label: 'Diyas', icon: '🪔' },
+  { id: 'lantern', label: 'Lanterns', icon: '🏮' },
+  { id: 'rangoli', label: 'Rangoli', icon: '🌸' }
+];
+
 export function SiteConfigProvider({ children }) {
   // Firestore data states with instant local storage fallback
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
+  const [categoriesConfig, setCategoriesConfig] = useState(() => getCachedConfig('categories', initialCategoriesConfig));
   const [homeSectionsConfig, setHomeSectionsConfig] = useState(() => getCachedConfig('home_sections', initialHomeSectionsConfig));
   const [navbarConfig, setNavbarConfig] = useState(() => getCachedConfig('navbar', initialNavbarConfig));
   const [heroConfig, setHeroConfig] = useState(() => getCachedConfig('hero', initialHeroConfig));
@@ -533,10 +540,42 @@ export function SiteConfigProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
+  // 13. Product Categories Config Listener
+  useEffect(() => {
+    const catRef = getTenantDoc("settings", "categories_config");
+    const unsubscribe = onSnapshot(
+      catRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const list = Array.isArray(data.list) && data.list.length > 0
+            ? data.list
+            : (Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : initialCategoriesConfig);
+          setCachedConfig('categories', list);
+          setCategoriesConfig(list);
+        } else {
+          setCategoriesConfig(initialCategoriesConfig);
+        }
+      },
+      (err) => console.warn("Tenant Categories config listen note:", err)
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const saveCategories = async (newCategories) => {
+    const list = Array.isArray(newCategories) ? newCategories : [];
+    setCategoriesConfig(list);
+    setCachedConfig('categories', list);
+    await saveSiteSettings("categories_config", { list });
+  };
+
   return (
     <SiteConfigContext.Provider
       value={{
         products,
+        categoriesConfig,
+        categories: categoriesConfig,
+        saveCategories,
         reviews,
         reviewsLoading,
         homeSectionsConfig,

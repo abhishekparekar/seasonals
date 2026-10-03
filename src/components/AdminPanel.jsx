@@ -22,9 +22,12 @@ import {
   query, 
   orderBy 
 } from 'firebase/firestore';
-import { useSiteConfig } from '../context/SiteConfigContext';
-import MultiImageManager from './MultiImageManager';
+import { useSiteConfig, initialCategoriesConfig } from '../context/SiteConfigContext';
+import MultiImageManager, { downscaleDataUrl } from './MultiImageManager';
 import { 
+  Tag,
+  Plus,
+  Loader2,
   CheckCircle2, 
   XCircle, 
   Clock, 
@@ -85,6 +88,8 @@ export default function AdminPanel({ onBackToHome }) {
   // Site Config Context
   const { 
     products: contextProducts, 
+    categories,
+    saveCategories,
     homeSectionsConfig,
     navbarConfig,
     heroConfig, 
@@ -98,6 +103,18 @@ export default function AdminPanel({ onBackToHome }) {
     footerConfig, 
     whatsappConfig 
   } = useSiteConfig();
+
+  // Active categories list with guaranteed fallback
+  const activeCategoryList = useMemo(() => {
+    return Array.isArray(categories) && categories.length > 0 ? categories : initialCategoriesConfig;
+  }, [categories]);
+
+  // Category Manager State
+  const [isManagingCategories, setIsManagingCategories] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editCategoryForm, setEditCategoryForm] = useState({ label: '', icon: '' });
+  const [newCategoryForm, setNewCategoryForm] = useState({ label: '', icon: '🪔', id: '' });
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   // Orders State
   const [orders, setOrders] = useState([]);
@@ -401,15 +418,21 @@ export default function AdminPanel({ onBackToHome }) {
 
   // Product Category Counts for Admin Filtering
   const adminCategoryCounts = useMemo(() => {
-    const counts = { all: productsList.length, diya: 0, lantern: 0, rangoli: 0 };
+    const counts = { all: productsList.length };
+    activeCategoryList.forEach((c) => { counts[c.id] = 0; });
     productsList.forEach((p) => {
       const cat = (p.category || 'diya').toLowerCase();
-      if (cat === 'diya' || cat === 'diyas') counts.diya++;
-      else if (cat === 'lantern' || cat === 'lanterns') counts.lantern++;
-      else if (cat === 'rangoli') counts.rangoli++;
+      const matched = activeCategoryList.find(
+        (c) => c.id === cat || (c.id === 'diya' && cat === 'diyas') || (c.id === 'lantern' && cat === 'lanterns')
+      );
+      if (matched) {
+        counts[matched.id] = (counts[matched.id] || 0) + 1;
+      } else {
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
     });
     return counts;
-  }, [productsList]);
+  }, [productsList, activeCategoryList]);
 
   // Products filtered by selected category in Admin
   const displayedAdminProducts = useMemo(() => {
@@ -418,7 +441,6 @@ export default function AdminPanel({ onBackToHome }) {
       const cat = (p.category || 'diya').toLowerCase();
       if (productCategoryFilter === 'diya') return cat === 'diya' || cat === 'diyas';
       if (productCategoryFilter === 'lantern') return cat === 'lantern' || cat === 'lanterns';
-      if (productCategoryFilter === 'rangoli') return cat === 'rangoli';
       return cat === productCategoryFilter;
     });
   }, [productsList, productCategoryFilter]);
@@ -632,6 +654,85 @@ export default function AdminPanel({ onBackToHome }) {
     reader.readAsDataURL(file);
   };
 
+  // Category Management Handlers
+  const handleSaveCategory = async (catId, newLabel, newIcon) => {
+    if (!newLabel || !newLabel.trim()) {
+      showToast("Category name cannot be empty", "error");
+      return;
+    }
+    const updated = activeCategoryList.map((c) => {
+      if (c.id === catId) {
+        return { ...c, label: newLabel.trim(), icon: (newIcon || c.icon || '✨').trim() };
+      }
+      return c;
+    });
+    try {
+      await saveCategories(updated);
+      showToast("Category updated successfully!");
+      setEditingCategory(null);
+    } catch (err) {
+      console.error("Error saving category:", err);
+      showToast("Failed to update category.", "error");
+    }
+  };
+
+  const handleAddCategory = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!newCategoryForm.label || !newCategoryForm.label.trim()) {
+      showToast("Please enter a category name", "error");
+      return;
+    }
+    const cleanLabel = newCategoryForm.label.trim();
+    const cleanId = (newCategoryForm.id || cleanLabel)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    if (!cleanId) {
+      showToast("Please provide a valid category identifier", "error");
+      return;
+    }
+
+    if (activeCategoryList.some((c) => c.id === cleanId)) {
+      showToast("A category with this ID already exists. Choose a different name.", "error");
+      return;
+    }
+
+    const newCat = {
+      id: cleanId,
+      label: cleanLabel,
+      icon: (newCategoryForm.icon || '🪔').trim()
+    };
+
+    const updated = [...activeCategoryList, newCat];
+    try {
+      await saveCategories(updated);
+      showToast(`Category "${cleanLabel}" added successfully!`);
+      setNewCategoryForm({ label: '', icon: '🪔', id: '' });
+    } catch (err) {
+      console.error("Error adding category:", err);
+      showToast("Failed to add category.", "error");
+    }
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    if (activeCategoryList.length <= 1) {
+      showToast("You must keep at least one category.", "error");
+      return;
+    }
+    if (!window.confirm(`Delete category "${cat.label}"? Products in this category will remain, but will not have a category tab until reassigned.`)) {
+      return;
+    }
+    const updated = activeCategoryList.filter((c) => c.id !== cat.id);
+    try {
+      await saveCategories(updated);
+      showToast(`Category "${cat.label}" deleted.`);
+    } catch (err) {
+      console.error("Error deleting category:", err);
+      showToast("Failed to delete category.", "error");
+    }
+  };
+
   // Product Form Handler
   const handleSaveProduct = async (e) => {
     e.preventDefault();
@@ -640,53 +741,101 @@ export default function AdminPanel({ onBackToHome }) {
       return;
     }
 
-    const sellingPrice = Number(productForm.price);
+    const cleanPrice = String(productForm.price || '').replace(/[^0-9.]/g, '');
+    const sellingPrice = Number(cleanPrice);
     if (!sellingPrice || sellingPrice <= 0) {
       showToast("Please enter a valid selling price (> 0)", "error");
       return;
     }
 
-    const regularMrp = productForm.originalPrice !== '' && productForm.originalPrice !== null && productForm.originalPrice !== undefined
-      ? Number(productForm.originalPrice)
-      : null;
+    let regularMrp = null;
+    if (productForm.originalPrice !== '' && productForm.originalPrice !== null && productForm.originalPrice !== undefined) {
+      const cleanMrp = String(productForm.originalPrice).replace(/[^0-9.]/g, '');
+      const mrpNum = Number(cleanMrp);
+      if (mrpNum > 0) regularMrp = mrpNum;
+    }
 
-    const activeImages = Array.isArray(productForm.images) && productForm.images.length > 0
-      ? productForm.images.filter(Boolean)
-      : (productForm.image ? [productForm.image] : []);
-
-    const payload = {
-      name: productForm.name.trim(),
-      price: sellingPrice,
-      originalPrice: regularMrp && regularMrp > 0 ? regularMrp : null,
-      pieces: Number(productForm.pieces) || 4,
-      category: productForm.category || 'diya',
-      categoryLabel: (productForm.categoryLabel || '').trim(),
-      badge: (productForm.badge || '').trim(),
-      image: activeImages[0] || '',
-      images: activeImages,
-      description: (productForm.description || '').trim(),
-      inStock: productForm.inStock !== false
-    };
-
+    setIsSavingProduct(true);
     try {
-      if (editingProduct) {
-        // Update Product
-        await updateProductInFirestore(editingProduct.id, payload);
-        showToast("Product updated successfully!");
-        setEditingProduct(null);
-      } else {
-        // Add New Product
-        await addProductToFirestore(payload);
-        showToast("New product added to store catalog!");
-        setIsAddingProduct(false);
+      let activeImages = Array.isArray(productForm.images) && productForm.images.length > 0
+        ? productForm.images.filter(Boolean)
+        : (productForm.image ? [productForm.image] : []);
+
+      // Check cumulative base64 size of images to prevent Firestore 1MB document limit
+      const totalLen = activeImages.reduce((sum, img) => sum + (img && img.startsWith('data:') ? img.length : 0), 0);
+      if (totalLen > 650000) {
+        activeImages = await Promise.all(
+          activeImages.map(async (img) => {
+            if (img && img.startsWith('data:') && img.length > 100000) {
+              return await downscaleDataUrl(img, 650, 0.72);
+            }
+            return img;
+          })
+        );
       }
+
+      const payload = {
+        name: productForm.name.trim(),
+        price: sellingPrice,
+        originalPrice: regularMrp,
+        pieces: Number(productForm.pieces) || 4,
+        category: productForm.category || 'diya',
+        categoryLabel: (productForm.categoryLabel || '').trim(),
+        badge: (productForm.badge || '').trim(),
+        image: activeImages[0] || '',
+        images: activeImages,
+        description: (productForm.description || '').trim(),
+        inStock: productForm.inStock !== false
+      };
+
+      try {
+        if (editingProduct) {
+          // Update Product
+          await updateProductInFirestore(editingProduct.id, payload);
+          showToast("Product updated successfully!");
+          setEditingProduct(null);
+        } else {
+          // Add New Product
+          await addProductToFirestore(payload);
+          showToast("New product added to store catalog!");
+          setIsAddingProduct(false);
+        }
+      } catch (saveErr) {
+        // If error is document size or quota related, attempt emergency compression and retry
+        const errMsg = String(saveErr?.message || saveErr || '').toLowerCase();
+        if (errMsg.includes('exceeds') || errMsg.includes('size') || errMsg.includes('quota') || totalLen > 300000) {
+          showToast("Optimizing images for database...", "info");
+          const emergencyImages = await Promise.all(
+            activeImages.map(async (img) => {
+              if (img && img.startsWith('data:')) {
+                return await downscaleDataUrl(img, 500, 0.65);
+              }
+              return img;
+            })
+          );
+          payload.images = emergencyImages;
+          payload.image = emergencyImages[0] || '';
+          if (editingProduct) {
+            await updateProductInFirestore(editingProduct.id, payload);
+            showToast("Product updated successfully with optimized images!");
+            setEditingProduct(null);
+          } else {
+            await addProductToFirestore(payload);
+            showToast("New product added to store catalog with optimized images!");
+            setIsAddingProduct(false);
+          }
+        } else {
+          throw saveErr;
+        }
+      }
+
       // Reset form to clean empty state
       setProductForm({
         name: '',
         price: '',
         originalPrice: '',
         pieces: 4,
-        category: 'diya',
+        category: activeCategoryList[0]?.id || 'diya',
         categoryLabel: '',
         badge: '',
         image: '',
@@ -695,8 +844,10 @@ export default function AdminPanel({ onBackToHome }) {
         inStock: true
       });
     } catch (err) {
-      console.error(err);
-      showToast("Error saving product.", "error");
+      console.error("Save product error:", err);
+      showToast(err?.message ? `Error: ${err.message}` : "Failed to save product.", "error");
+    } finally {
+      setIsSavingProduct(false);
     }
   };
 
@@ -1892,6 +2043,19 @@ export default function AdminPanel({ onBackToHome }) {
                   </button>
                 )}
                 <button
+                  type="button"
+                  onClick={() => setIsManagingCategories(!isManagingCategories)}
+                  className={`font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all border ${
+                    isManagingCategories
+                      ? 'bg-purple-600 text-white border-purple-500 shadow-lg'
+                      : 'bg-white/10 hover:bg-white/15 text-white/90 border-white/20'
+                  }`}
+                  title="Edit existing categories or add new custom categories"
+                >
+                  <Tag className="w-3.5 h-3.5 text-[#fdb927]" />
+                  <span>Manage Categories ({activeCategoryList.length})</span>
+                </button>
+                <button
                   onClick={() => {
                     if (!isAddingProduct) {
                       setProductForm({
@@ -1899,7 +2063,7 @@ export default function AdminPanel({ onBackToHome }) {
                         price: '',
                         originalPrice: '',
                         pieces: 4,
-                        category: 'diya',
+                        category: activeCategoryList[0]?.id || 'diya',
                         categoryLabel: '',
                         badge: '',
                         image: '',
@@ -1918,6 +2082,207 @@ export default function AdminPanel({ onBackToHome }) {
                 </button>
               </div>
             </div>
+
+            {/* Category Management Drawer / Panel */}
+            <AnimatePresence>
+              {isManagingCategories && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-gradient-to-br from-[#1c082b] to-[#12031c] border border-purple-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-[#fdb927] flex items-center justify-center font-bold">
+                        <Tag className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-playfair text-lg font-bold text-white flex items-center gap-2">
+                          <span>Product Categories Manager</span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-500/40">
+                            {activeCategoryList.length} Categories
+                          </span>
+                        </h3>
+                        <p className="text-xs text-white/60">
+                          Edit category names and icons, delete unneeded categories, or add new categories. Updates live across the website!
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsManagingCategories(false)}
+                      className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* List of Existing Categories */}
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#fdb927]">
+                      Current Categories ({activeCategoryList.length})
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {activeCategoryList.map((cat) => {
+                        const isEditingThis = editingCategory === cat.id;
+                        const productCount = adminCategoryCounts[cat.id] || 0;
+
+                        if (isEditingThis) {
+                          return (
+                            <div
+                              key={cat.id}
+                              className="p-3.5 bg-black/60 border-2 border-[#fdb927] rounded-2xl space-y-3 shadow-lg"
+                            >
+                              <div className="text-[11px] font-bold text-[#fdb927]">
+                                Editing "{cat.label}"
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editCategoryForm.icon}
+                                  onChange={(e) => setEditCategoryForm((prev) => ({ ...prev, icon: e.target.value }))}
+                                  className="w-12 px-2 py-1.5 bg-black/50 border border-white/20 rounded-xl text-center text-base text-white focus:outline-none focus:border-[#fdb927]"
+                                  placeholder="🪔"
+                                  title="Category Icon / Emoji"
+                                />
+                                <input
+                                  type="text"
+                                  value={editCategoryForm.label}
+                                  onChange={(e) => setEditCategoryForm((prev) => ({ ...prev, label: e.target.value }))}
+                                  className="flex-1 px-3 py-1.5 bg-black/50 border border-white/20 rounded-xl text-xs font-semibold text-white focus:outline-none focus:border-[#fdb927]"
+                                  placeholder="Category Name"
+                                  autoFocus
+                                />
+                              </div>
+
+                              <div className="flex items-center justify-end gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingCategory(null)}
+                                  className="px-2.5 py-1 text-xs text-white/60 hover:text-white"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveCategory(cat.id, editCategoryForm.label, editCategoryForm.icon)}
+                                  className="px-3.5 py-1 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] rounded-xl text-xs font-bold flex items-center gap-1 shadow"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Save</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div
+                            key={cat.id}
+                            className="p-3.5 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-between gap-3 hover:border-white/25 transition-all"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="text-xl flex-shrink-0">{cat.icon || '✨'}</span>
+                              <div className="min-w-0">
+                                <div className="text-sm font-bold text-white truncate">
+                                  {cat.label}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[10px] text-white/50">
+                                  <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-white/70">
+                                    id: {cat.id}
+                                  </span>
+                                  <span>•</span>
+                                  <span className="text-amber-300 font-semibold">
+                                    {productCount} {productCount === 1 ? 'product' : 'products'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingCategory(cat.id);
+                                  setEditCategoryForm({ label: cat.label, icon: cat.icon || '🪔' });
+                                }}
+                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/80 hover:text-white transition-all"
+                                title="Edit category name and icon"
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-[#fdb927]" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCategory(cat)}
+                                className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 hover:text-red-200 transition-all"
+                                title="Delete category"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Add New Category Form */}
+                  <div className="bg-black/40 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#fdb927] flex items-center gap-1.5">
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add New Product Category</span>
+                    </h4>
+
+                    <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newCategoryForm.icon}
+                          onChange={(e) => setNewCategoryForm((prev) => ({ ...prev, icon: e.target.value }))}
+                          placeholder="🪔"
+                          title="Category Icon / Emoji"
+                          className="w-14 px-2 py-2 bg-black/60 border border-white/20 rounded-xl text-center text-lg text-white focus:outline-none focus:border-[#fdb927]"
+                        />
+                        <div className="flex items-center gap-1">
+                          {['🪔', '🏮', '🌸', '🎁', '✨', '🕯️'].map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => setNewCategoryForm((prev) => ({ ...prev, icon: emoji }))}
+                              className={`w-7 h-7 rounded-lg text-xs flex items-center justify-center transition-all ${
+                                newCategoryForm.icon === emoji
+                                  ? 'bg-[#fdb927]/30 border border-[#fdb927] scale-110'
+                                  : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                              }`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <input
+                        type="text"
+                        required
+                        value={newCategoryForm.label}
+                        onChange={(e) => setNewCategoryForm((prev) => ({ ...prev, label: e.target.value }))}
+                        placeholder="Enter category name (e.g. Gift Hampers, Incense, Décor)"
+                        className="flex-1 px-3 py-2 bg-black/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#fdb927]"
+                      />
+
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Category</span>
+                      </button>
+                    </form>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Add / Edit Product Form Modal / Section */}
             {isAddingProduct && (
@@ -1976,48 +2341,51 @@ export default function AdminPanel({ onBackToHome }) {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-[#fdb927] flex items-center gap-1.5">
                         <span>Product Category *</span>
-                        <span className="text-[10px] text-white/50 font-normal">(Select whether this product is a Diya, Lantern, or Rangoli)</span>
+                        <span className="text-[10px] text-white/50 font-normal">(Select category for this product)</span>
                       </label>
-                      <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
-                        Active: {productForm.category === 'lantern' || productForm.category === 'lanterns' ? '🏮 Lantern' : productForm.category === 'rangoli' ? '🌸 Rangoli' : '🪔 Diya'}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsManagingCategories(true)}
+                        className="text-[11px] text-[#fdb927] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                      >
+                        <Tag className="w-3 h-3" />
+                        <span>Edit / Add Categories</span>
+                      </button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {[
-                        { id: 'diya', label: '🪔 Diya / Diya Set', desc: 'Handcrafted Clay Diyas' },
-                        { id: 'lantern', label: '🏮 Lantern / Kandil', desc: 'Festive Lanterns' },
-                        { id: 'rangoli', label: '🌸 Rangoli Product', desc: 'Rangoli Sets & Décor' }
-                      ].map((cat) => {
-                        const isSelected = productForm.category === cat.id || (cat.id === 'diya' && productForm.category === 'diyas') || (cat.id === 'lantern' && productForm.category === 'lanterns');
+                      {activeCategoryList.map((cat) => {
+                        const isSelected = productForm.category === cat.id || 
+                          (cat.id === 'diya' && productForm.category === 'diyas') || 
+                          (cat.id === 'lantern' && productForm.category === 'lanterns');
                         return (
                           <button
                             key={cat.id}
                             type="button"
-                            onClick={() => setProductForm({ ...productForm, category: cat.id })}
+                            onClick={() => setProductForm({ 
+                              ...productForm, 
+                              category: cat.id,
+                              categoryLabel: cat.label 
+                            })}
                             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                               isSelected
                                 ? 'bg-[#fdb927] text-[#1b072a] border-[#fdb927] shadow font-black scale-102'
                                 : 'bg-white/5 hover:bg-white/10 text-white/80 border-white/15'
                             }`}
                           >
+                            <span>{cat.icon || '✨'}</span>
                             <span>{cat.label}</span>
                           </button>
                         );
                       })}
 
-                      {/* Custom Category input */}
-                      <input
-                        type="text"
-                        value={!['diya', 'diyas', 'lantern', 'lanterns', 'rangoli'].includes(productForm.category) ? productForm.category : ''}
-                        onChange={(e) => setProductForm({ ...productForm, category: e.target.value.toLowerCase().trim() })}
-                        placeholder="+ Custom Category..."
-                        className={`px-3 py-1.5 bg-black/60 border rounded-xl text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#fdb927] ${
-                          !['diya', 'diyas', 'lantern', 'lanterns', 'rangoli'].includes(productForm.category) && productForm.category
-                            ? 'border-[#fdb927] text-[#fdb927] font-bold'
-                            : 'border-white/20'
-                        }`}
-                      />
+                      {/* Custom Category fallback if existing product has custom ID */}
+                      {productForm.category && !activeCategoryList.some((c) => c.id === productForm.category || (c.id === 'diya' && productForm.category === 'diyas') || (c.id === 'lantern' && productForm.category === 'lanterns')) && (
+                        <div className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#fdb927] text-[#1b072a] border border-[#fdb927] flex items-center gap-1.5">
+                          <span>✨</span>
+                          <span>{productForm.category} (Custom)</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -2290,10 +2658,20 @@ export default function AdminPanel({ onBackToHome }) {
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5"
+                      disabled={isSavingProduct}
+                      className="px-6 py-2.5 rounded-xl bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-bold text-xs sm:text-sm shadow-md flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <Save className="w-4 h-4" />
-                      <span>{editingProduct ? 'Save Changes' : 'Create Product'}</span>
+                      {isSavingProduct ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Saving to Database...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>{editingProduct ? 'Save Changes' : 'Create Product'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -2305,9 +2683,12 @@ export default function AdminPanel({ onBackToHome }) {
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 {[
                   { id: 'all', label: 'All Products', icon: '✨', count: adminCategoryCounts.all },
-                  { id: 'diya', label: 'Diyas', icon: '🪔', count: adminCategoryCounts.diya },
-                  { id: 'lantern', label: 'Lanterns', icon: '🏮', count: adminCategoryCounts.lantern },
-                  { id: 'rangoli', label: 'Rangoli', icon: '🌸', count: adminCategoryCounts.rangoli },
+                  ...activeCategoryList.map((cat) => ({
+                    id: cat.id,
+                    label: cat.label,
+                    icon: cat.icon || '✨',
+                    count: adminCategoryCounts[cat.id] || 0
+                  }))
                 ].map((cat) => {
                   const isSelected = productCategoryFilter === cat.id;
                   return (

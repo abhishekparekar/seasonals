@@ -15,7 +15,7 @@ import {
   serverTimestamp,
   setDoc
 } from "firebase/firestore";
-import { getStorage, ref as storageRef, deleteObject } from "firebase/storage";
+import { getStorage, ref as storageRef, deleteObject, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBX19VWQ81SAB5Hy_gkMyV6Dwx9SZgy6iI",
@@ -32,6 +32,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+/**
+ * Direct Firebase Storage Image Upload Helper with fast circuit-breaker & strict 1.5s timeout
+ * Prevents hanging when storage bucket is unauthenticated or slow, immediately falling back to instant client-side canvas
+ */
+let isStorageWorking = null; // null = untried, true = working, false = disabled
+
+export async function uploadImageFileToStorage(file, folder = "products") {
+  if (!file || isStorageWorking === false) return null;
+  try {
+    const uploadTask = (async () => {
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 7);
+      const cleanName = (file.name || 'image.jpg').replace(/[^a-zA-Z0-9.]/g, '_');
+      const path = `tenants/${TENANT_ID}/${folder}/${timestamp}_${random}_${cleanName}`;
+      const fileRef = storageRef(storage, path);
+      const snapshot = await uploadBytes(fileRef, file, {
+        contentType: file.type || 'image/jpeg'
+      });
+      return await getDownloadURL(snapshot.ref);
+    })();
+
+    // Strict 1.5-second timeout: If storage does not respond instantly, fail fast to client canvas
+    const timeoutTask = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Storage timeout")), 1500)
+    );
+
+    const downloadUrl = await Promise.race([uploadTask, timeoutTask]);
+    isStorageWorking = true;
+    return downloadUrl;
+  } catch (err) {
+    // Mark disabled so future uploads never wait
+    isStorageWorking = false;
+    return null;
+  }
+}
 
 /**
  * Universal helper to delete uploaded image files from storage if applicable

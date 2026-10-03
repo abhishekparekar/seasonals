@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import BannerBackground from '../components/BannerBackground';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function StoryPage({ onNavigate }) {
@@ -19,11 +19,6 @@ export default function StoryPage({ onNavigate }) {
 
         <div className="w-full px-3 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="w-full max-w-5xl mx-auto">
-            <div className="inline-flex items-center justify-center bg-[#1b072a]/85 backdrop-blur-md border border-[#fdb927]/40 px-4 py-1.5 rounded-full mb-3 sm:mb-4 shadow-lg text-xs sm:text-sm font-semibold text-[#fdb927] tracking-wide gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#fdb927]" />
-              <span>{storyConfig?.badgeText || "THE INSPIRING JOURNEY"}</span>
-            </div>
-
             <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold leading-[1.18] tracking-tight mb-3 sm:mb-4 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,1)] [text-shadow:_0_2px_12px_rgba(0,0,0,1),_0_1px_4px_rgba(0,0,0,1)]">
               {storyConfig?.title || "From Two Sisters to a Team of Young Creators"}
             </h1>
@@ -60,10 +55,6 @@ export default function StoryPage({ onNavigate }) {
 
           {/* Section Heading */}
           <div className="mb-8 text-center w-full px-4 sm:px-8">
-            <div className="inline-flex items-center gap-2 bg-[#fdb927]/15 border border-[#fdb927]/40 px-4 py-1 rounded-full text-xs font-black text-[#1b072a] mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-              <span>THE SEASONALS STORY</span>
-            </div>
             <h2 className="font-playfair text-2xl sm:text-4xl md:text-5xl font-black text-[#1b072a] leading-tight tracking-tight">
               From Two Sisters to a Team of Young Creators
             </h2>

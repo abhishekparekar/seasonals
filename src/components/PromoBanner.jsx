@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useSiteConfig } from '../context/SiteConfigContext';
 
@@ -8,7 +8,6 @@ export default function PromoBanner({ onNavigate }) {
   const { setQuickViewProduct } = useCart();
   const { products, promoConfig, whatsappConfig } = useSiteConfig();
 
-  const badgeText = promoConfig?.badgeText || "✨ Festive Celebration Special";
   const titleLine1 = promoConfig?.titleLine1 || "Make Every Celebration";
   const titleHighlight = promoConfig?.titleHighlight || "Extra Special";
   const subtitle = promoConfig?.subtitle || "Celebrate traditional joy, warmth, and special occasions with your family & friends. Get authentic handcrafted products delivered directly to your doorstep.";
@@ -42,43 +41,12 @@ export default function PromoBanner({ onNavigate }) {
   return (
     <section className="py-5 sm:py-8 bg-white w-full font-inter">
       <div className="w-full px-3.5 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative rounded-3xl overflow-hidden bg-[#1b072a] text-white p-5 sm:p-8 lg:p-10 shadow-xl border border-[#fdb927]/40 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10"
-        >
-          {/* Background animated breathing golden festive glow */}
-          <motion.div
-            animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.12, 0.22, 0.12]
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-[#fdb927] rounded-full blur-3xl pointer-events-none"
-          />
-
+        <div className="relative rounded-none overflow-hidden bg-[#1b072a] text-white p-5 sm:p-8 lg:p-10 shadow-xl border border-[#fdb927]/40 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10">
           {/* Left Content Side */}
           <div className="text-center lg:text-left z-10 max-w-xl">
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/35 px-3.5 py-1 rounded-full text-xs font-bold text-[#fdb927] mb-3 shadow-sm"
-            >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              <span>{badgeText}</span>
-            </motion.div>
-
             <h3 className="font-playfair text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight mb-2 sm:mb-3">
               {titleLine1} <br className="hidden sm:inline" />
-              <span className="text-[#fdb927] drop-shadow-[0_2px_15px_rgba(253,185,39,0.4)]">
+              <span className="text-[#fdb927]">
                 {titleHighlight}
               </span>
             </h3>
@@ -89,49 +57,46 @@ export default function PromoBanner({ onNavigate }) {
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
               {/* In-app Order Modal CTA */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
                 onClick={handleOrderClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-black text-xs sm:text-sm px-6 py-3 rounded-full shadow-[0_4px_18px_rgba(253,185,39,0.4)] transition-all cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#fdb927] hover:bg-[#ffc84a] text-[#1b072a] font-black text-xs sm:text-sm px-6 py-3 rounded-none shadow-md transition-colors cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Explore Catalog</span>
-              </motion.button>
+              </button>
 
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-full shadow-lg transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-none shadow-md transition-colors"
               >
                 <span>💬 Order on WhatsApp</span>
-              </motion.a>
+              </a>
             </div>
           </div>
 
-          {/* Right Image Banner Side with Smooth Multi-Image Crossfade */}
+          {/* Right Image Banner Side with Smooth Crossfade */}
           {promoImages.length > 0 && (
             <div className="relative z-10 w-full lg:w-96 flex-shrink-0">
-              <div className="relative h-48 sm:h-56 lg:h-64 rounded-2xl overflow-hidden border-2 border-[#fdb927]/50 shadow-2xl group bg-black/40">
+              <div className="relative h-48 sm:h-56 lg:h-64 rounded-none overflow-hidden border border-[#fdb927]/50 shadow-2xl bg-[#12031c]">
                 <AnimatePresence mode="sync">
                   <motion.img
                     key={currentImgIndex}
                     src={promoImages[currentImgIndex]}
                     alt="Festive handmade creations - Seasonals"
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 w-full h-full object-cover rounded-none select-none"
                   />
                 </AnimatePresence>
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1b072a]/70 via-transparent to-transparent pointer-events-none" />
                 
-                <div className="absolute bottom-3 left-3 right-3 bg-[#1b072a]/90 backdrop-blur-md p-2 rounded-xl border border-[#fdb927]/40 text-center flex items-center justify-between px-3">
+                <div className="absolute bottom-3 left-3 right-3 bg-[#1b072a]/90 backdrop-blur-md p-2 rounded-none border border-[#fdb927]/40 text-center flex items-center justify-between px-3">
                   <span className="text-[11px] font-extrabold text-[#fdb927] flex items-center gap-1">
                     <span>✨</span>
                     <span>Handcrafted Diya Art</span>
@@ -142,7 +107,7 @@ export default function PromoBanner({ onNavigate }) {
                       {promoImages.map((_, idx) => (
                         <span
                           key={idx}
-                          className={`h-1.5 rounded-full transition-all ${
+                          className={`h-1.5 rounded-none transition-all ${
                             currentImgIndex === idx ? 'w-4 bg-[#fdb927]' : 'w-1.5 bg-white/40'
                           }`}
                         />
@@ -153,8 +118,7 @@ export default function PromoBanner({ onNavigate }) {
               </div>
             </div>
           )}
-
-        </motion.div>
+        </div>
       </div>
     </section>
   );

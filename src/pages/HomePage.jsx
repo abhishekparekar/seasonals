@@ -6,7 +6,7 @@ import AboutCSR from '../components/AboutCSR';
 import PromoBanner from '../components/PromoBanner';
 import Features from '../components/Features';
 import Reviews from '../components/Reviews';
-import { Gift, HeartHandshake } from 'lucide-react';
+import { HeartHandshake } from 'lucide-react';
 
 export default function HomePage({ onNavigate }) {
   const { homeSectionsConfig } = useSiteConfig();
@@ -49,11 +49,6 @@ export default function HomePage({ onNavigate }) {
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#fdb927]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="w-full px-3.5 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-4xl mx-auto text-center space-y-3.5 sm:space-y-4">
-              <div className="inline-flex items-center gap-2 bg-[#fdb927]/20 border border-[#fdb927]/50 px-4 py-1 rounded-full text-xs font-black text-[#fdb927] shadow-sm">
-                <Gift className="w-3.5 h-3.5" />
-                <span>CORPORATE & BULK ORDERS</span>
-              </div>
-              
               <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight">
                 Looking for Corporate Gifting or Custom Festive Favors?
               </h2>

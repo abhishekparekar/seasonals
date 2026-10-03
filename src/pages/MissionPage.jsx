@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { useCart } from '../context/CartContext';
-import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, Award, Users, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Heart, HandHeart, ShoppingBag, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function MissionPage({ onNavigate }) {
@@ -42,16 +42,6 @@ export default function MissionPage({ onNavigate }) {
 
   const shareText = "🪔 Seasonals - A small act of kindness empowers specially-abled artisans. This Diwali, bring home authentic handcrafted terracotta diyas made with devotion:";
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + (typeof window !== 'undefined' ? window.location.origin : ''))}`;
-
-  const defaultStatIcons = [Users, Sparkles, Leaf, Award];
-  const activeImpactStats = (Array.isArray(missionConfig?.impactStats) && missionConfig.impactStats.length > 0)
-    ? missionConfig.impactStats
-    : [
-      { number: "50+", label: "Artisans Supported", desc: "Children receiving skill training & fair wages" },
-      { number: "10,000+", label: "Diyas Handcrafted", desc: "Illuminating homes with authentic festive warmth" },
-      { number: "100%", label: "Pure Terracotta", desc: "Organic natural clay sourced ethically" },
-      { number: "100%", label: "Dignity & Pride", desc: "Empowering self-reliance through talent" }
-    ];
 
   const craftSteps = [
     {
@@ -95,7 +85,7 @@ export default function MissionPage({ onNavigate }) {
 
       {/* 1. Hero Visual Image Banner / Multi-Image Showcase Carousel */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className="relative bg-[#1b072a] rounded-2xl sm:rounded-3xl border-2 border-[#fdb927]/40 shadow-xl overflow-hidden min-h-[260px] sm:min-h-[420px] md:min-h-[520px] max-h-[580px] flex items-center justify-center">
+        <div className="relative bg-[#1b072a] rounded-none border border-[#fdb927]/40 shadow-xl overflow-hidden min-h-[260px] sm:min-h-[420px] md:min-h-[520px] max-h-[580px] flex items-center justify-center">
           {showcaseImages.length > 0 ? (
             <>
               {showcaseImages.map((imgSrc, idx) => (
@@ -107,7 +97,7 @@ export default function MissionPage({ onNavigate }) {
                   <img
                     src={imgSrc}
                     alt={`Artisanal Crafting Showcase ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-none select-none"
                   />
                 </div>
               ))}
@@ -119,7 +109,7 @@ export default function MissionPage({ onNavigate }) {
                     type="button"
                     onClick={prevShowcase}
                     aria-label="Previous image"
-                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-black/75 hover:bg-black/95 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
@@ -127,27 +117,27 @@ export default function MissionPage({ onNavigate }) {
                     type="button"
                     onClick={nextShowcase}
                     aria-label="Next image"
-                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-black/60 hover:bg-black/90 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-none bg-black/75 hover:bg-black/95 text-white border border-[#fdb927]/50 flex items-center justify-center shadow-lg transition-all hover:scale-105 cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
 
                   {/* Dot Indicators */}
-                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-none border border-white/20">
                     {showcaseImages.map((_, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => setCurrentShowcaseIdx(idx)}
                         aria-label={`Go to slide ${idx + 1}`}
-                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === currentShowcaseIdx ? 'w-6 bg-[#fdb927]' : 'w-2 bg-white/50 hover:bg-white'
+                        className={`h-1.5 rounded-none transition-all duration-300 cursor-pointer ${idx === currentShowcaseIdx ? 'w-6 bg-[#fdb927]' : 'w-2 bg-white/50 hover:bg-white'
                           }`}
                       />
                     ))}
                   </div>
 
                   {/* Image Counter Badge */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/70 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black text-[#fdb927]">
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20 bg-black/75 backdrop-blur-md border border-[#fdb927]/40 px-2.5 py-1 rounded-none text-[10px] sm:text-xs font-black text-[#fdb927]">
                     📷 {currentShowcaseIdx + 1} / {showcaseImages.length}
                   </div>
                 </>
@@ -157,49 +147,9 @@ export default function MissionPage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 2. Impact Statistics Counters */}
-      <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-6 sm:pt-8 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {activeImpactStats.map((stat, idx) => {
-            const IconComp = defaultStatIcons[idx % defaultStatIcons.length];
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="bg-white rounded-2xl p-3 sm:p-5 border-2 border-[#fdb927]/40 shadow-lg hover:shadow-xl hover:border-[#fdb927] transition-all flex flex-col justify-between"
-              >
-                <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                  <span className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-[#1b072a]">
-                    {stat.number}
-                  </span>
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-[#fdb927]/20 text-[#1b072a] flex items-center justify-center">
-                    <IconComp className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-black text-gray-900 mb-0.5 sm:mb-1">
-                    {stat.label}
-                  </h3>
-                  <p className="text-[10px] sm:text-[11px] text-gray-500 leading-snug hidden sm:block">
-                    {stat.desc}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* 4. The 4-Step Crafting Journey */}
       <section className="w-full px-3.5 sm:px-6 lg:px-8 pt-10 sm:pt-14">
         <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-1.5 bg-[#fdb927]/15 border border-[#fdb927]/30 px-3.5 py-1 rounded-full text-xs font-bold text-[#1b072a] mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#b37400]" />
-            <span>THE ARTISANAL PROCESS</span>
-          </div>
           <h2 className="font-playfair text-xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
             How Every Diya Comes to Life
           </h2>
