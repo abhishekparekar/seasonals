@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Home Page -->
+  <url>
+    <loc>https://seasonals.in/</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://seasonals.in/images/logo3.png</image:loc>
+      <image:title>Seasonals Handcrafted Festive Diya Sets</image:title>
+      <image:caption>100% Pure Terracotta Handcrafted Diwali Diyas</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Shop Page -->
+  <url>
+    <loc>https://seasonals.in/shop</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Bulk & Corporate Gifting Page -->
+  <url>
+    <loc>https://seasonals.in/bulk-gifting</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Our Mission (CSR) Page -->
+  <url>
+    <loc>https://seasonals.in/our-mission</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Our Story Page -->
+  <url>
+    <loc>https://seasonals.in/our-story</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Contact Us Page -->
+  <url>
+    <loc>https://seasonals.in/contact</loc>
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
