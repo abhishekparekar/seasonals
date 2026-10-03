@@ -1,13 +1,26 @@
+# Ensure proper MIME types for JavaScript modules, CSS, and assets
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+  AddType image/svg+xml .svg
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
 
-  # Handle /admin directly
-  RewriteRule ^admin/?$ /index.html [L,QSA]
+  # Handle /admin route
+  RewriteRule ^admin/?$ index.html [L,QSA]
 
-  # Standard SPA rewrite for all routes
+  # Do NOT rewrite static files to index.html (prevents MIME type text/html error)
+  RewriteCond %{REQUEST_URI} \.(js|mjs|css|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
+  # Standard SPA rewrite for client-side pages
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteRule . index.html [L]
 </IfModule>
